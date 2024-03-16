@@ -10,4 +10,4 @@ class Product(Base):
     name: Mapped[str] = mapped_column(String(255), index=True)
     category: Mapped[str] = mapped_column(String(255), index=True)
     unit: Mapped[str] = mapped_column(String(255))
-    price: Mapped[str] = mapped_column(String(255))
+    price: Mapped[int] = mapped_column(Integer())

@@ -1,5 +1,6 @@
 from http.client import HTTPException
 from msilib.schema import File
+from typing import List, Any, Coroutine, Sequence
 
 import pandas as pd
 from fastapi import Depends, UploadFile
@@ -16,10 +17,13 @@ def read_excel_file(file_path: str) -> list[Product]:
         category = sheet_name
         for _, row in df.iterrows():
             try:
+                price = row.iloc[2]
+                if type(price) is str:
+                    price = int(price.replace(",", ""))
                 product_data = {
                     'name': row.iloc[0],
                     'unit': row.iloc[1],
-                    'price': row.iloc[2],
+                    'price': price,
                     'category': category
                 }
                 product = Product(**product_data)
@@ -45,3 +49,6 @@ class ProductService:
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
+
+    async def get_products_by_category(self, category: str) -> Sequence[Product]:
+        return await self.product_repository.get_products_by_category(category)
