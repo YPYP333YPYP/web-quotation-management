@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Sequence
 
 from fastapi import UploadFile, File, HTTPException, APIRouter, Depends, Form
 from starlette.responses import JSONResponse
@@ -25,7 +25,8 @@ async def upload_excel(file: UploadFile = File(...), product_service: ProductSer
             summary="분류 별 견적서 물품 조회",
             description="분류 별 견적서의 물품을 조회 합니다. ",
             response_model=List[ProductRead])
-async def get_products_by_category(category: str, product_service: ProductService = Depends(ProductService)) -> List[ProductRead]:
+async def get_products_by_category(category: str, product_service: ProductService = Depends(ProductService)) -> \
+        Sequence[Product]:
     result = await product_service.get_products_by_category(category)
     if result is None or len(result) == 0:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -35,10 +36,20 @@ async def get_products_by_category(category: str, product_service: ProductServic
 @router.put("/products/{product_id}/update",
             summary="견적서 물품 수정",
             description="물품 번호에 해당하는 물품의 정보를 수정합니다.")
-async def update_product(product_id: int, product_data: ProductCreate, product_service: ProductService = Depends(ProductService)) -> ProductRead:
+async def update_product(product_id: int, product_data: ProductCreate,
+                         product_service: ProductService = Depends(ProductService)) -> ProductRead:
     new_data = product_data.dict()
     updated_product = await product_service.update_product(product_id, new_data)
     if updated_product:
         return updated_product
     else:
         raise HTTPException(status_code=404, detail="Product not found")
+
+
+@router.post("/products/",
+             summary="견적서 물품 추가 생성",
+             description="견적서 물품을 추가 생성 합니다.")
+async def create_product(product: ProductCreate, product_service: ProductService = Depends(ProductService)):
+    new_data = product.dict()
+    await product_service.create_product(new_data)
+

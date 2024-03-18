@@ -11,7 +11,7 @@ class ProductRepository:
     def __init__(self, session: AsyncSession = Depends(async_get_db)):
         self.session = session
 
-    async def add_product(self, product: Product):
+    async def create_product(self, product: Product):
         self.session.add(product)
 
     async def get_products_by_category(self, category: str) -> Sequence[Product]:
@@ -36,3 +36,11 @@ class ProductRepository:
         async with self.session as session:
             product = await session.get(Product, product_id)
             return product if product else None
+
+    async def exists_product_by_name(self, name: str) -> bool:
+        async with self.session as session:
+            product = await session.get(Product, name)
+            if product is None:
+                return False
+            else:
+                return True

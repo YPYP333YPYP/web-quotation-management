@@ -29,7 +29,7 @@ def read_excel_file(file_path: str) -> list[Product]:
                 product = Product(**product_data)
                 data.append(product)
             except ValidationError as e:
-                raise HTTPException(status_code=400, detail=str(e))
+                raise Exception("excel file contains invalid")
     return data
 
 
@@ -45,10 +45,10 @@ class ProductService:
             products = read_excel_file(file_path)
 
             for product in products:
-                await self.product_repository.add_product(product)
+                await self.product_repository.create_product(product)
 
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException()
 
     async def get_products_by_category(self, category: str) -> Sequence[Product]:
         return await self.product_repository.get_products_by_category(category)
@@ -63,3 +63,11 @@ class ProductService:
             return updated_product
 
         return None
+
+    async def create_product(self, product_data: Dict[str, Any]) -> Product:
+        product_name = product_data["name"]
+        if self.product_repository.exists_product_by_name(product_name):
+            product = Product(**product_data)
+            return await self.product_repository.create_product(product)
+        else:
+            raise Exception("Product exist")
