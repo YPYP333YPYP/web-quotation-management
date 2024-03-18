@@ -1,4 +1,4 @@
-from typing import List, Sequence
+from typing import List, Sequence, Dict, Any, Optional
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,3 +20,19 @@ class ProductRepository:
             result = await session.execute(stmt)
             products = result.scalars().all()
             return products
+
+    async def update_product(self, product_id: int, new_data: Dict[str, Any]):
+        async with self.session as session:
+            product = await session.get(Product, product_id)
+            if product:
+                for key, value in new_data.items():
+                    setattr(product, key, value)
+                await session.commit()
+                return True
+            else:
+                return False
+
+    async def get_product_by_id(self, product_id: int) -> Optional[Product]:
+        async with self.session as session:
+            product = await session.get(Product, product_id)
+            return product if product else None

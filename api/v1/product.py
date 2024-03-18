@@ -1,9 +1,10 @@
-from typing import List
+from typing import List, Dict, Any, Optional
 
-from fastapi import UploadFile, File, HTTPException, APIRouter, Depends
+from fastapi import UploadFile, File, HTTPException, APIRouter, Depends, Form
 from starlette.responses import JSONResponse
 
-from schemas.product import ProductRead
+from models.product import Product
+from schemas.product import ProductRead, ProductCreate
 from service.product import ProductService
 
 router = APIRouter(tags=["product"])
@@ -19,6 +20,7 @@ async def upload_excel(file: UploadFile = File(...), product_service: ProductSer
     except HTTPException as e:
         raise e
 
+
 @router.get("/products/{category}",
             summary="분류 별 견적서 물품 조회",
             description="분류 별 견적서의 물품을 조회 합니다. ",
@@ -28,3 +30,15 @@ async def get_products_by_category(category: str, product_service: ProductServic
     if result is None or len(result) == 0:
         raise HTTPException(status_code=404, detail="Product not found")
     return result
+
+
+@router.put("/products/{product_id}/update",
+            summary="분류 별 견적서 물품 조회",
+            description="분류 별 견적서의 물품을 조회 합니다. ")
+async def update_product(product_id: int, product_data: ProductCreate, product_service: ProductService = Depends(ProductService)) -> ProductRead:
+    new_data = product_data.dict()
+    updated_product = await product_service.update_product(product_id, new_data)
+    if updated_product:
+        return updated_product
+    else:
+        raise HTTPException(status_code=404, detail="Product not found")

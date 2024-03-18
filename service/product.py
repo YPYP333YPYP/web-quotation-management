@@ -1,6 +1,6 @@
 from http.client import HTTPException
 from msilib.schema import File
-from typing import List, Any, Coroutine, Sequence
+from typing import List, Any, Coroutine, Sequence, Dict, Optional
 
 import pandas as pd
 from fastapi import Depends, UploadFile
@@ -52,3 +52,14 @@ class ProductService:
 
     async def get_products_by_category(self, category: str) -> Sequence[Product]:
         return await self.product_repository.get_products_by_category(category)
+
+    async def update_product(self, product_id: int, new_data: Dict[str, Any]) -> Optional[Product]:
+
+        if not new_data:
+            return None
+
+        if await self.product_repository.update_product(product_id, new_data):
+            updated_product = await self.product_repository.get_product_by_id(product_id)
+            return updated_product
+
+        return None
