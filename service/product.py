@@ -71,3 +71,6 @@ class ProductService:
             return await self.product_repository.create_product(product)
         else:
             raise Exception("Product exist")
+
+    async def delete_product(self, product_id: int) -> None:
+        await self.product_repository.delete_product_by_id(product_id)

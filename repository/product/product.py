@@ -44,3 +44,13 @@ class ProductRepository:
                 return False
             else:
                 return True
+
+    async def delete_product_by_id(self, product_id: int):
+        async with self.session as session:
+            stmt = select(Product).filter(Product.id == product_id)
+            result = await session.execute(stmt)
+            product = result.scalar_one_or_none()
+
+            if product:
+                await session.delete(product)
+                await session.commit()

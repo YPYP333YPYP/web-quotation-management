@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Optional, Sequence
+from typing import List, Sequence
 
 from fastapi import UploadFile, File, HTTPException, APIRouter, Depends, Form
 from starlette.responses import JSONResponse
@@ -52,4 +52,12 @@ async def update_product(product_id: int, product_data: ProductCreate,
 async def create_product(product: ProductCreate, product_service: ProductService = Depends(ProductService)):
     new_data = product.dict()
     await product_service.create_product(new_data)
+    return JSONResponse(content={"message": "Create successful"})
 
+
+@router.delete("/products/{product_id}/delete",
+               summary="견적서 물품 삭제",
+               description="견적서 물품을 삭제 합니다.")
+async def delete_product(product_id: int, product_service: ProductService = Depends(ProductService)):
+    await product_service.delete_product(product_id)
+    return JSONResponse(content={"message": "Delete successful"})
