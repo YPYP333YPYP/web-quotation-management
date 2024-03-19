@@ -51,7 +51,7 @@ class ProductService:
                 await self.product_repository.create_product(product)
 
         except Exception as e:
-            raise HTTPException()
+            raise HTTPException(str(e))
 
     async def get_products_by_category(self, category: str) -> Sequence[Product]:
         return await self.product_repository.get_products_by_category(category)
@@ -75,7 +75,7 @@ class ProductService:
             product = Product(**product_data)
             return await self.product_repository.create_product(product)
         else:
-            raise Exception("Product exist")
+            raise Exception("Product already exist")
 
     async def delete_product(self, product_id: int) -> None:
         await self.product_repository.delete_product_by_id(product_id)

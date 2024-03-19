@@ -1,4 +1,4 @@
-from typing import List, Sequence, Dict, Any, Optional
+from typing import Sequence, Dict, Any, Optional
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
