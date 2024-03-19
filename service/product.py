@@ -1,3 +1,4 @@
+from datetime import datetime
 from http.client import HTTPException
 from msilib.schema import File
 from typing import List, Any, Coroutine, Sequence, Dict, Optional
@@ -5,6 +6,8 @@ from typing import List, Any, Coroutine, Sequence, Dict, Optional
 import pandas as pd
 from fastapi import Depends, UploadFile
 from pydantic import ValidationError
+from sqlalchemy import func
+
 from repository.product.product import ProductRepository
 from models.product import Product
 
@@ -55,10 +58,12 @@ class ProductService:
 
     async def update_product(self, product_id: int, new_data: Dict[str, Any]) -> Optional[Product]:
 
+        product = new_data
+        product["updated_at"] = func.now()
         if not new_data:
             return None
 
-        if await self.product_repository.update_product(product_id, new_data):
+        if await self.product_repository.update_product(product_id,  product):
             updated_product = await self.product_repository.get_product_by_id(product_id)
             return updated_product
 
