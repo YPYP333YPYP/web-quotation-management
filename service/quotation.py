@@ -1,5 +1,7 @@
 from typing import List, Any, Coroutine, Sequence, Dict, Optional
 from fastapi import Depends, UploadFile, HTTPException
+from numpy import number
+from sqlalchemy import func
 
 from models import Quotation
 from models.quotation_product import QuotationProduct
@@ -22,10 +24,10 @@ class QuotationService:
         quotation = Quotation(**quotation_data)
         return await self.quotation_repository.create_quotation(quotation)
 
-    async def add_product_to_quotation(self, quotation_data: Dict[str, Any]):
+    async def add_product_to_quotation(self, quotation_data: Dict[str, Any]) -> QuotationProduct:
         quotation_id = quotation_data["quotation_id"]
         product_id = quotation_data["product_id"]
-        number = quotation_data["quantity"]
+        quantity = quotation_data["quantity"]
 
         product = await self.product_repository.get_product_by_id(product_id)
         if product is None:
@@ -45,8 +47,22 @@ class QuotationService:
         quotation_product = QuotationProduct(
             id=quotation_id,
             product_id=product_id,
-            price=product.price * number,
-            number=number,
+            price=product.price * quantity,
+            quantity=quantity,
         )
 
         return await self.quotation_product_repository.create_quotation_product(quotation_product)
+
+    async def update_quotation_product(self, quotation_id: int, product_id: int, new_data: Dict[str, Any]) -> Optional[QuotationProduct]:
+        product = await self.product_repository.get_product_by_id(product_id)
+
+        update_data = new_data
+
+        update_data["updated_at"] = func.now()
+        update_data["price"] = product.price * update_data["quantity"]
+
+        if await self.quotation_product_repository.update_quotation_product(quotation_id, product_id, update_data):
+            updated_quotation_product = await self.quotation_product_repository.get_quotation_product_by_quotation_id_and_product_id(quotation_id, product_id)
+            return updated_quotation_product
+
+        return None

@@ -8,9 +8,9 @@ from core.db.database import Base
 class QuotationProduct(Base):
     __tablename__ = 'quotation_product'
 
-    id = Column('quotation_id', Integer, ForeignKey('quotations.id'), primary_key=True)
+    quotation_id = Column('quotation_id', Integer, ForeignKey('quotations.id'), primary_key=True)
     product_id = Column('product_id', Integer, ForeignKey('products.id'), primary_key=True)
     price = Column("price", Integer)
-    number = Column("number", Integer)
+    quantity = Column("quantity", Integer)
     created_at = Column("created_at", DateTime, default=func.now(), nullable=False)
     updated_at = Column("updated_at", DateTime, nullable=True, onupdate=func.now())
