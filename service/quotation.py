@@ -1,5 +1,5 @@
 from typing import List, Any, Coroutine, Sequence, Dict, Optional
-from fastapi import Depends, UploadFile
+from fastapi import Depends, UploadFile, HTTPException
 
 from models import Quotation
 from models.quotation_product import QuotationProduct
@@ -29,11 +29,18 @@ class QuotationService:
 
         product = await self.product_repository.get_product_by_id(product_id)
         if product is None:
-            raise Exception("Product not found")
+            raise HTTPException(status_code=404, detail="Product not found")
 
         quotation = await self.quotation_repository.get_quotation_by_id(quotation_id)
         if quotation is None:
-            raise Exception("Quotation not found")
+            raise HTTPException(status_code=404, detail="Quotation not found")
+
+        quotation_product = await self.quotation_product_repository.get_quotation_product_by_quotation_id_and_product_id(
+            quotation_id=quotation_id,
+            product_id=product_id
+        )
+        if quotation_product is not None:
+            raise HTTPException(status_code=400, detail="Already exists product at quotation")
 
         quotation_product = QuotationProduct(
             id=quotation_id,
