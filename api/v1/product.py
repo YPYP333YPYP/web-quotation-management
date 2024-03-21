@@ -22,8 +22,8 @@ async def upload_excel(file: UploadFile = File(...), product_service: ProductSer
 
 
 @router.get("/products/{category}",
-            summary="분류 별 견적서 물품 조회",
-            description="분류 별 견적서의 물품을 조회 합니다. ",
+            summary="분류 별 물품 조회",
+            description="분류 별 물품을 조회 합니다. ",
             response_model=List[ProductRead])
 async def get_products_by_category(category: str, product_service: ProductService = Depends(ProductService)) -> \
         Sequence[Product]:
@@ -34,7 +34,7 @@ async def get_products_by_category(category: str, product_service: ProductServic
 
 
 @router.put("/products/{product_id}/update",
-            summary="견적서 물품 수정",
+            summary="물품 수정",
             description="물품 번호에 해당하는 물품의 정보를 수정합니다.")
 async def update_product(product_id: int, product_data: ProductCreate,
                          product_service: ProductService = Depends(ProductService)) -> ProductRead:
@@ -47,7 +47,7 @@ async def update_product(product_id: int, product_data: ProductCreate,
 
 
 @router.post("/products/",
-             summary="견적서 물품 추가 생성",
+             summary="물품 추가 생성",
              description="견적서 물품을 추가 생성 합니다.")
 async def create_product(product: ProductCreate, product_service: ProductService = Depends(ProductService)):
     new_data = product.dict()
@@ -56,7 +56,7 @@ async def create_product(product: ProductCreate, product_service: ProductService
 
 
 @router.delete("/products/{product_id}/delete",
-               summary="견적서 물품 삭제",
+               summary="물품 삭제",
                description="견적서 물품을 삭제 합니다.")
 async def delete_product(product_id: int, product_service: ProductService = Depends(ProductService)):
     await product_service.delete_product(product_id)

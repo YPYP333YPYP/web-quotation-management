@@ -10,3 +10,8 @@ class QuotationRepository:
 
     async def create_quotation(self, quotation: Quotation):
         self.session.add(quotation)
+
+    async def get_quotation_by_id(self, quotation_id: int):
+        async with self.session as session:
+            product = await session.get(Quotation, quotation_id)
+            return product if product else None
