@@ -15,3 +15,4 @@ class QuotationRepository:
         async with self.session as session:
             product = await session.get(Quotation, quotation_id)
             return product if product else None
+

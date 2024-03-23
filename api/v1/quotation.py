@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import HTTPException, APIRouter, Depends
 from starlette.responses import JSONResponse
 
@@ -32,9 +34,16 @@ async def add_product_to_quotation(quotation: QuotationAdd,
 async def update_quotation_product(product_id: int,
                                    quotation_id: int,
                                    update_data: QuotationUpdate,
-                                   quotation_service: QuotationService = Depends(QuotationService)) -> QuotationProductRead:
+                                   quotation_service: QuotationService = Depends(QuotationService)) -> None:
     new_data = update_data.dict()
     updated_quotation_product = await quotation_service.update_quotation_product(product_id, quotation_id, new_data)
-    if updated_quotation_product:
-        return updated_quotation_product
+    if not updated_quotation_product:
+        raise HTTPException(status_code=404, detail="Quotation product not found")
 
+
+@router.get("/quotations/{quotation_id}",
+            summary="견적서 물품 리스트 조회",
+            description="견적서의 물품 리스트를 조회합니다.")
+async def get_quotation_products(quotation_id: int,
+                                 quotation_service: QuotationService = Depends(QuotationService)) -> List[QuotationProductRead]:
+    return await quotation_service.get_quotation_products(quotation_id)

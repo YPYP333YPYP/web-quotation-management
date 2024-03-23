@@ -2,6 +2,7 @@ from typing import Dict, Any
 
 from fastapi import Depends
 from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.db.database import async_get_db
 
@@ -17,8 +18,20 @@ class QuotationProductRepository:
 
     async def get_quotation_product_by_quotation_id(self, quotation_id: int):
         async with self.session as session:
-            quotation_product = await session.get(QuotationProduct, quotation_id)
-            return quotation_product if quotation_product else None
+            try:
+                quotation_product = await session.execute(
+                    select(QuotationProduct).filter_by(quotation_id=quotation_id)
+                )
+                return quotation_product.scalar_one()
+            except NoResultFound:
+                return None
+
+    async def get_quotation_products_by_quotation_id(self, quotation_id: int):
+        async with self.session as session:
+            quotation_products = await session.execute(
+                select(QuotationProduct).filter_by(quotation_id=quotation_id)
+            )
+            return quotation_products.fetchall()
 
     async def get_quotation_product_by_quotation_id_and_product_id(self, quotation_id: int, product_id: int):
         async with self.session as session:
