@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional, List
 
 from fastapi import Depends
 from sqlalchemy import select
@@ -15,6 +15,10 @@ class QuotationProductRepository:
 
     async def create_quotation_product(self, quotation_product: QuotationProduct):
         self.session.add(quotation_product)
+
+    async def bulk_create_quotation_product(self, quotation_products: List[QuotationProduct]):
+        for quotation_product in quotation_products:
+            await self.create_quotation_product(quotation_product)
 
     async def get_quotation_product_by_quotation_id(self, quotation_id: int):
         async with self.session as session:
@@ -33,12 +37,13 @@ class QuotationProductRepository:
             )
             return quotation_products.fetchall()
 
-    async def get_quotation_product_by_quotation_id_and_product_id(self, quotation_id: int, product_id: int):
+    async def get_quotation_product_by_quotation_id_and_product_id(self, quotation_id: int, product_id: int) -> Optional[QuotationProduct]:
         async with self.session as session:
-            query = select(QuotationProduct).filter_by(quotation_id=quotation_id, product_id=product_id)
-            result = await session.execute(query)
-            quotation_product = result.scalars().first()
-        return quotation_product
+            async with session.begin():
+                query = select(QuotationProduct).filter_by(quotation_id=quotation_id, product_id=product_id)
+                result = await session.execute(query)
+                quotation_product = result.scalars().first()
+            return quotation_product
 
     async def update_quotation_product(self, quotation_id: int, product_id: int, new_data: Dict[str, Any]):
         async with self.session as session:

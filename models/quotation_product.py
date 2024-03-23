@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from sqlalchemy import ForeignKey, Column, Integer, func, DateTime
-from sqlalchemy.orm import class_mapper
+from sqlalchemy.orm import class_mapper, relationship
 
 from core.db.database import Base
 
@@ -16,6 +16,9 @@ class QuotationProduct(Base):
     quantity = Column("quantity", Integer)
     created_at = Column("created_at", DateTime, default=func.now(), nullable=False)
     updated_at = Column("updated_at", DateTime, nullable=True, onupdate=func.now())
+
+    quotation = relationship("Quotation", lazy='joined')
+    product = relationship("Product", lazy='joined')
 
     def to_dict(self):
         mapper = class_mapper(self.__class__)

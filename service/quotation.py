@@ -9,7 +9,7 @@ from repository.client.client import ClientRepository
 from repository.product.product import ProductRepository
 from repository.quotation.quotation import QuotationRepository
 from repository.quotation.quotation_product import QuotationProductRepository
-from schemas.quotation import QuotationProductRead
+from schemas.quotation import QuotationProductRead, QuotationAdd
 
 
 class QuotationService:
@@ -39,34 +39,38 @@ class QuotationService:
         quotation = Quotation(**quotation_data)
         return await self.quotation_repository.create_quotation(quotation)
 
-    async def add_product_to_quotation(self, quotation_data: Dict[str, Any]) -> QuotationProduct:
-        quotation_id = quotation_data["quotation_id"]
-        product_id = quotation_data["product_id"]
-        quantity = quotation_data["quantity"]
+    async def add_products_to_quotation(self, quotation_data: List[QuotationAdd]):
+        tmp_list = []
+        for qt in quotation_data:
+            quotation_id = qt.quotation_id
+            product_id = qt.product_id
+            quantity = qt.quantity
 
-        product = await self.product_repository.get_product_by_id(product_id)
-        if product is None:
-            raise HTTPException(status_code=404, detail="Product not found")
+            product = await self.product_repository.get_product_by_id(product_id)
+            if product is None:
+                raise HTTPException(status_code=404, detail="Product not found")
 
-        quotation = await self.quotation_repository.get_quotation_by_id(quotation_id)
-        if quotation is None:
-            raise HTTPException(status_code=404, detail="Quotation not found")
+            quotation = await self.quotation_repository.get_quotation_by_id(quotation_id)
+            if quotation is None:
+                raise HTTPException(status_code=404, detail="Quotation not found")
 
-        quotation_product = await self.quotation_product_repository.get_quotation_product_by_quotation_id_and_product_id(
-            quotation_id=quotation_id,
-            product_id=product_id
-        )
-        if quotation_product is not None:
-            raise HTTPException(status_code=400, detail="Already exists product at quotation")
+            quotation_product = await self.quotation_product_repository.get_quotation_product_by_quotation_id_and_product_id(
+                quotation_id=quotation_id,
+                product_id=product_id
+            )
+            if quotation_product is not None:
+                raise HTTPException(status_code=400, detail="Already exists product at quotation")
 
-        quotation_product = QuotationProduct(
-            quotation_id=quotation_id,
-            product_id=product_id,
-            price=product.price * quantity,
-            quantity=quantity,
-        )
+            quotation_product = QuotationProduct(
+                quotation_id=quotation_id,
+                product_id=product_id,
+                price=product.price * quantity,
+                quantity=quantity,
+            )
+            tmp_list.append(quotation_product)
+        return await self.quotation_product_repository.bulk_create_quotation_product(tmp_list)
 
-        return await self.quotation_product_repository.create_quotation_product(quotation_product)
+
 
     async def update_quotation_product(self, quotation_id: int, product_id: int, new_data: Dict[str, Any]) -> Optional[
         QuotationProduct]:
@@ -107,5 +111,8 @@ class QuotationService:
             result_list.append(result_dict)
 
         return result_list
+
+    async def update_total_price(self, quotation_id: int):
+        return await self.quotation_repository.update_total_price(quotation_id)
 
 
