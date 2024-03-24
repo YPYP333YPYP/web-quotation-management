@@ -1,4 +1,4 @@
-from typing import Optional, List, Sequence
+from typing import Optional, List, Sequence, Dict, Any
 
 from fastapi import Depends
 from sqlalchemy import select
@@ -30,3 +30,27 @@ class ClientRepository:
             result = await session.execute(stmt)
             clients = result.scalars().all()
             return clients
+
+    async def create_client(self, client: Client):
+        self.session.add(client)
+
+    async def update_client(self, client_id: int, new_data: Dict[str, Any]):
+        async with self.session as session:
+            client = await session.get(Client, client_id)
+            if client:
+                for key, value in new_data.items():
+                    setattr(client, key, value)
+                await session.commit()
+                return True
+            else:
+                return False
+
+    async def delete_client_by_id(self, client_id: int):
+        async with self.session as session:
+            stmt = select(Client).filter(Client.id == client_id)
+            result = await session.execute(stmt)
+            client = result.scalar_one_or_none()
+
+            if client:
+                await session.delete(client)
+                await session.commit()
