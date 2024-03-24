@@ -110,6 +110,20 @@ class QuotationService:
 
         return result_list
 
+    async def get_quotation_info(self, quotation_id: int):
+        products = await self.get_quotation_products(quotation_id)
+        quotation = await self.quotation_repository.get_quotation_by_id(quotation_id)
+
+        quotation_info = {
+            "products": products,
+            "name": quotation.name,
+            "total": quotation.total_price,
+            "created_at": quotation.created_at,
+            "updated_at": quotation.updated_at
+        }
+
+        return quotation_info
+
     async def update_total_price(self, quotation_id: int):
         return await self.quotation_repository.update_total_price(quotation_id)
 

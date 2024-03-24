@@ -1,10 +1,9 @@
 from typing import List, Optional
 
 from fastapi import HTTPException, APIRouter, Depends, Query
-from sqlalchemy import Integer, func
 from starlette.responses import JSONResponse
 
-from schemas.quotation import QuotationCreate, QuotationAdd, QuotationUpdate, QuotationProductRead
+from schemas.quotation import QuotationCreate, QuotationAdd, QuotationUpdate, QuotationRead
 from service.quotation import QuotationService
 
 router = APIRouter(tags=["quotation"])
@@ -43,12 +42,11 @@ async def update_quotation_product(product_id: int,
 
 
 @router.get("/quotations/{quotation_id}",
-            summary="견적서 물품 리스트 조회",
-            description="견적서의 물품 리스트를 조회합니다.")
+            summary="견적서 정보 조회",
+            description="견적서의 주문 물품, 이름, 총 금액, 생성 일, 수정 일 정보를 조회 합니다.")
 async def get_quotation_products(quotation_id: int,
-                                 quotation_service: QuotationService = Depends(QuotationService)) -> List[
-    QuotationProductRead]:
-    return await quotation_service.get_quotation_products(quotation_id)
+                                 quotation_service: QuotationService = Depends(QuotationService)) -> QuotationRead:
+    return await quotation_service.get_quotation_info(quotation_id)
 
 
 @router.get("/quotations/{quotation_id}/total",

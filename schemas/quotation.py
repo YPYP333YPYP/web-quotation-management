@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
 
@@ -25,3 +25,10 @@ class QuotationProductRead(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime]
 
+
+class QuotationRead(BaseModel):
+    products: List[QuotationProductRead]
+    name: str
+    total: float
+    created_at: datetime
+    updated_at: Optional[datetime]
