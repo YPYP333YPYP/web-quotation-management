@@ -49,3 +49,5 @@ async def update_client(client_id: int, client: ClientUpdate, client_service: Cl
 async def delete_client(client_id: int, client_service: ClientService = Depends(ClientService)):
     await client_service.delete_client(client_id)
     return JSONResponse(content={"message": "Delete successful"})
+
+

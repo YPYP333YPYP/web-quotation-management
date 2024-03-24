@@ -13,4 +13,5 @@ class Client(Base):
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(255), index=True)
     region: Mapped[str] = mapped_column(String(255))
+    address: Mapped[str] = mapped_column(String(255))
     quotations = relationship("Quotation", back_populates="client")
