@@ -26,9 +26,17 @@ class QuotationProductRead(BaseModel):
     updated_at: Optional[datetime]
 
 
-class QuotationRead(BaseModel):
+class QuotationInfo(BaseModel):
     products: List[QuotationProductRead]
     name: str
     total: float
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+
+class QuotationRead(BaseModel):
+    id: int
+    name: str
+    total_price: float
     created_at: datetime
     updated_at: Optional[datetime]

@@ -22,9 +22,9 @@ async def upload_excel(file: UploadFile = File(...), product_service: ProductSer
 
 
 @router.get("/products/{category}",
+            response_model=Sequence[ProductRead],
             summary="분류 별 물품 조회",
-            description="분류 별 물품을 조회 합니다. ",
-            response_model=List[ProductRead])
+            description="분류 별 물품을 조회 합니다. ")
 async def get_products_by_category(category: str, product_service: ProductService = Depends(ProductService)) -> \
         Sequence[Product]:
     result = await product_service.get_products_by_category(category)
@@ -34,6 +34,7 @@ async def get_products_by_category(category: str, product_service: ProductServic
 
 
 @router.put("/products/{product_id}/update",
+            response_model=ProductRead,
             summary="물품 수정",
             description="물품 번호에 해당하는 물품의 정보를 수정합니다.")
 async def update_product(product_id: int, product_data: ProductCreate,

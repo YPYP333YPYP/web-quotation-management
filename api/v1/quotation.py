@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import HTTPException, APIRouter, Depends, Query
 from starlette.responses import JSONResponse
 
-from schemas.quotation import QuotationCreate, QuotationAdd, QuotationUpdate, QuotationRead
+from schemas.quotation import QuotationCreate, QuotationAdd, QuotationUpdate, QuotationRead, QuotationInfo
 from service.quotation import QuotationService
 
 router = APIRouter(tags=["quotation"])
@@ -31,25 +31,29 @@ async def add_products_to_quotation(quotation: List[QuotationAdd],
 @router.put("/quotations/{quotation_id}/{product_id}",
             summary="견적서 물품 수정",
             description="견적서의 물품을 수정합니다.")
-async def update_quotation_product(product_id: int,
-                                   quotation_id: int,
+async def update_quotation_product(quotation_id: int,
+                                   product_id: int,
                                    update_data: QuotationUpdate,
-                                   quotation_service: QuotationService = Depends(QuotationService)) -> None:
+                                   quotation_service: QuotationService = Depends(QuotationService)):
     new_data = update_data.dict()
     updated_quotation_product = await quotation_service.update_quotation_product(product_id, quotation_id, new_data)
     if not updated_quotation_product:
         raise HTTPException(status_code=404, detail="Quotation product not found")
+    else:
+        return JSONResponse(content={"message": "Update successful"})
 
 
 @router.get("/quotations/{quotation_id}",
+            response_model=QuotationInfo,
             summary="견적서 정보 조회",
             description="견적서의 주문 물품, 이름, 총 금액, 생성 일, 수정 일 정보를 조회 합니다.")
 async def get_quotation_products(quotation_id: int,
-                                 quotation_service: QuotationService = Depends(QuotationService)) -> QuotationRead:
+                                 quotation_service: QuotationService = Depends(QuotationService)) -> QuotationInfo:
     return await quotation_service.get_quotation_info(quotation_id)
 
 
 @router.get("/quotations/{quotation_id}/total",
+            response_model=int,
             summary="견적서 합계 금액 업데이트",
             description="견적서의 합계 금액을 업데이트 합니다.")
 async def update_total_price(quotation_id: int, quotation_service: QuotationService = Depends(QuotationService)):
@@ -57,6 +61,7 @@ async def update_total_price(quotation_id: int, quotation_service: QuotationServ
 
 
 @router.get("/quotations/search/info",
+            response_model=List[QuotationRead],
             summary="견적서 정보 조회",
             description="조건에 맞는 견적서를 조회 합니다. ( 조건 -> 시작일, 종료일, 검색어)")
 async def get_quotations_search(start: Optional[str] = Query(None, description="시작일('2024-01-01' 형식)"),
