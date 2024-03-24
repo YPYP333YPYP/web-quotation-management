@@ -11,3 +11,5 @@ class MySQLSettings(BaseSettings):
     @property
     def MYSQL_URI(self) -> str:
         return f"mysql+aiomysql://{self.MYSQL_USER}:{self.MYSQL_PASSWORD}@{self.MYSQL_SERVER}:{self.MYSQL_PORT}/{self.MYSQL_DB}"
+
+
