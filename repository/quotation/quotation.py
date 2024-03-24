@@ -1,3 +1,6 @@
+from datetime import date
+from typing import List, Sequence
+
 from fastapi import Depends
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,3 +36,19 @@ class QuotationRepository:
                 quotation.total_price = total_price
                 await session.commit()
             return total_price
+
+    async def search_quotation(self, start: date, end: date, query: str) -> Sequence[Quotation]:
+        async with self.session as session:
+            stmt = select(Quotation)
+
+            if start:
+                stmt = stmt.filter(Quotation.created_at >= start)
+            if end:
+                stmt = stmt.filter(Quotation.created_at <= end)
+            if query:
+                stmt = stmt.filter(Quotation.name.contains(query))
+
+            tmp_result = await session.execute(stmt)
+            result = tmp_result.scalars().all()
+
+            return result

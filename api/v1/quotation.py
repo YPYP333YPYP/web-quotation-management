@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Optional
 
-from fastapi import HTTPException, APIRouter, Depends
-from sqlalchemy import Integer
+from fastapi import HTTPException, APIRouter, Depends, Query
+from sqlalchemy import Integer, func
 from starlette.responses import JSONResponse
 
 from schemas.quotation import QuotationCreate, QuotationAdd, QuotationUpdate, QuotationProductRead
@@ -50,8 +50,19 @@ async def get_quotation_products(quotation_id: int,
     QuotationProductRead]:
     return await quotation_service.get_quotation_products(quotation_id)
 
+
 @router.get("/quotations/{quotation_id}/total",
             summary="견적서 합계 금액 업데이트",
             description="견적서의 합계 금액을 업데이트 합니다.")
-async def update_total_price(quotation_id: int, quotation_service: QuotationService = Depends(QuotationService)) -> Integer:
+async def update_total_price(quotation_id: int, quotation_service: QuotationService = Depends(QuotationService)):
     return await quotation_service.update_total_price(quotation_id)
+
+
+@router.get("/quotations/search/info",
+            summary="견적서 정보 조회",
+            description="조건에 맞는 견적서를 조회 합니다. ( 조건 -> 시작일, 종료일, 검색어)")
+async def get_quotations_search(start: Optional[str] = Query(None, description="시작일('2024-01-01' 형식)"),
+                                end: Optional[str] = Query(None, description="종료일('2024-01-01' 형식)"),
+                                query: Optional[str] = Query(None, description="검색어"),
+                                quotation_service: QuotationService = Depends(QuotationService)):
+    return await quotation_service.get_quotation_search(start, end, query)

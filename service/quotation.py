@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import List, Any, Coroutine, Sequence, Dict, Optional
 from fastapi import Depends, UploadFile, HTTPException
 from sqlalchemy import func
@@ -70,8 +70,6 @@ class QuotationService:
             tmp_list.append(quotation_product)
         return await self.quotation_product_repository.bulk_create_quotation_product(tmp_list)
 
-
-
     async def update_quotation_product(self, quotation_id: int, product_id: int, new_data: Dict[str, Any]) -> Optional[
         QuotationProduct]:
         product = await self.product_repository.get_product_by_id(product_id)
@@ -115,4 +113,9 @@ class QuotationService:
     async def update_total_price(self, quotation_id: int):
         return await self.quotation_repository.update_total_price(quotation_id)
 
-
+    async def get_quotation_search(self, start: str, end: str, query: str):
+        start_date = datetime.strptime(start, "%Y-%m-%d")
+        end_date = datetime.strptime(end, '%Y-%m-%d')
+        print(type(start_date), type(end_date))
+        quotations = await self.quotation_repository.search_quotation(start_date, end_date, query)
+        return quotations
