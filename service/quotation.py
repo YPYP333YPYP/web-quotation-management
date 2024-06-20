@@ -1,7 +1,11 @@
-from datetime import datetime, date
-from typing import List, Any, Coroutine, Sequence, Dict, Optional
-from fastapi import Depends, UploadFile, HTTPException
+import urllib.parse
+from datetime import datetime
+from typing import List, Any, Dict, Optional
+
+from fastapi import Depends, HTTPException
 from sqlalchemy import func
+from sqlalchemy.orm import InstrumentedAttribute
+from sqlalchemy.orm.base import _T_co
 
 from models import Quotation
 from models.quotation_product import QuotationProduct
@@ -9,7 +13,10 @@ from repository.client.client import ClientRepository
 from repository.product.product import ProductRepository
 from repository.quotation.quotation import QuotationRepository
 from repository.quotation.quotation_product import QuotationProductRepository
-from schemas.quotation import QuotationProductRead, QuotationAdd
+from schemas.quotation import QuotationAdd
+
+import io
+from openpyxl import Workbook
 
 
 class QuotationService:
@@ -86,7 +93,8 @@ class QuotationService:
 
         return None
 
-    async def get_quotation_products(self, quotation_id: int) -> List[QuotationProductRead]:
+    async def get_quotation_products(self, quotation_id: int) -> list[
+        dict[str, InstrumentedAttribute[_T_co] | _T_co | Any]]:
         quotation_products = await self.quotation_product_repository.get_quotation_products_by_quotation_id(
             quotation_id)
 
@@ -132,3 +140,29 @@ class QuotationService:
         end_date = datetime.strptime(end, '%Y-%m-%d')
         quotations = await self.quotation_repository.search_quotation(start_date, end_date, query)
         return quotations
+
+    async def extract_quotations(self, quotation_id):
+        products = await self.get_quotation_products(quotation_id)
+        quotation = await self.quotation_repository.get_quotation_by_id(quotation_id)
+
+        output = io.BytesIO()
+        workbook = Workbook()
+        worksheet = workbook.active
+
+        header = ["물품", "수량", "단가"]
+        worksheet.append(header)
+
+        for result_dict in products:
+            row = [
+                str(result_dict["product"]),
+                str(result_dict["quantity"]),
+                str(result_dict["price"]),
+            ]
+            worksheet.append(row)
+
+        workbook.save(output)
+        output.seek(0)
+        print(output)
+        filename = f'{quotation.name} 견적서'
+        encoded_filename = urllib.parse.quote(filename, encoding='utf-8')
+        return output, encoded_filename

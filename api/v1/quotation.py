@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from fastapi import HTTPException, APIRouter, Depends, Query
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, StreamingResponse
 
 from schemas.quotation import QuotationCreate, QuotationAdd, QuotationUpdate, QuotationRead, QuotationInfo
 from service.quotation import QuotationService
@@ -69,3 +69,16 @@ async def get_quotations_search(start: Optional[str] = Query(None, description="
                                 query: Optional[str] = Query(None, description="검색어"),
                                 quotation_service: QuotationService = Depends(QuotationService)):
     return await quotation_service.get_quotation_search(start, end, query)
+
+
+@router.get("/quotations/extract/{quotation_id}",
+            summary="견적서 excel 파일로 추출",
+            description="거래처 견적서를 excel 파일로 추출합니다.")
+async def extract_quotations_to_excel_file(quotation_id: int,
+                                           quotation_service: QuotationService = Depends(QuotationService)):
+    output, filename = await quotation_service.extract_quotations(quotation_id)
+    headers = {
+        'Content-Disposition': f'attachment; filename*=UTF-8\'\'{filename}'
+    }
+    return StreamingResponse(output, headers=headers,
+                             media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
