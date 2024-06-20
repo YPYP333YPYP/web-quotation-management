@@ -47,7 +47,7 @@ async def update_product(product_id: int, product_data: ProductCreate,
         raise HTTPException(status_code=404, detail="Product not found")
 
 
-@router.post("/products/",
+@router.post("/products",
              summary="물품 추가 생성",
              description="견적서 물품을 추가 생성 합니다.")
 async def create_product(product: ProductCreate, product_service: ProductService = Depends(ProductService)):

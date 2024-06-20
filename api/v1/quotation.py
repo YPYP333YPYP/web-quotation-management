@@ -9,7 +9,7 @@ from service.quotation import QuotationService
 router = APIRouter(tags=["quotation"])
 
 
-@router.post("/quotations/",
+@router.post("/quotations",
              summary="견적서 생성",
              description="견적서를 생성합니다.")
 async def create_quotation(quotation: QuotationCreate, quotation_service: QuotationService = Depends(QuotationService)) -> JSONResponse:

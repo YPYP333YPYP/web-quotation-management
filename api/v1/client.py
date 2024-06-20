@@ -27,7 +27,7 @@ async def get_clients_by_region(region: str, client_service: ClientService = Dep
     return await client_service.get_clients_by_region(region)
 
 
-@router.post("/clients/",
+@router.post("/clients",
              summary="거래처 생성",
              description="새로운 거래처를 생성합니다.")
 async def create_client(client: ClientCreate, client_service: ClientService = Depends(ClientService)):

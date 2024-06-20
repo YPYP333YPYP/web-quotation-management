@@ -11,6 +11,7 @@ class ClientCreate(BaseModel):
     name: str
     region: str
 
+
 class ClientUpdate(BaseModel):
     name: str
     region: str

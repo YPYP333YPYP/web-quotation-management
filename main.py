@@ -19,7 +19,6 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-
     return application
 
 
