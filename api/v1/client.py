@@ -1,10 +1,11 @@
 from typing import Sequence
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from starlette.responses import JSONResponse
 
 from schemas.client import ClientRead, ClientUpdate, ClientCreate
 from service.client import ClientService
+from service.quotation import QuotationService
 
 router = APIRouter(tags=["client"])
 
@@ -50,4 +51,11 @@ async def delete_client(client_id: int, client_service: ClientService = Depends(
     await client_service.delete_client(client_id)
     return JSONResponse(content={"message": "Delete successful"})
 
+
+@router.get("/clients/{client_id}/quotation",
+            summary="거래처 견적서 조회 ",
+            description="거래처의 모든 견적서를 조회 합니다. page -> 페이지 시작 번호, page_size -> 페이지 당 반환 개수")
+async def get_quotations(client_id: int, quotation_service: QuotationService = Depends(QuotationService),
+                         page: int = Query(1, ge=1), page_size: int = Query(10, ge=1, le=100)):
+    return await quotation_service.get_paginated_quotations_for_client(client_id, page, page_size)
 

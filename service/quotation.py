@@ -1,5 +1,6 @@
 import urllib.parse
 from datetime import datetime
+from math import ceil
 from typing import List, Any, Dict, Optional
 
 from fastapi import Depends, HTTPException
@@ -13,7 +14,8 @@ from repository.client.client import ClientRepository
 from repository.product.product import ProductRepository
 from repository.quotation.quotation import QuotationRepository
 from repository.quotation.quotation_product import QuotationProductRepository
-from schemas.quotation import QuotationAdd
+from schemas.client import ClientPaginatedResponse
+from schemas.quotation import QuotationAdd, QuotationRead
 
 import io
 from openpyxl import Workbook
@@ -166,3 +168,26 @@ class QuotationService:
         filename = f'{quotation.name} 견적서'
         encoded_filename = urllib.parse.quote(filename, encoding='utf-8')
         return output, encoded_filename
+
+    async def get_paginated_quotations_for_client(self, client_id: int, page: int = 1, page_size: int = 10):
+
+        quotations, total = await self.quotation_repository.get_quotations_by_client_id(client_id, page, page_size)
+        quotation_reads = [
+            QuotationRead(
+                id=q.id,
+                name=q.name,
+                total_price=q.total_price,
+                created_at=q.created_at,
+                updated_at=q.updated_at
+            ) for q in quotations
+        ]
+
+        total_pages = ceil(total / page_size)
+
+        return ClientPaginatedResponse(
+            items=quotation_reads,
+            total=total,
+            page=page,
+            page_size=page_size,
+            total_pages=total_pages
+        )

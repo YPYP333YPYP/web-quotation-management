@@ -1,4 +1,16 @@
+from typing import List
+
 from pydantic import BaseModel
+
+from schemas.quotation import QuotationRead
+
+
+class ClientPaginatedResponse(BaseModel):
+    items: List[QuotationRead]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
 
 
 class ClientRead(BaseModel):

@@ -52,3 +52,21 @@ class QuotationRepository:
             result = tmp_result.scalars().all()
 
             return result
+
+    async def get_quotations_by_client_id(self, client_id: int, page: int = 1, page_size: int = 10):
+        async with self.session as session:
+            offset = (page - 1) * page_size
+
+            count_query = select(func.count()).select_from(Quotation).where(Quotation.client_id == client_id)
+            total = await session.scalar(count_query)
+
+            query = (
+                select(Quotation)
+                .where(Quotation.client_id == client_id)
+                .order_by(Quotation.created_at.desc())
+                .offset(offset)
+                .limit(page_size)
+            )
+            result = await session.execute(query)
+            quotations = result.scalars().all()
+            return quotations, total

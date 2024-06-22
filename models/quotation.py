@@ -24,3 +24,4 @@ class Quotation(Base):
         mapper = class_mapper(self.__class__)
         columns = [column.key for column in mapper.columns]
         return {column: getattr(self, column) for column in columns}
+
