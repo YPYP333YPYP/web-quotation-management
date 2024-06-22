@@ -2,7 +2,7 @@ from datetime import date
 from typing import List, Sequence
 
 from fastapi import Depends
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.db.database import async_get_db
 from models import Quotation
@@ -69,4 +69,33 @@ class QuotationRepository:
             )
             result = await session.execute(query)
             quotations = result.scalars().all()
+            return quotations, total
+
+    async def get_quotations_by_data_range(self, client_id, start_date: date, end_date: date, page: int = 1,
+                                           page_size: int = 10):
+        async with self.session as session:
+            count_query = (
+                select(func.count())
+                .select_from(Quotation)
+                .where(and_(
+                    Quotation.created_at.between(start_date, end_date),
+                    Quotation.client_id == client_id
+                ))
+            )
+            total = await session.scalar(count_query)
+
+            offset = (page - 1) * page_size
+            query = (
+                select(Quotation)
+                .where(and_(
+                    Quotation.created_at.between(start_date, end_date),
+                    Quotation.client_id == client_id
+                ))
+                .order_by(Quotation.created_at.desc())
+                .offset(offset)
+                .limit(page_size)
+            )
+            result = await session.execute(query)
+            quotations = result.scalars().all()
+
             return quotations, total

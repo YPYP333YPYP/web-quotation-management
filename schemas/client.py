@@ -1,3 +1,5 @@
+from datetime import datetime
+from enum import Enum
 from typing import List
 
 from pydantic import BaseModel
@@ -27,3 +29,14 @@ class ClientCreate(BaseModel):
 class ClientUpdate(BaseModel):
     name: str
     region: str
+
+
+class DateRangeType(str, Enum):
+    WEEK = "week"
+    MONTH = "month"
+    CUSTOM = "custom"
+
+
+class DateRange(BaseModel):
+    start_date: datetime
+    end_date: datetime
