@@ -1,5 +1,5 @@
 from datetime import datetime
-from http.client import HTTPException
+from fastapi import HTTPException
 from msilib.schema import File
 from typing import List, Any, Coroutine, Sequence, Dict, Optional
 
@@ -12,8 +12,8 @@ from repository.product.product import ProductRepository
 from models.product import Product
 
 
-def read_excel_file(file_path: str) -> list[Product]:
-    data = []
+def read_excel_file_about_product_list(file_path: str) -> list[Product]:
+    data = list()
     xls = pd.ExcelFile(file_path)
     for sheet_name in xls.sheet_names:
         df = xls.parse(sheet_name)
@@ -36,6 +36,19 @@ def read_excel_file(file_path: str) -> list[Product]:
     return data
 
 
+def read_excel_file_about_vegetable_price_list(file_path: str) -> dict:
+    data = dict()
+    xls = pd.ExcelFile(file_path)
+    df = pd.read_excel(file_path, header=None)
+
+    for _, row in df.iterrows():
+        product_name = row.iloc[0]
+        price = row.iloc[1]
+        data[product_name] = price
+
+    return data
+
+
 class ProductService:
     def __init__(self, product_repository: ProductRepository = Depends(ProductRepository)):
         self.product_repository = product_repository
@@ -45,13 +58,13 @@ class ProductService:
             file_path = f"./datas/excel_file/{file.filename}"
             with open(file_path, "wb") as buffer:
                 buffer.write(await file.read())
-            products = read_excel_file(file_path)
+            products = read_excel_file_about_product_list(file_path)
 
             for product in products:
                 await self.product_repository.create_product(product)
 
         except Exception as e:
-            raise HTTPException(str(e))
+            raise HTTPException(status_code=500, detail=f" IO Exception - detail -> {str(e)}")
 
     async def get_products_by_category(self, category: str) -> Sequence[Product]:
         return await self.product_repository.get_products_by_category(category)
@@ -85,3 +98,19 @@ class ProductService:
             return True
         else:
             raise HTTPException(status_code=401, detail="Product Not updated")
+
+    async def update_vegetable_product_price_from_file(self, file: UploadFile = File):
+        try:
+            file_path = f"./datas/excel_file/{file.filename}"
+            with open(file_path, "wb") as buffer:
+                buffer.write(await file.read())
+            vegetable_price_data = read_excel_file_about_vegetable_price_list(file_path)
+            result = await self.product_repository.update_vegetable_products_price(vegetable_price_data)
+            return {"message": "Update successful", "updated_count": result}
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"IO Exception - detail -> {str(e)}")
+
+
+
+

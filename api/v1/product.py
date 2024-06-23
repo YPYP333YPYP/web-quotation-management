@@ -70,3 +70,11 @@ async def delete_product(product_id: int, product_service: ProductService = Depe
 async def update_vegetable_product_price(product_id: int, price: int, product_service: ProductService = Depends(ProductService)):
     await product_service.update_vegetable_product_price(product_id, price)
     return JSONResponse(content={"message": "Update successful"})
+
+
+@router.patch("/products/vegetable/file",
+              summary="vegetable(야채) 물품 가격 엑셀 파일로 변경",
+              description="야채 물품의 가격을 엑셀 파일을 통해 변경합니다.")
+async def update_vegetable_product_price(file: UploadFile = File(...), product_service: ProductService = Depends(ProductService)):
+    response = await product_service.update_vegetable_product_price_from_file(file)
+    return JSONResponse(content=response)

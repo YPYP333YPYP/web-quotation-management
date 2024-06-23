@@ -57,7 +57,7 @@ class ProductRepository:
                 await session.delete(product)
                 await session.commit()
 
-    async def update_vegetable_product_price(self, product_id, price):
+    async def update_vegetable_product_price(self, product_id: int, price: int):
         async with self.session as session:
             product = await session.get(Product, product_id)
             if product:
@@ -67,3 +67,23 @@ class ProductRepository:
                 return True
             else:
                 raise ValueError(f"Product {product_id} does not exist")
+
+    async def update_vegetable_products_price(self, price_data: dict):
+        async with self.session as session:
+            updated_count = 0
+            for product_name, new_price in price_data.items():
+                try:
+                    product = await session.execute(select(Product).where(Product.name == product_name))
+                    product = product.scalar_one_or_none()
+
+                    if product:
+                        product.price = new_price
+                        product.updated_at = datetime.utcnow()
+                        updated_count += 1
+                    else:
+                        raise ValueError((f"Product not found: {product_name}"))
+                except Exception as e:
+                    raise ValueError(f"Error updating {product_name}: {str(e)}")
+
+            await session.commit()
+            return updated_count
