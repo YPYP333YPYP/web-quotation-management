@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Dict, Any, Optional, List
 
 from fastapi import Depends
@@ -53,6 +54,7 @@ class QuotationProductRepository:
             if quotation_product:
                 for key, value in new_data.items():
                     setattr(quotation_product, key, value)
+                quotation_product.updated_at = datetime.utcnow()
                 await session.commit()
                 return True
             else:

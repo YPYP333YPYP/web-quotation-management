@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import List, Sequence
 
 from fastapi import Depends
@@ -34,6 +34,7 @@ class QuotationRepository:
 
             if quotation and total_price is not None:
                 quotation.total_price = total_price
+                quotation.updated_at = datetime.utcnow()
                 await session.commit()
             return total_price
 

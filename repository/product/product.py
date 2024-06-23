@@ -28,6 +28,7 @@ class ProductRepository:
             if product:
                 for key, value in new_data.items():
                     setattr(product, key, value)
+                product.updated_at = datetime.utcnow()
                 await session.commit()
                 return True
             else:
