@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Sequence, Dict, Any, Optional
 
 from fastapi import Depends
@@ -54,3 +55,14 @@ class ProductRepository:
             if product:
                 await session.delete(product)
                 await session.commit()
+
+    async def update_vegetable_product_price(self, product_id, price):
+        async with self.session as session:
+            product = await session.get(Product, product_id)
+            if product:
+                product.price = price
+                product.updated_at = datetime.utcnow()
+                await session.commit()
+                return True
+            else:
+                raise ValueError(f"Product {product_id} does not exist")

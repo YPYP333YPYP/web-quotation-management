@@ -63,7 +63,7 @@ class ProductService:
         if not new_data:
             return None
 
-        if await self.product_repository.update_product(product_id,  product):
+        if await self.product_repository.update_product(product_id, product):
             updated_product = await self.product_repository.get_product_by_id(product_id)
             return updated_product
 
@@ -79,3 +79,9 @@ class ProductService:
 
     async def delete_product(self, product_id: int) -> None:
         await self.product_repository.delete_product_by_id(product_id)
+
+    async def update_vegetable_product_price(self, product_id, price):
+        if await self.product_repository.update_vegetable_product_price(product_id, price):
+            return True
+        else:
+            raise HTTPException(status_code=401, detail="Product Not updated")

@@ -62,3 +62,11 @@ async def create_product(product: ProductCreate, product_service: ProductService
 async def delete_product(product_id: int, product_service: ProductService = Depends(ProductService)):
     await product_service.delete_product(product_id)
     return JSONResponse(content={"message": "Delete successful"})
+
+
+@router.patch("/products/{product_id}/vegetable",
+              summary="vegetable(야채) 물품 가격 직접 변경",
+              description="야채 물품의 가격을 직접 변경합니다.")
+async def update_vegetable_product_price(product_id: int, price: int, product_service: ProductService = Depends(ProductService)):
+    await product_service.update_vegetable_product_price(product_id, price)
+    return JSONResponse(content={"message": "Update successful"})
