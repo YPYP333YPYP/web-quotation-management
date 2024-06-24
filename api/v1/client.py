@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 from http.client import HTTPException
-from typing import Sequence
+from typing import Sequence, List
 
 from fastapi import APIRouter, Depends, Query
 from starlette.responses import JSONResponse
 
-from schemas.client import ClientRead, ClientUpdate, ClientCreate, ClientPaginatedResponse, DateRangeType
+from schemas.client import ClientRead, ClientUpdate, ClientCreate, ClientPaginatedResponse, DateRangeType, RegionType
 from service.client import ClientService
 from service.quotation import QuotationService
 
@@ -21,12 +21,12 @@ async def get_clients_by_name(name: str, client_service: ClientService = Depends
     return await client_service.get_clients_by_name(name)
 
 
-@router.get("/clients/region/{region}",
+@router.get("/clients/region",
             response_model=Sequence[ClientRead],
             summary="거래처 지역으로 조회",
             description="거래처 지역으로 거래처를 조회 합니다.")
-async def get_clients_by_region(region: str, client_service: ClientService = Depends(ClientService)) -> Sequence[
-    ClientRead]:
+async def get_clients_by_region(region: RegionType,
+                                client_service: ClientService = Depends(ClientService)) -> Sequence[ClientRead]:
     return await client_service.get_clients_by_region(region)
 
 
@@ -93,3 +93,5 @@ async def get_quotations(
     return await quotation_service.get_paginated_quotations_by_date_range(
         client_id, start_date, end_date, page, page_size
     )
+
+

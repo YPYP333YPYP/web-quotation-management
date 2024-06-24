@@ -19,16 +19,18 @@ class ClientRead(BaseModel):
     id: int
     name: str
     region: str
+    address: str
 
 
 class ClientCreate(BaseModel):
     name: str
     region: str
-
+    address: str
 
 class ClientUpdate(BaseModel):
     name: str
     region: str
+    address: str
 
 
 class DateRangeType(str, Enum):
@@ -40,3 +42,8 @@ class DateRangeType(str, Enum):
 class DateRange(BaseModel):
     start_date: datetime
     end_date: datetime
+
+
+class RegionType(str, Enum):
+    NOWON = "노원"
+    UIJEONGBU = "의정부"
