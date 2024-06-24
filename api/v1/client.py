@@ -63,7 +63,7 @@ async def get_quotations(client_id: int, quotation_service: QuotationService = D
     return await quotation_service.get_paginated_quotations_for_client(client_id, page, page_size)
 
 
-@router.get("/quotations/{client_id}/quotations/date",
+@router.get("/clients/{client_id}/quotations/date",
             response_model=ClientPaginatedResponse,
             summary="거래처 견적서 기간에 따른 조회 ",
             description="거래처의 기간 별 모든 견적서를 조회 합니다. page -> 페이지 시작 번호, page_size -> 페이지 당 반환 개수")
@@ -93,5 +93,4 @@ async def get_quotations(
     return await quotation_service.get_paginated_quotations_by_date_range(
         client_id, start_date, end_date, page, page_size
     )
-
 
