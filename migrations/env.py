@@ -8,17 +8,12 @@ from models.product import Base
 import os
 
 load_dotenv()
-DB_USERNAME = os.getenv('DB_USERNAME')
-DB_PASSWORD = os.getenv('DB_PASSWORD')
-DB_HOST = os.getenv('DB_HOST')
-DB_PORT = os.getenv('DB_PORT')
-DB_NAME = os.getenv('DB_NAME')
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+MYSQL_URI = os.getenv('ALEMBIC_MYSQL_URI')
+
 config = context.config
+
 if not config.get_main_option('sqlalchemy.url'):
-    config.set_main_option('sqlalchemy.url', 'mysql://{username}:{password}@{host}:{port}/{db_name}'
-                           .format(username=DB_USERNAME, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT, db_name=DB_NAME))
+    config.set_main_option('sqlalchemy.url', f"{MYSQL_URI}")
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
