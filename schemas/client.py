@@ -27,6 +27,7 @@ class ClientCreate(BaseModel):
     region: str
     address: str
 
+
 class ClientUpdate(BaseModel):
     name: str
     region: str
