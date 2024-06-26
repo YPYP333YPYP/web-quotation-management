@@ -4,6 +4,7 @@ from core.config import jwt_settings
 from fastapi import Security
 from fastapi.security import APIKeyHeader
 
+from models import User
 from service.user import UserService
 
 
@@ -33,5 +34,7 @@ async def get_current_user(
     return user
 
 
-async def get_current_superuser():
-    ...
+async def get_admin_user(current_user: User = Depends(get_current_user)):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin privileges required")
+    return current_user
