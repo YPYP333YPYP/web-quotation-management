@@ -17,6 +17,7 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.current_timestamp())
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     client_id: Mapped[int] = mapped_column(ForeignKey('clients.id'), nullable=True)
 
     client = relationship("Client", back_populates="users")

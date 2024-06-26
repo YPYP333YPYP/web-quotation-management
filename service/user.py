@@ -22,8 +22,7 @@ class UserService:
             email=user.email,
             hashed_password=get_password_hash(user.password),
             social=None,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
+            created_at=datetime.utcnow()
 
         )
         return await self.user_repository.create(db_user)

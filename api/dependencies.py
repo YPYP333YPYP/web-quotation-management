@@ -1,5 +1,4 @@
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from core.config import jwt_settings
 from fastapi import Security
