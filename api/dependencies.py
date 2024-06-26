@@ -7,10 +7,13 @@ from fastapi.security import APIKeyHeader
 
 from service.user import UserService
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+def verify_token(access_token=Security(APIKeyHeader(name="access-token"))):
+    return access_token
+
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(verify_token),
     user_service: UserService = Depends(UserService)
 ):
     credentials_exception = HTTPException(
@@ -29,9 +32,6 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
-
-async def get_optional_user():
-    ...
 
 
 async def get_current_superuser():
