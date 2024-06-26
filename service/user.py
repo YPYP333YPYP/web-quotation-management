@@ -29,3 +29,17 @@ class UserService:
 
     async def get_user_by_email(self, email: str) -> User | None:
         return await self.user_repository.get_by_email(email)
+
+    async def change_user_password(self, user_id: int, current_password: str, new_password: str):
+        user = await self.user_repository.get_by_id(user_id)
+        if not user:
+            raise ValueError("User not found")
+
+        if not verify_password(current_password, user.hashed_password):
+            raise ValueError("Incorrect current password")
+
+        if current_password == new_password:
+            raise ValueError("New password must be different from the current password")
+
+        hashed_password = get_password_hash(new_password)
+        await self.user_repository.update_user_password(user_id, hashed_password)
