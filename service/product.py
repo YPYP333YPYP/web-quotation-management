@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from fastapi import HTTPException
 from msilib.schema import File
@@ -5,11 +6,19 @@ from typing import List, Any, Coroutine, Sequence, Dict, Optional
 
 import pandas as pd
 from fastapi import Depends, UploadFile
+from fuzzywuzzy import fuzz
 from pydantic import ValidationError
 from sqlalchemy import func
 
+from core.config import redis_settings
+from models import User
 from repository.product.product import ProductRepository
 from models.product import Product
+from schemas.product import ProductRead
+
+import redis.asyncio as redis
+
+redis_client = redis.from_url(f"redis://{redis_settings.REDIS_HOST}", decode_responses=True)
 
 
 def read_excel_file_about_product_list(file_path: str) -> list[Product]:
@@ -111,6 +120,28 @@ class ProductService:
             print(f"Error: {str(e)}")
             raise HTTPException(status_code=500, detail=f"IO Exception - detail -> {str(e)}")
 
+    async def search_products_by_prefix(self, current_user: User, name_prefix: str, limit: int, cached_time: int):
+        cache_key = f"search:{current_user.id}:{name_prefix}"
+        cached_result = await redis_client.get(cache_key)
 
+        if cached_result:
+            return [ProductRead.parse_raw(item) for item in json.loads(cached_result)]
 
+        products = await self.product_repository.get_products_by_prefix(name_prefix, limit)
 
+        if not products:
+            all_products = await self.product_repository.get_all_products()
+            fuzzy_matches = sorted(
+                [p for p in all_products if fuzz.partial_ratio(name_prefix.lower(), p.name.lower()) > 75],
+                key=lambda x: fuzz.partial_ratio(name_prefix.lower(), x.name.lower()),
+                reverse=True
+            )[:limit]
+            products = fuzzy_matches
+
+        if products:
+            await redis_client.setex(
+                cache_key,
+                cached_time,
+                ','.join([ProductRead.from_orm(p).json() for p in products])
+            )
+        return [ProductRead.from_orm(p) for p in products]

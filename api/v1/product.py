@@ -1,8 +1,10 @@
 from typing import List, Sequence
 
-from fastapi import UploadFile, File, HTTPException, APIRouter, Depends, Form
+from fastapi import UploadFile, File, HTTPException, APIRouter, Depends, Form, Query
 from starlette.responses import JSONResponse
 
+from api.dependencies import get_current_user
+from models import User
 from models.product import Product
 from schemas.product import ProductRead, ProductCreate
 from service.product import ProductService
@@ -78,3 +80,16 @@ async def update_vegetable_product_price(product_id: int, price: int, product_se
 async def update_vegetable_product_price(file: UploadFile = File(...), product_service: ProductService = Depends(ProductService)):
     response = await product_service.update_vegetable_product_price_from_file(file)
     return JSONResponse(content=response)
+
+@router.get("/products/search/", response_model=List[ProductRead])
+async def search_products_by_prefix(
+    name_prefix: str = Query(..., min_length=1),
+    limit: int = Query(10, ge=1, le=100),
+    cached_time: int = Query(default=300),
+    product_service: ProductService = Depends(ProductService),
+    current_user: User = Depends(get_current_user)
+):
+    products = await product_service.search_products_by_prefix(current_user, name_prefix, limit, cached_time)
+    if not products:
+        raise HTTPException(status_code=404, detail="No products found")
+    return products

@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Sequence, Dict, Any, Optional
 
 from fastapi import Depends
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.product import Product
 from core.db.database import async_get_db
@@ -18,6 +19,13 @@ class ProductRepository:
     async def get_products_by_category(self, category: str) -> Sequence[Product]:
         async with self.session as session:
             stmt = select(Product).filter(Product.category == category)
+            result = await session.execute(stmt)
+            products = result.scalars().all()
+            return products
+
+    async def get_all_products(self):
+        async with self.session as session:
+            stmt = select(Product)
             result = await session.execute(stmt)
             products = result.scalars().all()
             return products
@@ -87,3 +95,15 @@ class ProductRepository:
 
             await session.commit()
             return updated_count
+
+    async def get_products_by_prefix(self, name_prefix: str, limit: int) -> Sequence[Product]:
+        async with self.session as session:
+            query = (
+                select(Product)
+                .where(func.lower(Product.name).like(f"%{name_prefix.lower()}"))
+                .order_by(func.length(Product.name))
+                .limit(limit)
+            )
+            result = await session.execute(query)
+            products = result.scalars().all()
+        return products
