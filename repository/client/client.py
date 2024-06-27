@@ -32,7 +32,11 @@ class ClientRepository:
             return clients
 
     async def create_client(self, client: Client):
-        self.session.add(client)
+        async with self.session as session:
+            session.add(client)
+            await session.commit()
+            await session.refresh(client)
+        return client
 
     async def update_client(self, client_id: int, new_data: Dict[str, Any]):
         async with self.session as session:

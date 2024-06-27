@@ -1,12 +1,15 @@
 from datetime import datetime, timedelta
 from http.client import HTTPException
-from typing import Sequence, List
+from typing import Sequence
 
 from fastapi import APIRouter, Depends, Query
 from starlette.responses import JSONResponse
 
-from schemas.client import ClientRead, ClientUpdate, ClientCreate, ClientPaginatedResponse, DateRangeType, RegionType
+from models import User
+from schemas.client import ClientRead, ClientCreate, DateRangeType, RegionType, ClientUpdate, ClientPaginatedResponse
 from service.client import ClientService
+
+from api.dependencies import get_current_user
 from service.quotation import QuotationService
 
 router = APIRouter(tags=["client"])
@@ -33,8 +36,9 @@ async def get_clients_by_region(region: RegionType,
 @router.post("/clients",
              summary="거래처 생성",
              description="새로운 거래처를 생성합니다.")
-async def create_client(client: ClientCreate, client_service: ClientService = Depends(ClientService)):
-    await client_service.create_client(client)
+async def create_client(client: ClientCreate, client_service: ClientService = Depends(ClientService),
+                        current_user: User = Depends(get_current_user)):
+    await client_service.create_client(client, current_user.id)
     return JSONResponse(content={"message": "Create successful"})
 
 

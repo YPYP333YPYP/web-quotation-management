@@ -1,4 +1,5 @@
 from fastapi import Depends
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -33,3 +34,9 @@ class UserRepository:
             if user:
                 user.hashed_password = hashed_password
                 await session.commit()
+
+    async def update_client_id(self, user_id: int, client_id: int) -> None:
+        async with self.session as session:
+            query = update(User).where(User.id == user_id).values(client_id=client_id)
+            await session.execute(query)
+            await session.commit()

@@ -43,3 +43,11 @@ class UserService:
 
         hashed_password = get_password_hash(new_password)
         await self.user_repository.update_user_password(user_id, hashed_password)
+
+    async def link_user_to_client(self, client_id: int, user_id: int) -> None:
+        user = await self.user_repository.get_by_id(user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+
+        await self.user_repository.update_client_id(user_id, client_id)
+
