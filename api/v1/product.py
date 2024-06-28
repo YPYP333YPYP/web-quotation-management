@@ -81,7 +81,10 @@ async def update_vegetable_product_price(file: UploadFile = File(...), product_s
     response = await product_service.update_vegetable_product_price_from_file(file)
     return JSONResponse(content=response)
 
-@router.get("/products/search/", response_model=List[ProductRead])
+@router.get("/products/search/",
+            response_model=List[ProductRead],
+            summary="검색제안/자동완성 기능",
+            description="검색어가 포함된 물품을 조회합니다.")
 async def search_products_by_prefix(
     name_prefix: str = Query(..., min_length=1),
     limit: int = Query(10, ge=1, le=100),
