@@ -81,6 +81,7 @@ async def update_vegetable_product_price(file: UploadFile = File(...), product_s
     response = await product_service.update_vegetable_product_price_from_file(file)
     return JSONResponse(content=response)
 
+
 @router.get("/products/search/",
             response_model=List[ProductRead],
             summary="검색제안/자동완성 기능",
@@ -96,3 +97,6 @@ async def search_products_by_prefix(
     if not products:
         raise HTTPException(status_code=404, detail="No products found")
     return products
+
+
+
