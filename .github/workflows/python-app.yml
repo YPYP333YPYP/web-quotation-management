@@ -32,6 +32,13 @@ jobs:
       run: poetry run pytest tests
       continue-on-error: true
 
+    - name: Verify and create .env file
+      run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+          if [ ! -f .env ]; then
+            echo ".env file does not exist"
+            exit 1
+          fi
 
     - name: Set up GCP SSH key
       run: |
