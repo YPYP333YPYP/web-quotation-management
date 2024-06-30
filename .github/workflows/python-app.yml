@@ -18,7 +18,7 @@ jobs:
 
       - name: Install Poetry
         run: |
-          curl -sSL https://install.python-poetry.org | python - --user
+          curl -sSL https://install.python-poetry.org | python - 
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Load cached venv
