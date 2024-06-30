@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         poetry lock
-        poetry install --with dev
+        poetry install 
 
     - name: Run tests
       run: poetry run pytest
