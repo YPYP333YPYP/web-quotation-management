@@ -8,69 +8,66 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+    - uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11'
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
 
-      - name: Install Poetry
-        run: |
-          python -c "$(curl -fsSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py)"
+    - name: Install poetry
+      run: pip install poetry
 
+    - name: Configure poetry
+      run: |
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
 
-      - name: Configure poetry
-        run: |
-          poetry config virtualenvs.create true
-          poetry config virtualenvs.in-project true
+    - name: Install dependencies
+      run: |
+        poetry lock
+        poetry install 
 
-      - name: Install dependencies
-        run: |
-          poetry lock
-          poetry install 
+    - name: Run tests
+      run: poetry run pytest tests
+      continue-on-error: true
 
-      - name: Run tests
-        run: poetry run pytest tests
-        continue-on-error: true
-
-      - name: Verify and create .env file
-        run: |
+    - name: Verify and create .env file
+      run: |
           echo "${{ secrets.ENV_FILE_CONTENT }}" > $GITHUB_WORKSPACE/.env
           if [ ! -f $GITHUB_WORKSPACE/.env ]; then
-            echo ".env file does not exist"
-            exit 1
+          echo ".env file does not exist"
+          exit 1
           fi
 
-      - name: Set up GCP SSH key
-        run: |
-          mkdir -p ~/.ssh/
-          echo "${{ secrets.GCP_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          echo "${{ secrets.GCP_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+    - name: Set up GCP SSH key
+      run: |
+        mkdir -p ~/.ssh/
+        echo "${{ secrets.GCP_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        echo "${{ secrets.GCP_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
 
-      - name: Deploy to GCP
-        env:
-          GCP_HOST_SERVER: ${{ secrets.GCP_HOST_SERVER }}
-          GCP_HOST_NAME: ${{ secrets.GCP_HOST_NAME }}
-        run: |
-          # .env 파일을 서버로 전송
-          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} "mkdir -p /home/${{ secrets.GCP_HOST_NAME }}/app"
-          scp -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/.env ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/.env
+    - name: Deploy to GCP
+      env:
+        GCP_HOST_SERVER: ${{ secrets.GCP_HOST_SERVER }}
+        GCP_HOST_NAME: ${{ secrets.GCP_HOST_NAME }}
+      run: |
+        # .env 파일을 서버로 전송
+        ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} "mkdir -p /home/${{ secrets.GCP_HOST_NAME }}/app"
+       scp -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/.env ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/.env
+        
+        # Transfer other files to server
+        scp -o StrictHostKeyChecking=no -r $GITHUB_WORKSPACE/* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app
+        
+        # SSH into server and execute commands
+        ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << EOF
+          cd /home/${{ secrets.GCP_HOST_NAME }}/app
           
-          # Transfer other files to server
-          scp -o StrictHostKeyChecking=no -r $GITHUB_WORKSPACE/* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app
+          # .env 파일 권한 설정
+          chmod 600 .env
           
-          # SSH into server and execute commands
-          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << 'EOF'
-            cd /home/${{ secrets.GCP_HOST_NAME }}/app
-            
-            # .env 파일 권한 설정
-            chmod 600 .env
-            
-            # Alembic 마이그레이션 실행
-            poetry run alembic upgrade head
-            
-            # Start the FastAPI application
-            poetry run uvicorn main:app --host 0.0.0.0 --port 8000
-          EOF
+          # Alembic 마이그레이션 실행
+          poetry run alembic upgrade head
+          
+          poetry run uvicorn main:app --host 0.0.0.0 --port 8000
+        EOF
