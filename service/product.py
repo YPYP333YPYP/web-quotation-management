@@ -1,7 +1,6 @@
 import json
 from datetime import datetime
 from fastapi import HTTPException
-from msilib.schema import File
 from typing import List, Any, Coroutine, Sequence, Dict, Optional
 
 import pandas as pd
@@ -62,7 +61,7 @@ class ProductService:
     def __init__(self, product_repository: ProductRepository = Depends(ProductRepository)):
         self.product_repository = product_repository
 
-    async def upload_products(self, file: UploadFile = File):
+    async def upload_products(self, file: UploadFile ):
         try:
             file_path = f"./datas/excel_file/{file.filename}"
             with open(file_path, "wb") as buffer:
@@ -108,7 +107,7 @@ class ProductService:
         else:
             raise HTTPException(status_code=401, detail="Product Not updated")
 
-    async def update_vegetable_product_price_from_file(self, file: UploadFile = File):
+    async def update_vegetable_product_price_from_file(self, file: UploadFile):
         try:
             file_path = f"./datas/excel_file/{file.filename}"
             with open(file_path, "wb") as buffer:
