@@ -61,61 +61,66 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << 'EOF'
             cd /home/${{ secrets.GCP_HOST_NAME }}/app
-            
+
             # Python 3.11 버전 확인 및 설정
             python3.11 --version
             export PATH="/usr/bin:$PATH"
             which python3.11
-            
+
+            # pip 업그레이드 및 필요한 패키지 설치
+            python3.11 -m pip install --upgrade pip
+            python3.11 -m pip install platformdirs
+
             # Poetry 설치 (사용자 로컬 설치)
             curl -sSL https://install.python-poetry.org | python3.11 - --user
             export PATH="$HOME/.local/bin:$PATH"
-            
-            # Poetry 버전 확인
+
+            # Poetry 버전 및 의존성 확인
             $HOME/.local/bin/poetry --version
-            
+            $HOME/.local/bin/poetry debug info
+
             # Poetry 환경 설정
             $HOME/.local/bin/poetry config virtualenvs.in-project true
-            
+
             # 기존 가상 환경 및 캐시 제거
             rm -rf .venv
             rm -rf ~/.cache/pypoetry
-            
+
             # Poetry가 Python 3.11을 사용하도록 명시적으로 설정
             $HOME/.local/bin/poetry env use python3.11
-            
+
             # Poetry를 사용하여 의존성 설치 (자세한 로그 출력)
             $HOME/.local/bin/poetry install -vv
-            
+
             # 가상 환경 경로 및 Python 버전 확인
             $HOME/.local/bin/poetry env info
             $HOME/.local/bin/poetry run python --version
-            
+
             # 설치된 패키지 목록 확인
             $HOME/.local/bin/poetry run pip list
-            
+
             # .env 파일 권한 설정 (파일이 존재하는 경우에만)
             if [ -f .env ]; then
               chmod 600 .env
             else
               echo ".env file not found"
             fi
-            
+
             # Poetry 환경에서 Alembic 마이그레이션 실행
             $HOME/.local/bin/poetry run alembic upgrade head
-            
+
             # 기존 프로세스 종료
             pkill -f "uvicorn main:app" || true
-            
+
             # 애플리케이션 실행
             nohup $HOME/.local/bin/poetry run uvicorn main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
-            
+
             # 프로세스 확인
             ps aux | grep "uvicorn main:app"
-            
+
             # 로그 확인 (마지막 20줄)
             tail -n 20 app.log
-            
+
             # 오류 발생 시 추가 디버깅 정보
             if [ $? -ne 0 ]; then
               echo "Deployment failed. Additional debug information:"
