@@ -57,39 +57,52 @@ jobs:
         GCP_HOST_SERVER: ${{ secrets.GCP_HOST_SERVER }}
         GCP_HOST_NAME: ${{ secrets.GCP_HOST_NAME }}
       run: |
-        # .env 파일을 서버로 전송
-        ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} "mkdir -p /home/${{ secrets.GCP_HOST_NAME }}/app"
-        scp -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/.env ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/.env
-        
-        # 기타 파일들을 서버로 전송
-        scp -o StrictHostKeyChecking=no -r $GITHUB_WORKSPACE/* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app
-        
-        # 서버에 접속하여 명령어 실행
         ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << 'EOF'
           cd /home/${{ secrets.GCP_HOST_NAME }}/app
 
-          # Poetry 설치 (서버에 Poetry가 설치되어 있지 않은 경우)
-          curl -sSL https://install.python-poetry.org | python3 -
+          # Python 3.11 설치 확인
+          python3.11 --version
 
-          # Poetry를 사용하여 의존성 설치
-          poetry install
+          # Poetry 설치 또는 업데이트
+          curl -sSL https://install.python-poetry.org | python3.11 -
+
+          # PATH에 Poetry 추가
+          export PATH="/home/${{ secrets.GCP_HOST_NAME }}/.local/bin:$PATH"
+
+          # Poetry 버전 확인
+          poetry --version
+
+          # Poetry 환경 설정
+          poetry config virtualenvs.in-project true
+
+          # 기존 가상 환경 제거
+          rm -rf .venv
+
+          # Poetry를 사용하여 의존성 설치 (자세한 로그 출력)
+          poetry install -vv
+
+          # 가상 환경 경로 확인
+          poetry env info
+
+          # 설치된 패키지 목록 확인
+          poetry run pip list
 
           # .env 파일 권한 설정
           chmod 600 .env
 
-          # Alembic 마이그레이션 실행
+          # Poetry 환경에서 Alembic 마이그레이션 실행
           poetry run alembic upgrade head
-          poetry lock
 
           # 기존 프로세스 종료
           pkill -f "uvicorn main:app"
-        
-          # 애플리케이션 실행
-          nohup poetry run uvicorn main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
-        
+
+          # 애플리케이션 실행 (가상 환경 명시적 활성화)
+          source $(poetry env info --path)/bin/activate
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
+
           # 프로세스 확인
           ps aux | grep "uvicorn main:app"
-        
-          # 로그 확인 (마지막 10줄)
-          tail -n 10 app.log
+
+          # 로그 확인 (마지막 20줄)
+          tail -n 20 app.log
         EOF
