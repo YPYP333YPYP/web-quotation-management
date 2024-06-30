@@ -1,0 +1,59 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install poetry
+        poetry install
+
+    - name: Run tests
+      run: poetry run pytest
+
+    - name: Set up GCP SSH key
+      run: |
+        mkdir -p ~/.ssh/
+        echo "${{ secrets.GCP_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        echo "${{ secrets.GCP_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+
+    - name: Deploy to GCP
+      env:
+        GCP_HOST_SERVER: ${{ secrets.GCP_HOST_SERVER }}
+        GCP_HOST_NAME: ${{ secrets.GCP_HOST_NAME }}
+      run: |
+        # .env 파일을 서버로 전송
+        scp -o StrictHostKeyChecking=no .env ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/path/to/app/.env
+        
+        # 나머지 파일들을 서버로 전송
+        scp -o StrictHostKeyChecking=no -r ./* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/path/to/app
+        
+        ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << EOF
+          cd /path/to/app
+          
+          # .env 파일 권한 설정
+          chmod 600 .env
+          
+          # Alembic 마이그레이션 실행
+          poetry run alembic upgrade head
+          
+          docker build -t my-fastapi-app .
+          docker stop my-fastapi-app || true
+          docker rm my-fastapi-app || true
+          docker run -d --name my-fastapi-app -p 8000:8000 \
+            --env-file .env \
+            my-fastapi-app
+        EOF
