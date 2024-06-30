@@ -54,13 +54,14 @@ jobs:
       run: |
         # .env 파일을 서버로 전송
         ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} "mkdir -p /home/${{ secrets.GCP_HOST_NAME }}/app"
-        scp -o StrictHostKeyChecking=no .env ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/path/to/app/.env
+        scp -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/.env ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/.env
         
-        # 나머지 파일들을 서버로 전송
-        scp -o StrictHostKeyChecking=no -r ./* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/path/to/app
+        # Transfer other files to server
+        scp -o StrictHostKeyChecking=no -r $GITHUB_WORKSPACE/* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app
         
+        # SSH into server and execute commands
         ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << EOF
-          cd /path/to/app
+          cd /home/${{ secrets.GCP_HOST_NAME }}/app
           
           # .env 파일 권한 설정
           chmod 600 .env
