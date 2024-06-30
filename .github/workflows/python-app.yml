@@ -8,28 +8,31 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: '3.11'
 
     - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        echo 'export PATH="$HOME/.poetry/bin:$PATH"' >> $GITHUB_ENV
-        source $GITHUB_ENV
+      uses: abatilo/actions-poetry@v2
+      with:
+        poetry-version: '1.7.1'
 
-    - name: Configure Poetry
+    - name: Setup a local virtual environment (if no poetry.toml file)
       run: |
-        poetry config virtualenvs.create true
-        poetry config virtualenvs.in-project true
+        poetry config virtualenvs.create true --local
+        poetry config virtualenvs.in-project true --local
+
+    - uses: actions/cache@v3
+      name: Define a cache for the virtual environment based on the dependencies lock file
+      with:
+        path: ./.venv
+        key: venv-${{ hashFiles('poetry.lock') }}
 
     - name: Install dependencies
-      run: |
-        poetry lock
-        poetry install
+      run: poetry install
 
     - name: Run tests
       run: poetry run pytest tests
