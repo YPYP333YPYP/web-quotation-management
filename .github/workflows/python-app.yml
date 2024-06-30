@@ -22,12 +22,10 @@ jobs:
       run: |
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
-
     - name: Install dependencies
       run: |
         poetry lock
-        poetry install 
-
+        poetry install
     - name: Run tests
       run: poetry run pytest tests
       continue-on-error: true
@@ -39,14 +37,12 @@ jobs:
           echo ".env file does not exist"
           exit 1
           fi
-
     - name: Set up GCP SSH key
       run: |
         mkdir -p ~/.ssh/
         echo "${{ secrets.GCP_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         echo "${{ secrets.GCP_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
-
     - name: Deploy to GCP
       env:
         GCP_HOST_SERVER: ${{ secrets.GCP_HOST_SERVER }}
@@ -54,7 +50,7 @@ jobs:
       run: |
         # .env 파일을 서버로 전송
         ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} "mkdir -p /home/${{ secrets.GCP_HOST_NAME }}/app"
-       scp -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/.env ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/.env
+        scp -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/.env ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/.env
         
         # Transfer other files to server
         scp -o StrictHostKeyChecking=no -r $GITHUB_WORKSPACE/* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app
@@ -66,8 +62,9 @@ jobs:
           # .env 파일 권한 설정
           chmod 600 .env
           
-
+          # Alembic 마이그레이션 실행
           poetry run alembic upgrade head
           
           poetry run uvicorn main:app --host 0.0.0.0 --port 8000
+
         EOF
