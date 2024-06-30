@@ -1,9 +1,10 @@
 [tool.poetry]
-name = "web-quotation"
+name = "web-quotation-management"
 version = "0.1.0"
 description = ""
 authors = ["YPYP333YPYP <ypyp333ypyp@gmail.com>"]
 readme = "README.md"
+
 
 [tool.poetry.dependencies]
 python = "^3.11"
