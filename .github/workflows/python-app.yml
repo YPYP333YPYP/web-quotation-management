@@ -5,76 +5,86 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
 
-    - name: Install Poetry
-      uses: abatilo/actions-poetry@v2
-      with:
-        poetry-version: '1.7.1'
+      - name: cache poetry install
+        uses: actions/cache@v2
+        with:
+          path: ~/.local
+          key: poetry-1.1.12-0
 
-    - name: Setup a local virtual environment (if no poetry.toml file)
-      run: |
-        poetry config virtualenvs.create true --local
-        poetry config virtualenvs.in-project true --local
+      - uses: snok/install-poetry@v1
+        with:
+          version: 1.1.12
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
-    - uses: actions/cache@v3
-      name: Define a cache for the virtual environment based on the dependencies lock file
-      with:
-        path: ./.venv
-        key: venv-${{ hashFiles('poetry.lock') }}
+      - name: cache deps
+        id: cache-deps
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: pydeps-${{ hashFiles('**/poetry.lock') }}
 
-    - name: Install dependencies
-      run: poetry install
 
-    - name: Run tests
-      run: poetry run pytest tests
-      continue-on-error: true
+      - run: poetry install --no-interaction --no-root
+        if: steps.cache-deps.outputs.cache-hit != 'true'
 
-    - name: Verify and create .env file
-      run: |
-        echo "${{ secrets.ENV_FILE_CONTENT }}" > $GITHUB_WORKSPACE/.env
-        if [ ! -f $GITHUB_WORKSPACE/.env ]; then
-          echo ".env file does not exist"
-          exit 1
-        fi
+      - run: poetry install --no-interaction
 
-    - name: Set up GCP SSH key
-      run: |
-        mkdir -p ~/.ssh/
-        echo "${{ secrets.GCP_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        echo "${{ secrets.GCP_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+      - run: poetry run pytest
 
-    - name: Deploy to GCP
-      env:
-        GCP_HOST_SERVER: ${{ secrets.GCP_HOST_SERVER }}
-        GCP_HOST_NAME: ${{ secrets.GCP_HOST_NAME }}
-      run: |
-        # .env 파일을 서버로 전송
-        ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} "mkdir -p /home/${{ secrets.GCP_HOST_NAME }}/app"
-        scp -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/.env ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/.env
-        
-        # 기타 파일들을 서버로 전송
-        scp -o StrictHostKeyChecking=no -r $GITHUB_WORKSPACE/* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app
-        
-        # 서버에 접속하여 명령어 실행
-        ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << 'EOF'
-          cd /home/${{ secrets.GCP_HOST_NAME }}/app
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Run tests
+        run: poetry run pytest tests
+        continue-on-error: true
+
+      - name: Verify and create .env file
+        run: |
+          echo "${{ secrets.ENV_FILE_CONTENT }}" > $GITHUB_WORKSPACE/.env
+          if [ ! -f $GITHUB_WORKSPACE/.env ]; then
+            echo ".env file does not exist"
+            exit 1
+          fi
+
+      - name: Set up GCP SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.GCP_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.GCP_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+
+      - name: Deploy to GCP
+        env:
+          GCP_HOST_SERVER: ${{ secrets.GCP_HOST_SERVER }}
+          GCP_HOST_NAME: ${{ secrets.GCP_HOST_NAME }}
+        run: |
+          # .env 파일을 서버로 전송
+          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} "mkdir -p /home/${{ secrets.GCP_HOST_NAME }}/app"
+          scp -o StrictHostKeyChecking=no $GITHUB_WORKSPACE/.env ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/.env
           
-          # .env 파일 권한 설정
-          chmod 600 .env
+          # 기타 파일들을 서버로 전송
+          scp -o StrictHostKeyChecking=no -r $GITHUB_WORKSPACE/* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app
           
-          # Alembic 마이그레이션 실행
-          poetry run alembic upgrade head
-          
-          # 애플리케이션 실행
-          poetry run uvicorn main:app --host 0.0.0.0 --port 8000
-        EOF
+          # 서버에 접속하여 명령어 실행
+          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << 'EOF'
+            cd /home/${{ secrets.GCP_HOST_NAME }}/app
+            
+            # .env 파일 권한 설정
+            chmod 600 .env
+            
+            # Alembic 마이그레이션 실행
+            poetry run alembic upgrade head
+            
+            # 애플리케이션 실행
+            poetry run uvicorn main:app --host 0.0.0.0 --port 8000
+          EOF
