@@ -15,16 +15,14 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install requests module
-        run: python -m pip install requests
-
       - name: Install Poetry
         run: |
-          python -c "$(curl -fsSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py)"
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py -o get-poetry.py
+          python get-poetry.py
+          source $HOME/.poetry/env
 
       - name: Configure poetry
         run: |
-          source $HOME/.poetry/env
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
 
