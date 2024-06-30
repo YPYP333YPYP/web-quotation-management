@@ -60,7 +60,7 @@ SQLAlchemy = "^2.0.28"
 starlette = "^0.36.3"
 typing-extensions = "^4.10.0"
 tzdata = "^2024.1"
-urllib3 = "^2.2.1"
+urllib3= "1.26.9"
 uvicorn = "^0.28.0"
 pytest = "^7.0.0"
 
