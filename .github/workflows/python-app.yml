@@ -53,6 +53,7 @@ jobs:
         GCP_HOST_NAME: ${{ secrets.GCP_HOST_NAME }}
       run: |
         # .env 파일을 서버로 전송
+        ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} "mkdir -p /path/to/app"
         scp -o StrictHostKeyChecking=no .env ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/path/to/app/.env
         
         # 나머지 파일들을 서버로 전송
