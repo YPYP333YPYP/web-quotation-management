@@ -15,12 +15,13 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install poetry
+    - name: Install Poetry
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
-        echo "export PATH=$HOME/.local/bin:$PATH" >> $GITHUB_ENV
+        echo 'export PATH="$HOME/.poetry/bin:$PATH"' >> $GITHUB_ENV
+        source $GITHUB_ENV
 
-    - name: Configure poetry
+    - name: Configure Poetry
       run: |
         poetry config virtualenvs.create true
         poetry config virtualenvs.in-project true
