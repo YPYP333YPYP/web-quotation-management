@@ -66,11 +66,7 @@ jobs:
           # .env 파일 권한 설정
           chmod 600 .env
         
-          # Poetry 설치 및 의존성 설치
-          poetry config virtualenvs.create true
-          poetry lock --no-update
-          poetry install
-        
+  
           # Alembic 마이그레이션 실행
           poetry run alembic upgrade head
           
