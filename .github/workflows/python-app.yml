@@ -13,7 +13,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.10.12'
+        python-version: '3.11'
 
     - name: Install Poetry
       uses: snok/install-poetry@v1
@@ -80,6 +80,15 @@ jobs:
           # Alembic 마이그레이션 실행
           poetry run alembic upgrade head
 
+          # 기존 프로세스 종료
+          pkill -f "uvicorn main:app"
+        
           # 애플리케이션 실행
-          poetry run uvicorn main:app --host 0.0.0.0 --port 8000 &
+          nohup poetry run uvicorn main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
+        
+          # 프로세스 확인
+          ps aux | grep "uvicorn main:app"
+        
+          # 로그 확인 (마지막 10줄)
+          tail -n 10 app.log
         EOF
