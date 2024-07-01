@@ -67,9 +67,21 @@ jobs:
             echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
             chmod 600 .env
 
-            # 의존성 설치
-            poetry config virtualenvs.create true
-            poetry install --no-interaction --sync
+            sudo apt-get update
+            sudo apt-get install -y python3-pip
+            pip3 install --upgrade pip setuptools
+            pip3 install poetry
 
-        
+            # 가상환경 설정 및 의존성 설치
+            cd ~/app
+            poetry config virtualenvs.create true
+            poetry config virtualenvs.in-project true
+            poetry install --no-interaction --no-root
+
+            # 애플리케이션 실행 (예시: FastAPI 애플리케이션)
+            poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+            # 프로세스 및 로그 확인
+            ps aux | grep "uvicorn main:app"
+            tail -n 20 app.log
           EOF
