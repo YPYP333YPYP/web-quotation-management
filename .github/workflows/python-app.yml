@@ -27,15 +27,10 @@ jobs:
         run: |
           poetry config virtualenvs.in-project true
 
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v2
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Update poetry lock file
+        run: poetry lock
 
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
 
       - name: Run tests
@@ -91,6 +86,9 @@ jobs:
 
             # Poetry가 Python 3.11을 사용하도록 명시적으로 설정
             poetry env use python3.11
+
+            # Poetry lock 파일 업데이트
+            poetry lock
 
             # Poetry를 사용하여 의존성 설치 (자세한 로그 출력)
             poetry install -vv
