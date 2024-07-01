@@ -22,6 +22,9 @@ jobs:
           pipx install poetry
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
+      - name: Update poetry lock file
+        run: poetry lock --no-update
+
       - name: Install dependencies
         run: |
           poetry config virtualenvs.in-project true
@@ -49,6 +52,10 @@ jobs:
             # 환경 변수 설정
             echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
             chmod 600 .env
+
+            # Poetry 환경 설정 및 의존성 설치
+            poetry config virtualenvs.in-project true
+            poetry install --no-interaction
 
             # 애플리케이션 재시작
             poetry run alembic upgrade head
