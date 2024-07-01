@@ -34,18 +34,21 @@ jobs:
         run: poetry run pytest tests
         continue-on-error: true
 
-      - name: Set up GCP SSH key
+      - name: Set up GCP SSH key and known hosts
         run: |
           mkdir -p ~/.ssh/
           echo "${{ secrets.GCP_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.GCP_SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
           chmod 600 ~/.ssh/id_rsa
+          chmod 644 ~/.ssh/id_rsa.pub
+          echo "${{ secrets.GCP_HOST_SERVER }} $(ssh-keyscan ${{ secrets.GCP_HOST_SERVER }} 2>/dev/null)" >> ~/.ssh/known_hosts
 
       - name: Deploy to GCP
         env:
           GCP_HOST_SERVER: ${{ secrets.GCP_HOST_SERVER }}
           GCP_HOST_NAME: ${{ secrets.GCP_HOST_NAME }}
         run: |
-          scp -r ./* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/
+          scp -o StrictHostKeyChecking=no -r ./* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/
           ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << 'EOF'
             cd /home/${{ secrets.GCP_HOST_NAME }}/app
 
