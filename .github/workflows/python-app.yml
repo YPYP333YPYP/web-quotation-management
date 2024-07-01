@@ -79,14 +79,24 @@ jobs:
             echo "Listing installed packages:"
             poetry show
             
-            echo "Starting application..."
-            poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+            echo "Starting application in background..."
+            nohup poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload > app.log 2>&1 &
             
-            echo "Checking running processes:"
-            ps aux | grep "uvicorn main:app"
+            echo "Waiting for application to start..."
+            sleep 5
             
-            echo "Tailing log file:"
-            tail -n 20 app.log || echo "No log file found"
+            echo "Checking if application is running..."
+            if pgrep -f "uvicorn main:app" > /dev/null
+            then
+              echo "Application is running."
+              echo "Recent log entries:"
+              tail -n 20 app.log
+            else
+              echo "Error: Application failed to start."
+              echo "Log contents:"
+              cat app.log
+              exit 1
+            fi
             
-            echo "Deployment completed."
+            echo "Deployment completed successfully."
           EOF
