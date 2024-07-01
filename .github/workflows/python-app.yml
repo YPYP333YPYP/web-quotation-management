@@ -25,7 +25,6 @@ jobs:
       - name: Install Poetry with pipx
         run: |
           pipx install poetry
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Update poetry lock file
         run: poetry lock --no-update
@@ -67,13 +66,7 @@ jobs:
             echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
             chmod 600 .env
 
-            sudo apt-get update
-            sudo apt-get install -y python3-pip
-            pip3 install --upgrade pip setuptools
-            pip3 install poetry
-
             # 가상환경 설정 및 의존성 설치
-            cd ~/app
             poetry config virtualenvs.create true
             poetry config virtualenvs.in-project true
             poetry install --no-interaction --no-root
