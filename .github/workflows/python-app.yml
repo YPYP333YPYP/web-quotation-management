@@ -63,7 +63,7 @@ jobs:
             chmod 600 .env
 
             # Poetry 환경 설정 및 의존성 설치
-            poetry config virtualenvs.in-project true
+            export PATH="$HOME/.local/bin:$PATH"
             poetry install --no-interaction
 
             # 애플리케이션 재시작
