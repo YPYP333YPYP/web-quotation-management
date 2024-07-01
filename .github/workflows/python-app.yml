@@ -16,9 +16,14 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Poetry
+      - name: Install pipx
         run: |
+          pip install --upgrade pip
           pip install pipx
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Poetry with pipx
+        run: |
           pipx install poetry
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
@@ -27,8 +32,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry config virtualenvs.in-project true
-          poetry install --no-interaction
+          poetry config virtualenvs.create true
+          poetry install --no-interaction --no-root
 
       - name: Run tests
         run: poetry run pytest tests
@@ -62,9 +67,13 @@ jobs:
             echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
             chmod 600 .env
 
-            # Poetry 환경 설정 및 의존성 설치
+            # Poetry 설치 및 환경 설정
+            pipx install poetry
             export PATH="$HOME/.local/bin:$PATH"
-            poetry install --no-interaction
+
+            # 의존성 설치
+            poetry config virtualenvs.create true
+            poetry install --no-interaction --sync
 
             # 애플리케이션 재시작
             poetry run alembic upgrade head
