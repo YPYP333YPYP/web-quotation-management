@@ -22,70 +22,71 @@ jobs:
         env:
           GCP_HOST_SERVER: ${{ secrets.GCP_HOST_SERVER }}
           GCP_HOST_NAME: ${{ secrets.GCP_HOST_NAME }}
+          ENV_FILE_CONTENT: ${{ secrets.ENV_FILE }}
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << EOF
             set -e
-
+            
             echo "Changing to app directory..."
             cd /home/${{ secrets.GCP_HOST_NAME }}/app
-
-            echo "Setting up environment variables..."
-            echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+            
+            echo "Creating .env file..."
+            echo "$ENV_FILE_CONTENT" > .env
             chmod 600 .env
-
+            
             echo "Updating Python..."
             sudo apt-get update
             sudo apt-get install -y python3-pip python3-venv
-
+            
             echo "Upgrading pip..."
             python3 -m pip install --upgrade pip
-
+            
             echo "Installing Poetry..."
             curl -sSL https://install.python-poetry.org | python3 -
             export PATH="/home/${{ secrets.GCP_HOST_NAME }}/.local/bin:$PATH"
-
+            
             echo "Upgrading Poetry..."
             poetry self update
-
+            
             echo "Installing platformdirs..."
             pip install platformdirs
-
+            
             echo "Configuring Poetry..."
             poetry config virtualenvs.create true
             poetry config virtualenvs.in-project true
-
+            
             echo "Poetry version:"
             poetry --version
-
+            
             echo "Removing existing virtual environment..."
             rm -rf .venv
-
+            
             echo "Creating new virtual environment..."
             python3 -m venv .venv
-
+            
             echo "Activating virtual environment..."
             source .venv/bin/activate
-
+            
             echo "Updating poetry lock file..."
             poetry lock --no-update
-
+            
             echo "Installing dependencies..."
             poetry install --no-interaction --no-root
-
+            
             echo "Checking virtual environment path:"
             poetry env info --path
-
+            
             echo "Listing installed packages:"
             poetry show
-
+            
             echo "Starting application..."
-            uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
-
+            poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+            
             echo "Checking running processes:"
             ps aux | grep "uvicorn main:app"
-
+            
             echo "Tailing log file:"
             tail -n 20 app.log || echo "No log file found"
-
+            
             echo "Deployment completed."
           EOF
