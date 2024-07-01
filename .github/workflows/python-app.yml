@@ -70,6 +70,7 @@ jobs:
             # Poetry 설치 및 환경 설정
             pipx install poetry
             export PATH="$HOME/.local/bin:$PATH"
+            pip install packaging platformdirs
 
             # 의존성 설치
             poetry config virtualenvs.create true
