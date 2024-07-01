@@ -16,24 +16,27 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Poetry
+      - name: Install Poetry and dependencies
         run: |
-          curl -sSL https://install.python-poetry.org | python - 
+          python -m pip install --upgrade pip
+          pip install platformdirs packaging
+          curl -sSL https://install.python-poetry.org | python - --user
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.in-project true
 
       - name: Load cached venv
         id: cached-poetry-dependencies
         uses: actions/cache@v2
         with:
-          path: ~/.cache/pypoetry/virtualenvs
+          path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-
 
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: |
-          poetry install --no-interaction --no-root
+        run: poetry install --no-interaction --no-root
 
       - name: Run tests
         run: poetry run pytest tests
@@ -69,7 +72,7 @@ jobs:
 
             # pip 업그레이드 및 필요한 패키지 설치
             python3.11 -m pip install --upgrade pip
-            python3.11 -m pip install platformdirs
+            python3.11 -m pip install platformdirs packaging
 
             # Poetry 설치 (사용자 로컬 설치)
             curl -sSL https://install.python-poetry.org | python3.11 - --user
