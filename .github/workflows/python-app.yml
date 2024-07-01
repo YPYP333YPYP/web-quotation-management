@@ -48,7 +48,13 @@ jobs:
           GCP_HOST_SERVER: ${{ secrets.GCP_HOST_SERVER }}
           GCP_HOST_NAME: ${{ secrets.GCP_HOST_NAME }}
         run: |
+          # 먼저 디렉토리 생성
+          ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} "mkdir -p /home/${{ secrets.GCP_HOST_NAME }}/app"
+
+          # 파일 복사
           scp -o StrictHostKeyChecking=no -r ./* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/
+
+          # 나머지 배포 과정
           ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }} << 'EOF'
             cd /home/${{ secrets.GCP_HOST_NAME }}/app
 
