@@ -78,7 +78,10 @@ jobs:
             
             echo "Listing installed packages:"
             poetry show
-            
+          
+            echo "Running database migrations..."
+            poetry run alembic upgrade head
+          
             echo "Checking for existing process on port 8000..."
             existing_pid=\$(lsof -ti:8000)
             if [ ! -z "\$existing_pid" ]; then
