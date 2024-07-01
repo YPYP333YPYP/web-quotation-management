@@ -51,6 +51,9 @@ jobs:
             echo "Poetry version:"
             poetry --version
             
+            echo "Updating poetry lock file..."
+            poetry lock --no-update
+            
             echo "Installing dependencies..."
             poetry install --no-interaction --no-root
             
