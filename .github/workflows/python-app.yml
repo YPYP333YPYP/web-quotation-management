@@ -16,11 +16,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Poetry and dependencies
+      - name: Install pipx
+        run: python -m pip install --user pipx
+
+      - name: Install Poetry
         run: |
-          python -m pip install --upgrade pip
-          pip install platformdirs packaging
-          curl -sSL https://install.python-poetry.org | python -
+          pipx install poetry
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Configure Poetry
@@ -31,7 +32,7 @@ jobs:
         run: poetry lock
 
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root
+        run: poetry install --no-interaction
 
       - name: Run tests
         run: poetry run pytest tests
@@ -65,12 +66,12 @@ jobs:
             export PATH="/usr/bin:$PATH"
             which python3.11
 
-            # pip 업그레이드 및 필요한 패키지 설치
-            python3.11 -m pip install --upgrade pip
-            python3.11 -m pip install platformdirs packaging
+            # pipx 설치
+            python3.11 -m pip install --user pipx
+            python3.11 -m pipx ensurepath
 
             # Poetry 설치
-            curl -sSL https://install.python-poetry.org | python3.11 -
+            pipx install poetry
             export PATH="$HOME/.local/bin:$PATH"
 
             # Poetry 버전 및 의존성 확인
