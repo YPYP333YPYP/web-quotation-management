@@ -49,11 +49,11 @@ class ErrorStatus(BaseCode):
     EXTERNAL_SERVICE_TIMEOUT = ("6001", "외부 서비스 응답 시간이 초과되었습니다.", "EXTERNAL")
     EXTERNAL_SERVICE_ERROR = ("6002", "외부 서비스에서 오류가 발생했습니다.", "EXTERNAL")
 
-
-    # Product related error statuses (9000-9999)
-    PRODUCT_NOT_FOUND = ("9000", "요청한 상품을 찾을 수 없습니다.", "PRODUCT")
-    INVALID_PRODUCT_DATA = ("9001", "유효하지 않은 상품 데이터입니다.", "PRODUCT")
-    PRODUCT_ALREADY_EXISTS = ("9002", "이미 존재하는 상품입니다.", "PRODUCT")
+    PRODUCT_NOT_FOUND = ("4001", "요청한 상품을 찾을 수 없습니다.", "PRODUCT")
+    INVALID_PRODUCT_DATA = ("4002", "유효하지 않은 상품 데이터입니다.", "PRODUCT")
+    PRODUCT_ALREADY_EXISTS = ("4003", "이미 존재하는 상품입니다.", "PRODUCT")
+    PRODUCT_NOT_UPDATED = ("4004", "Product가 업데이트 되지 않았습니다.", "PRODUCT")
+    PRODUCT_NOT_CREATED = ("4005", "Product가 생성 되지 않았습니다..", "PRODUCT")
 
     # User related error statuses (10000-10999)
     USER_NOT_FOUND = ("4001", "요청한 사용자를 찾을 수 없습니다.", "USER")
