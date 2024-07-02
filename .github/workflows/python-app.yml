@@ -18,6 +18,10 @@ jobs:
           chmod 644 ~/.ssh/id_rsa.pub
           echo "${{ secrets.GCP_HOST_SERVER }} $(ssh-keyscan ${{ secrets.GCP_HOST_SERVER }} 2>/dev/null)" >> ~/.ssh/known_hosts
 
+      - name: Copy source code to GCP
+        run: |
+          scp -r ./* ${{ secrets.GCP_HOST_NAME }}@${{ secrets.GCP_HOST_SERVER }}:/home/${{ secrets.GCP_HOST_NAME }}/app/
+
       - name: Deploy to GCP
         env:
           GCP_HOST_SERVER: ${{ secrets.GCP_HOST_SERVER }}
