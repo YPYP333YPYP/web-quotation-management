@@ -10,7 +10,7 @@ def get_application() -> FastAPI:
     application = FastAPI()
     application.include_router(router)
 
-    origins = ["http://localhost", "http://localhost:8001"]
+    origins = ["*"]
 
     application.add_middleware(
         CORSMiddleware,
