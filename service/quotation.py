@@ -93,13 +93,11 @@ class QuotationService:
 
         update_data["updated_at"] = func.now()
         update_data["price"] = product.price * update_data["quantity"]
-
         if await self.quotation_product_repository.update_quotation_product(quotation_id, product_id, update_data):
             updated_quotation_product = await self.quotation_product_repository.get_quotation_product_by_quotation_id_and_product_id(
                 quotation_id, product_id)
             return updated_quotation_product
 
-        return None
 
     async def get_quotation_products(self, quotation_id: int) -> list[
         dict[str, InstrumentedAttribute[_T_co] | _T_co | Any]]:

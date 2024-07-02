@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
-from typing import Sequence
+from typing import Sequence, List
 from fastapi import APIRouter, Depends, Query
 
 from models import User
-from schemas.client import ClientRead, ClientCreate, DateRangeType, RegionType, ClientUpdate, ClientPaginatedResponse
+from schemas.client import ClientRead, ClientCreate, DateRangeType, RegionType, ClientUpdate, ClientPaginatedResponse, \
+    to_client_read
 from service.client import ClientService
 from api.dependencies import get_current_user
 from service.quotation import QuotationService
@@ -17,12 +18,13 @@ router = APIRouter(tags=["client"])
 
 
 @router.get("/clients/name/{name}",
-            response_model=ApiResponse[Sequence[ClientRead]],
+            response_model=ApiResponse[List[ClientRead]],
             summary="거래처 명으로 조회",
             description="거래처 명으로 거래처를 조회 합니다.")
 async def get_clients_by_name(name: str, client_service: ClientService = Depends(ClientService)):
     clients = await client_service.get_clients_by_name(name)
-    return ApiResponse[Sequence[ClientRead]].of(SuccessStatus.OK, result=clients)
+    result = [to_client_read(client) for client in clients]
+    return ApiResponse[List[ClientRead]].of(SuccessStatus.OK,  result)
 
 
 @router.get("/clients/region",

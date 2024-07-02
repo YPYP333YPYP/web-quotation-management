@@ -4,6 +4,7 @@ from typing import List
 
 from pydantic import BaseModel
 
+from models import Client
 from schemas.quotation import QuotationRead
 
 
@@ -48,3 +49,12 @@ class DateRange(BaseModel):
 class RegionType(str, Enum):
     NOWON = "노원"
     UIJEONGBU = "의정부"
+
+
+def to_client_read(client: Client) -> ClientRead:
+    return ClientRead(
+        id=client.id,
+        name=client.name,
+        region=client.region,
+        address=client.address
+    )

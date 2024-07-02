@@ -3,7 +3,8 @@ from typing import List, Optional
 from fastapi import HTTPException, APIRouter, Depends, Query
 from starlette.responses import JSONResponse, StreamingResponse
 
-from schemas.quotation import QuotationCreate, QuotationAdd, QuotationUpdate, QuotationRead, QuotationInfo
+from schemas.quotation import QuotationCreate, QuotationAdd, QuotationUpdate, QuotationRead, QuotationInfo, \
+    to_quotation_read
 from service.quotation import QuotationService
 
 from core.response.api_response import ApiResponse
@@ -44,7 +45,7 @@ async def update_quotation_product(quotation_id: int,
                                    update_data: QuotationUpdate,
                                    quotation_service: QuotationService = Depends(QuotationService)):
     new_data = update_data.dict()
-    updated_quotation_product = await quotation_service.update_quotation_product(product_id, quotation_id, new_data)
+    updated_quotation_product = await quotation_service.update_quotation_product(quotation_id, product_id, new_data)
     if not updated_quotation_product:
         raise GeneralException(ErrorStatus.QUOTATION_NOT_UPDATED)
     else:
@@ -79,7 +80,8 @@ async def get_quotations_search(start: Optional[str] = Query(None, description="
                                 query: Optional[str] = Query(None, description="검색어"),
                                 quotation_service: QuotationService = Depends(QuotationService)):
     quotations = await quotation_service.get_quotation_search(start, end, query)
-    return ApiResponse[List[QuotationRead]].of(SuccessStatus.OK, result=quotations)
+    result = [to_quotation_read(quotation) for quotation in quotations]
+    return ApiResponse[List[QuotationRead]].of(SuccessStatus.OK, result=result)
 
 
 @router.get("/quotations/extract/{quotation_id}",

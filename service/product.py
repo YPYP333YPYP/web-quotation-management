@@ -99,7 +99,7 @@ class ProductService:
 
     async def create_product(self, product_data: Dict[str, Any]) -> Product:
         product_name = product_data["name"]
-        if await self.product_repository.exists_product_by_name(product_name):
+        if not await self.product_repository.exists_product_by_name(product_name):
             product = Product(**product_data)
             return await self.product_repository.create_product(product)
         else:

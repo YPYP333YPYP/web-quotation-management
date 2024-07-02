@@ -35,7 +35,7 @@ class UserRepository:
     @handle_db_exceptions
     async def update_user_password(self, user_id: int, hashed_password: str):
         async with self.session as session:
-            user = self.get_by_id(user_id)
+            user = await self.get_by_id(user_id)
             if user:
                 user.hashed_password = hashed_password
                 await session.commit()

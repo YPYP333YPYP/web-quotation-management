@@ -4,7 +4,7 @@ from fastapi import UploadFile, File, APIRouter, Depends, Query
 
 from api.dependencies import get_current_user
 from models import User
-from schemas.product import ProductRead, ProductCreate
+from schemas.product import ProductRead, ProductCreate, to_product_read
 from service.product import ProductService
 
 from core.response.api_response import ApiResponse
@@ -29,7 +29,8 @@ async def upload_excel(file: UploadFile = File(...), product_service: ProductSer
             summary="분류 별 물품 조회",
             description="분류 별 물품을 조회 합니다. ")
 async def get_products_by_category(category: str, product_service: ProductService = Depends(ProductService)):
-    result = await product_service.get_products_by_category(category)
+    products = await product_service.get_products_by_category(category)
+    result = [to_product_read(product) for product in products]
     if result is None or len(result) == 0:
         raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
     return ApiResponse[Sequence[ProductRead]].of(SuccessStatus.OK, result=result)
@@ -43,8 +44,9 @@ async def update_product(product_id: int, product_data: ProductCreate,
                          product_service: ProductService = Depends(ProductService)):
     new_data = product_data.dict()
     updated_product = await product_service.update_product(product_id, new_data)
+    result = to_product_read(updated_product)
     if updated_product:
-        return ApiResponse[ProductRead].of(SuccessStatus.OK, result=updated_product)
+        return ApiResponse[ProductRead].of(SuccessStatus.OK, result=result)
     else:
         raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
 

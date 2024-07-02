@@ -50,7 +50,7 @@ class QuotationProductRepository:
                 query = select(QuotationProduct).filter_by(quotation_id=quotation_id, product_id=product_id)
                 result = await session.execute(query)
                 quotation_product = result.scalars().first()
-            return quotation_product
+                return quotation_product
 
     @handle_db_exceptions
     async def update_quotation_product(self, quotation_id: int, product_id: int, new_data: Dict[str, Any]):
@@ -63,6 +63,7 @@ class QuotationProductRepository:
                     setattr(quotation_product, key, value)
                 quotation_product.updated_at = datetime.utcnow()
                 await session.commit()
+                await session.refresh(quotation_product)
                 return True
             else:
                 return False
