@@ -1,4 +1,4 @@
-from typing import Optional, List, Sequence, Dict, Any
+from typing import Optional, Sequence, Dict, Any
 
 from fastapi import Depends
 from sqlalchemy import select

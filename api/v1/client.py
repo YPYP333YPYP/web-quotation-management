@@ -1,14 +1,10 @@
 from datetime import datetime, timedelta
-from http.client import HTTPException
 from typing import Sequence
-
 from fastapi import APIRouter, Depends, Query
-from starlette.responses import JSONResponse
 
 from models import User
 from schemas.client import ClientRead, ClientCreate, DateRangeType, RegionType, ClientUpdate, ClientPaginatedResponse
 from service.client import ClientService
-
 from api.dependencies import get_current_user
 from service.quotation import QuotationService
 
