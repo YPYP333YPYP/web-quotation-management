@@ -101,6 +101,3 @@ async def search_products_by_prefix(
     if not products:
         raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
     return ApiResponse[List[ProductRead]].of(SuccessStatus.OK, result=products)
-
-
-
