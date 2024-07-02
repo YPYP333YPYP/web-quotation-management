@@ -8,6 +8,8 @@ from sqlalchemy import func
 from sqlalchemy.orm import InstrumentedAttribute
 from sqlalchemy.orm.base import _T_co
 
+from core.response.code.error_status import ErrorStatus
+from core.response.handler.exception_handler import GeneralException
 from models import Quotation
 from models.quotation_product import QuotationProduct
 from repository.client.client import ClientRepository
@@ -35,6 +37,8 @@ class QuotationService:
     async def create_quotation(self, quotation_data: Dict[str, Any]) -> Quotation:
         client_id = quotation_data.get("client_id")
         client = await self.client_repository.get_client_by_id(client_id)
+        if not client:
+            raise GeneralException(ErrorStatus.CLIENT_NOT_FOUND)
 
         now_datetime = datetime.now()
         year = now_datetime.year
@@ -57,18 +61,18 @@ class QuotationService:
 
             product = await self.product_repository.get_product_by_id(product_id)
             if product is None:
-                raise HTTPException(status_code=404, detail="Product not found")
+                raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
 
             quotation = await self.quotation_repository.get_quotation_by_id(quotation_id)
             if quotation is None:
-                raise HTTPException(status_code=404, detail="Quotation not found")
+                raise GeneralException(ErrorStatus.QUOTATION_NOT_FOUND)
 
             quotation_product = await self.quotation_product_repository.get_quotation_product_by_quotation_id_and_product_id(
                 quotation_id=quotation_id,
                 product_id=product_id
             )
             if quotation_product is not None:
-                raise HTTPException(status_code=400, detail="Already exists product at quotation")
+                raise GeneralException(ErrorStatus.QUOTATION_PRODUCT_ALREADY_EXISTS)
 
             quotation_product = QuotationProduct(
                 quotation_id=quotation_id,
@@ -82,6 +86,8 @@ class QuotationService:
     async def update_quotation_product(self, quotation_id: int, product_id: int, new_data: Dict[str, Any]) -> Optional[
         QuotationProduct]:
         product = await self.product_repository.get_product_by_id(product_id)
+        if not product:
+            raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
 
         update_data = new_data
 
@@ -108,6 +114,9 @@ class QuotationService:
             product_id = tmp_dict.get("product_id")
             product = await self.product_repository.get_product_by_id(product_id)
 
+            if not product:
+                raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
+
             result_dict = {
                 "product": product.name,
                 "quantity": tmp_dict.get("quantity"),
@@ -123,6 +132,12 @@ class QuotationService:
     async def get_quotation_info(self, quotation_id: int):
         products = await self.get_quotation_products(quotation_id)
         quotation = await self.quotation_repository.get_quotation_by_id(quotation_id)
+
+        if not quotation:
+            raise GeneralException(ErrorStatus.QUOTATION_NOT_FOUND)
+
+        if not products:
+            raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
 
         quotation_info = {
             "products": products,

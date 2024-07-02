@@ -1,11 +1,9 @@
 from typing import List, Sequence
 
-from fastapi import UploadFile, File, HTTPException, APIRouter, Depends, Form, Query
-from starlette.responses import JSONResponse
+from fastapi import UploadFile, File, APIRouter, Depends, Query
 
 from api.dependencies import get_current_user
 from models import User
-from models.product import Product
 from schemas.product import ProductRead, ProductCreate
 from service.product import ProductService
 
