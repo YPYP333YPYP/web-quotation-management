@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from typing import Sequence, List
 from fastapi import APIRouter, Depends, Query
 
+from core.decorator.decorator import handle_exceptions
 from models import User
 from schemas.client import ClientRead, ClientCreate, DateRangeType, RegionType, ClientUpdate, ClientPaginatedResponse, \
     to_client_read
@@ -21,26 +22,29 @@ router = APIRouter(tags=["client"])
             response_model=ApiResponse[List[ClientRead]],
             summary="거래처 명으로 조회",
             description="거래처 명으로 거래처를 조회 합니다.")
+@handle_exceptions(List[ClientRead])
 async def get_clients_by_name(name: str, client_service: ClientService = Depends(ClientService)):
     clients = await client_service.get_clients_by_name(name)
     result = [to_client_read(client) for client in clients]
-    return ApiResponse[List[ClientRead]].of(SuccessStatus.OK,  result)
+    return result
 
 
 @router.get("/clients/region",
             response_model=ApiResponse[Sequence[ClientRead]],
             summary="거래처 지역으로 조회",
             description="거래처 지역으로 거래처를 조회 합니다.")
+@handle_exceptions(Sequence[ClientRead])
 async def get_clients_by_region(region: RegionType,
                                 client_service: ClientService = Depends(ClientService)):
     clients = await client_service.get_clients_by_region(region)
-    return ApiResponse[Sequence[ClientRead]].of(SuccessStatus.OK, result=clients)
+    return clients
 
 
 @router.post("/clients",
              response_model=ApiResponse,
              summary="거래처 생성",
              description="새로운 거래처를 생성합니다.")
+@handle_exceptions()
 async def create_client(client: ClientCreate, client_service: ClientService = Depends(ClientService),
                         current_user: User = Depends(get_current_user)):
     await client_service.create_client(client, current_user.id)
@@ -51,6 +55,7 @@ async def create_client(client: ClientCreate, client_service: ClientService = De
             response_model=ApiResponse,
             summary="거래처 수정",
             description="거래처 정보를 수정합니다.")
+@handle_exceptions()
 async def update_client(client_id: int, client: ClientUpdate, client_service: ClientService = Depends(ClientService)):
     await client_service.update_client(client_id, client)
     return ApiResponse.on_success()
@@ -60,6 +65,7 @@ async def update_client(client_id: int, client: ClientUpdate, client_service: Cl
                response_model=ApiResponse,
                summary="거래처 삭제",
                description="거래처를 삭제합니다.")
+@handle_exceptions()
 async def delete_client(client_id: int, client_service: ClientService = Depends(ClientService)):
     await client_service.delete_client(client_id)
     return ApiResponse.on_success()
@@ -69,16 +75,18 @@ async def delete_client(client_id: int, client_service: ClientService = Depends(
             response_model=ApiResponse[ClientPaginatedResponse],
             summary="거래처 견적서 조회 ",
             description="거래처의 모든 견적서를 조회 합니다. page -> 페이지 시작 번호, page_size -> 페이지 당 반환 개수")
+@handle_exceptions(ClientPaginatedResponse)
 async def get_quotations(client_id: int, quotation_service: QuotationService = Depends(QuotationService),
                          page: int = Query(1, ge=1), page_size: int = Query(10, ge=1, le=100)):
     quotations = await quotation_service.get_paginated_quotations_for_client(client_id, page, page_size)
-    return ApiResponse[ClientPaginatedResponse].of(SuccessStatus.OK, result=quotations)
+    return quotations
 
 
 @router.get("/clients/{client_id}/quotations/date",
             response_model=ApiResponse[ClientPaginatedResponse],
             summary="거래처 견적서 기간에 따른 조회 ",
             description="거래처의 기간 별 모든 견적서를 조회 합니다. page -> 페이지 시작 번호, page_size -> 페이지 당 반환 개수")
+@handle_exceptions(ClientPaginatedResponse)
 async def get_quotations(
         client_id: int,
         date_range_type: DateRangeType = Query(..., description="기간 옵션 선택 WEEK -> 일주일, MONTH -> 한달, CUSTOM -> 사용자 직접 입력"),
@@ -104,5 +112,5 @@ async def get_quotations(
 
     quotations = await quotation_service.get_paginated_quotations_by_date_range(client_id, start_date, end_date, page,
                                                                                 page_size)
-    return ApiResponse[ClientPaginatedResponse].of(SuccessStatus.OK, result=quotations)
+    return quotations
 

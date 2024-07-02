@@ -14,7 +14,7 @@ from sqlalchemy import func
 
 from core.config import redis_settings
 from core.response.code.error_status import ErrorStatus
-from core.response.handler.exception_handler import GeneralException
+from core.response.handler.exception_handler import ServiceException
 from models import User
 from repository.product.product import ProductRepository
 from models.product import Product
@@ -46,7 +46,7 @@ def read_excel_file_about_product_list(file_path: str) -> list[Product]:
                 product = Product(**product_data)
                 data.append(product)
             except ValidationError as e:
-                raise GeneralException(ErrorStatus.INVALID_VALUE)
+                raise ServiceException(ErrorStatus.INVALID_VALUE)
     return data
 
 
@@ -59,7 +59,7 @@ def read_excel_file_about_vegetable_price_list(file_path: str) -> dict:
             price = row.iloc[1]
             data[product_name] = price
     except ValidationError as e:
-        raise GeneralException(ErrorStatus.INVALID_VALUE)
+        raise ServiceException(ErrorStatus.INVALID_VALUE)
     return data
 
 
@@ -79,7 +79,7 @@ class ProductService:
                 await self.product_repository.create_product(product)
 
         except Exception as e:
-            raise GeneralException(ErrorStatus.FILE_UPLOAD_ERROR)
+            raise ServiceException(ErrorStatus.FILE_UPLOAD_ERROR)
 
     async def get_products_by_category(self, category: str) -> Sequence[Product]:
         return await self.product_repository.get_products_by_category(category)
@@ -103,7 +103,7 @@ class ProductService:
             product = Product(**product_data)
             return await self.product_repository.create_product(product)
         else:
-            raise GeneralException(ErrorStatus.PRODUCT_NOT_CREATED)
+            raise ServiceException(ErrorStatus.PRODUCT_NOT_CREATED)
 
     async def delete_product(self, product_id: int) -> None:
         await self.product_repository.delete_product_by_id(product_id)
@@ -112,7 +112,7 @@ class ProductService:
         if await self.product_repository.update_vegetable_product_price(product_id, price):
             return True
         else:
-            raise GeneralException(ErrorStatus.PRODUCT_NOT_UPDATED)
+            raise ServiceException(ErrorStatus.PRODUCT_NOT_UPDATED)
 
     async def update_vegetable_product_price_from_file(self, file: UploadFile):
         try:
@@ -123,7 +123,7 @@ class ProductService:
             vegetable_price_data = read_excel_file_about_vegetable_price_list(file_path)
             result = await self.product_repository.update_vegetable_products_price(vegetable_price_data)
         except Exception as e:
-            raise GeneralException(ErrorStatus.FILE_UPLOAD_ERROR)
+            raise ServiceException(ErrorStatus.FILE_UPLOAD_ERROR)
 
     async def search_products_by_prefix(self, current_user: User, name_prefix: str, limit: int, cached_time: int):
         cache_key = f"search:{current_user.id}:{name_prefix}"

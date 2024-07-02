@@ -3,6 +3,7 @@ from typing import List, Optional
 from fastapi import HTTPException, APIRouter, Depends, Query
 from starlette.responses import JSONResponse, StreamingResponse
 
+from core.decorator.decorator import handle_exceptions
 from schemas.quotation import QuotationCreate, QuotationAdd, QuotationUpdate, QuotationRead, QuotationInfo, \
     to_quotation_read
 from service.quotation import QuotationService
@@ -19,6 +20,7 @@ router = APIRouter(tags=["quotation"])
              response_model=ApiResponse,
              summary="견적서 생성",
              description="견적서를 생성합니다.")
+@handle_exceptions()
 async def create_quotation(quotation: QuotationCreate, quotation_service: QuotationService = Depends(QuotationService)) -> JSONResponse:
     new_data = quotation.dict()
     await quotation_service.create_quotation(new_data)
@@ -29,6 +31,7 @@ async def create_quotation(quotation: QuotationCreate, quotation_service: Quotat
              response_model=ApiResponse,
              summary="견적서 물품 생성",
              description="견적서에 물품을 추가합니다.")
+@handle_exceptions()
 async def add_products_to_quotation(quotation: List[QuotationAdd],
                                     quotation_service: QuotationService = Depends(QuotationService)) -> JSONResponse:
 
@@ -40,6 +43,7 @@ async def add_products_to_quotation(quotation: List[QuotationAdd],
             response_model=ApiResponse,
             summary="견적서 물품 수정",
             description="견적서의 물품을 수정합니다.")
+@handle_exceptions()
 async def update_quotation_product(quotation_id: int,
                                    product_id: int,
                                    update_data: QuotationUpdate,
@@ -56,25 +60,28 @@ async def update_quotation_product(quotation_id: int,
             response_model=ApiResponse[QuotationInfo],
             summary="견적서 정보 조회",
             description="견적서의 주문 물품, 이름, 총 금액, 생성 일, 수정 일 정보를 조회 합니다.")
+@handle_exceptions(QuotationInfo)
 async def get_quotation_products(quotation_id: int,
                                  quotation_service: QuotationService = Depends(QuotationService)) -> QuotationInfo:
     quotation = await quotation_service.get_quotation_info(quotation_id)
-    return ApiResponse[QuotationInfo].of(SuccessStatus.OK, result=quotation)
+    return quotation
 
 
 @router.get("/quotations/{quotation_id}/total",
             response_model=ApiResponse[int],
             summary="견적서 합계 금액 업데이트",
             description="견적서의 합계 금액을 업데이트 합니다.")
+@handle_exceptions(int)
 async def update_total_price(quotation_id: int, quotation_service: QuotationService = Depends(QuotationService)):
     updated_sum = await quotation_service.update_total_price(quotation_id)
-    return ApiResponse[int].of(SuccessStatus.OK, result=updated_sum)
+    return updated_sum
 
 
 @router.get("/quotations/search/info",
             response_model=ApiResponse[List[QuotationRead]],
             summary="견적서 정보 조회",
             description="조건에 맞는 견적서를 조회 합니다. ( 조건 -> 시작일, 종료일, 검색어)")
+@handle_exceptions(List[QuotationRead])
 async def get_quotations_search(start: Optional[str] = Query(None, description="시작일('2024-01-01' 형식)"),
                                 end: Optional[str] = Query(None, description="종료일('2024-01-01' 형식)"),
                                 query: Optional[str] = Query(None, description="검색어"),

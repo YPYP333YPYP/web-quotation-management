@@ -3,13 +3,13 @@ from datetime import datetime, date
 from math import ceil
 from typing import List, Any, Dict, Optional
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from sqlalchemy import func
 from sqlalchemy.orm import InstrumentedAttribute
 from sqlalchemy.orm.base import _T_co
 
 from core.response.code.error_status import ErrorStatus
-from core.response.handler.exception_handler import GeneralException
+from core.response.handler.exception_handler import ServiceException
 from models import Quotation
 from models.quotation_product import QuotationProduct
 from repository.client.client import ClientRepository
@@ -38,7 +38,7 @@ class QuotationService:
         client_id = quotation_data.get("client_id")
         client = await self.client_repository.get_client_by_id(client_id)
         if not client:
-            raise GeneralException(ErrorStatus.CLIENT_NOT_FOUND)
+            raise ServiceException(ErrorStatus.CLIENT_NOT_FOUND)
 
         now_datetime = datetime.now()
         year = now_datetime.year
@@ -61,18 +61,18 @@ class QuotationService:
 
             product = await self.product_repository.get_product_by_id(product_id)
             if product is None:
-                raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
+                raise ServiceException(ErrorStatus.PRODUCT_NOT_FOUND)
 
             quotation = await self.quotation_repository.get_quotation_by_id(quotation_id)
             if quotation is None:
-                raise GeneralException(ErrorStatus.QUOTATION_NOT_FOUND)
+                raise ServiceException(ErrorStatus.QUOTATION_NOT_FOUND)
 
             quotation_product = await self.quotation_product_repository.get_quotation_product_by_quotation_id_and_product_id(
                 quotation_id=quotation_id,
                 product_id=product_id
             )
             if quotation_product is not None:
-                raise GeneralException(ErrorStatus.QUOTATION_PRODUCT_ALREADY_EXISTS)
+                raise ServiceException(ErrorStatus.QUOTATION_PRODUCT_ALREADY_EXISTS)
 
             quotation_product = QuotationProduct(
                 quotation_id=quotation_id,
@@ -87,7 +87,7 @@ class QuotationService:
         QuotationProduct]:
         product = await self.product_repository.get_product_by_id(product_id)
         if not product:
-            raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
+            raise ServiceException(ErrorStatus.PRODUCT_NOT_FOUND)
 
         update_data = new_data
 
@@ -97,7 +97,6 @@ class QuotationService:
             updated_quotation_product = await self.quotation_product_repository.get_quotation_product_by_quotation_id_and_product_id(
                 quotation_id, product_id)
             return updated_quotation_product
-
 
     async def get_quotation_products(self, quotation_id: int) -> list[
         dict[str, InstrumentedAttribute[_T_co] | _T_co | Any]]:
@@ -113,7 +112,7 @@ class QuotationService:
             product = await self.product_repository.get_product_by_id(product_id)
 
             if not product:
-                raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
+                raise ServiceException(ErrorStatus.PRODUCT_NOT_FOUND)
 
             result_dict = {
                 "product": product.name,
@@ -132,10 +131,10 @@ class QuotationService:
         quotation = await self.quotation_repository.get_quotation_by_id(quotation_id)
 
         if not quotation:
-            raise GeneralException(ErrorStatus.QUOTATION_NOT_FOUND)
+            raise ServiceException(ErrorStatus.QUOTATION_NOT_FOUND)
 
         if not products:
-            raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
+            raise ServiceException(ErrorStatus.PRODUCT_NOT_FOUND)
 
         quotation_info = {
             "products": products,
@@ -177,7 +176,6 @@ class QuotationService:
 
         workbook.save(output)
         output.seek(0)
-        print(output)
         filename = f'{quotation.name} 견적서'
         encoded_filename = urllib.parse.quote(filename, encoding='utf-8')
         return output, encoded_filename

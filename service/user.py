@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from core.response.code.error_status import ErrorStatus
-from core.response.handler.exception_handler import GeneralException
+from core.response.handler.exception_handler import ServiceException
 from core.security import get_password_hash, verify_password
 from fastapi import Depends
 from models.user import User
@@ -35,13 +35,13 @@ class UserService:
     async def change_user_password(self, user_id: int, current_password: str, new_password: str):
         user = await self.user_repository.get_by_id(user_id)
         if not user:
-            raise GeneralException(ErrorStatus.USER_NOT_FOUND)
+            raise ServiceException(ErrorStatus.USER_NOT_FOUND)
 
         if not verify_password(current_password, user.hashed_password):
-            raise GeneralException(ErrorStatus.INVALID_PASSWORD)
+            raise ServiceException(ErrorStatus.INVALID_PASSWORD)
 
         if current_password == new_password:
-            raise GeneralException(ErrorStatus.PASSWORDS_MUST_BE_DIFFERENT)
+            raise ServiceException(ErrorStatus.PASSWORDS_MUST_BE_DIFFERENT)
 
         hashed_password = get_password_hash(new_password)
         await self.user_repository.update_user_password(user_id, hashed_password)
@@ -49,7 +49,7 @@ class UserService:
     async def link_user_to_client(self, client_id: int, user_id: int) -> None:
         user = await self.user_repository.get_by_id(user_id)
         if not user:
-            raise GeneralException(ErrorStatus.USER_NOT_FOUND)
+            raise ServiceException(ErrorStatus.USER_NOT_FOUND)
 
         await self.user_repository.update_client_id(user_id, client_id)
 
