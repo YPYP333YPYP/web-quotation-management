@@ -2,7 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
 from api.dependencies import get_current_user
-from core.security import create_access_token, verify_password, get_password_hash
+from core.response.api_response import ApiResponse
+from core.response.code.error_status import ErrorStatus
+from core.response.code.success_status import SuccessStatus
+from core.response.handler.exception_handler import GeneralException
+from core.security import create_access_token
 from models.user import User
 from schemas.user import UserCreate, UserInDB
 from schemas.auth import Token, PasswordChange
@@ -12,7 +16,7 @@ router = APIRouter(tags=["auth"])
 
 
 @router.post("/token",
-             response_model=Token,
+             response_model=ApiResponse[Token],
              summary="액세스 토큰 발급",
              description="사용자 로그인 시 토큰을 발급합니다.")
 async def login_access_token(
@@ -21,13 +25,14 @@ async def login_access_token(
 ):
     user = await user_service.authenticate_user(form_data.username, form_data.password)
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise GeneralException(ErrorStatus.INVALID_CREDENTIALS)
     access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    token_info = Token(access_token=access_token, token_type="bearer")
+    return ApiResponse[Token].of(SuccessStatus.OK, result=token_info)
 
 
 @router.post("/users",
-             response_model=UserInDB,
+             response_model=ApiResponse[UserInDB],
              summary="유저 회원 가입",
              description="사용자 정보를 받아 회원 가입을 진행합니다.")
 async def create_user(
@@ -36,19 +41,21 @@ async def create_user(
 ):
     db_user = await user_service.get_user_by_email(user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    return await user_service.create_user(user)
+        raise GeneralException(ErrorStatus.USER_ALREADY_EXISTS)
+    new_user = await user_service.create_user(user)
+    return ApiResponse[UserInDB].of(SuccessStatus.CREATED, result=new_user)
 
 
 @router.get("/users/me",
-            response_model=UserInDB,
+            response_model=ApiResponse[UserInDB],
             summary="내 정보 조회",
             description="내 정보를 조회 합니다.")
 async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
+    return ApiResponse[UserInDB].of(SuccessStatus.OK, result=current_user)
 
 
 @router.put("/users/me/password",
+            response_model=ApiResponse[dict],
             summary="비밀번호 변경",
             description="비밀번호를 변경 합니다.")
 async def change_password(
@@ -60,6 +67,6 @@ async def change_password(
         await user_service.change_user_password(current_user.id, password_change.current_password,
                                           password_change.new_password)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise GeneralException(ErrorStatus.INVALID_INPUT)
 
-    return {"message": "Password changed successfully"}
+    return ApiResponse[dict].of(SuccessStatus.OK, result={"message": "Password changed successfully"})

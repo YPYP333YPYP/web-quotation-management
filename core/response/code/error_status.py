@@ -21,6 +21,8 @@ class ErrorStatus(BaseCode):
     ACCOUNT_DISABLED = ("2004", "계정이 비활성화되었습니다.", "AUTH")
     PASSWORD_EXPIRED = ("2005", "비밀번호가 만료되었습니다.", "AUTH")
     INSUFFICIENT_PERMISSIONS = ("2006", "권한이 부족합니다.", "AUTH")
+    INVALID_PASSWORD = ("2007", "현재 비밀번호와 일치하지 않습니다", "AUTH")
+    PASSWORDS_MUST_BE_DIFFERENT = ("2008", "현재 비밀번호와 과거 비밀번호는 달라야 합니다", "AUTH")
 
     # Database
     DB_CONNECTION_ERROR = ("3000", "데이터베이스 연결 오류가 발생했습니다.", "DATABASE")
@@ -40,6 +42,7 @@ class ErrorStatus(BaseCode):
     FILE_TOO_LARGE = ("5001", "파일 크기가 너무 큽니다.", "FILE")
     INVALID_FILE_TYPE = ("5002", "유효하지 않은 파일 형식입니다.", "FILE")
     FILE_UPLOAD_ERROR = ("5003", "파일 업로드 중 오류가 발생했습니다.", "FILE")
+    INVALID_VALUE = ("5004", "파일 CELL 값이 올바르지 않습니다", "FILE")
 
     # External Service
     EXTERNAL_SERVICE_UNAVAILABLE = ("6000", "외부 서비스를 사용할 수 없습니다.", "EXTERNAL")
@@ -53,8 +56,8 @@ class ErrorStatus(BaseCode):
     PRODUCT_ALREADY_EXISTS = ("9002", "이미 존재하는 상품입니다.", "PRODUCT")
 
     # User related error statuses (10000-10999)
-    USER_NOT_FOUND = ("10000", "요청한 사용자를 찾을 수 없습니다.", "USER")
-    INVALID_USER_DATA = ("10001", "유효하지 않은 사용자 데이터입니다.", "USER")
-    USER_ALREADY_EXISTS = ("10002", "이미 존재하는 사용자입니다.", "USER")
+    USER_NOT_FOUND = ("4001", "요청한 사용자를 찾을 수 없습니다.", "USER")
+    INVALID_USER_DATA = ("4002", "유효하지 않은 사용자 데이터입니다.", "USER")
+    USER_ALREADY_EXISTS = ("4003", "이미 존재하는 사용자입니다.", "USER")
 
     # 필요한 다른 에러 상태 코드들을 여기에 추가할 수 있습니다.

@@ -3,6 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 import uvicorn
 
 from api import router
+from core.response.handler.exception_handler import GeneralException, general_exception_handler
 
 
 def get_application() -> FastAPI:
@@ -18,6 +19,7 @@ def get_application() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    application.add_exception_handler(GeneralException, general_exception_handler)
 
     return application
 
