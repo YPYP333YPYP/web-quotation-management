@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from api.dependencies import get_current_user
@@ -55,7 +55,7 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
 
 
 @router.put("/users/me/password",
-            response_model=ApiResponse[dict],
+            response_model=ApiResponse,
             summary="비밀번호 변경",
             description="비밀번호를 변경 합니다.")
 async def change_password(
@@ -69,4 +69,5 @@ async def change_password(
     except ValueError as e:
         raise GeneralException(ErrorStatus.INVALID_INPUT)
 
-    return ApiResponse[dict].of(SuccessStatus.OK, result={"message": "Password changed successfully"})
+    return ApiResponse.on_success()
+

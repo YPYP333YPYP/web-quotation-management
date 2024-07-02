@@ -12,63 +12,73 @@ from service.client import ClientService
 from api.dependencies import get_current_user
 from service.quotation import QuotationService
 
+from core.response.api_response import ApiResponse
+from core.response.code.error_status import ErrorStatus
+from core.response.code.success_status import SuccessStatus
+from core.response.handler.exception_handler import GeneralException
+
 router = APIRouter(tags=["client"])
 
 
 @router.get("/clients/name/{name}",
-            response_model=Sequence[ClientRead],
+            response_model=ApiResponse[Sequence[ClientRead]],
             summary="거래처 명으로 조회",
             description="거래처 명으로 거래처를 조회 합니다.")
-async def get_clients_by_name(name: str, client_service: ClientService = Depends(ClientService)) -> Sequence[
-    ClientRead]:
-    return await client_service.get_clients_by_name(name)
+async def get_clients_by_name(name: str, client_service: ClientService = Depends(ClientService)):
+    clients = await client_service.get_clients_by_name(name)
+    return ApiResponse[Sequence[ClientRead]].of(SuccessStatus.OK, result=clients)
 
 
 @router.get("/clients/region",
-            response_model=Sequence[ClientRead],
+            response_model=ApiResponse[Sequence[ClientRead]],
             summary="거래처 지역으로 조회",
             description="거래처 지역으로 거래처를 조회 합니다.")
 async def get_clients_by_region(region: RegionType,
-                                client_service: ClientService = Depends(ClientService)) -> Sequence[ClientRead]:
-    return await client_service.get_clients_by_region(region)
+                                client_service: ClientService = Depends(ClientService)):
+    clients = await client_service.get_clients_by_region(region)
+    return ApiResponse[Sequence[ClientRead]].of(SuccessStatus.OK, result=clients)
 
 
 @router.post("/clients",
+             response_model=ApiResponse,
              summary="거래처 생성",
              description="새로운 거래처를 생성합니다.")
 async def create_client(client: ClientCreate, client_service: ClientService = Depends(ClientService),
                         current_user: User = Depends(get_current_user)):
     await client_service.create_client(client, current_user.id)
-    return JSONResponse(content={"message": "Create successful"})
+    return ApiResponse.on_success()
 
 
 @router.put("/clients/{client_id}/update",
+            response_model=ApiResponse,
             summary="거래처 수정",
             description="거래처 정보를 수정합니다.")
 async def update_client(client_id: int, client: ClientUpdate, client_service: ClientService = Depends(ClientService)):
     await client_service.update_client(client_id, client)
-    return JSONResponse(content={"message": "Update successful"})
+    return ApiResponse.on_success()
 
 
 @router.delete("/clients/{client_id}/delete",
+               response_model=ApiResponse,
                summary="거래처 삭제",
                description="거래처를 삭제합니다.")
 async def delete_client(client_id: int, client_service: ClientService = Depends(ClientService)):
     await client_service.delete_client(client_id)
-    return JSONResponse(content={"message": "Delete successful"})
+    return ApiResponse.on_success()
 
 
 @router.get("/clients/{client_id}/quotations",
-            response_model=ClientPaginatedResponse,
+            response_model=ApiResponse[ClientPaginatedResponse],
             summary="거래처 견적서 조회 ",
             description="거래처의 모든 견적서를 조회 합니다. page -> 페이지 시작 번호, page_size -> 페이지 당 반환 개수")
 async def get_quotations(client_id: int, quotation_service: QuotationService = Depends(QuotationService),
                          page: int = Query(1, ge=1), page_size: int = Query(10, ge=1, le=100)):
-    return await quotation_service.get_paginated_quotations_for_client(client_id, page, page_size)
+    quotations = await quotation_service.get_paginated_quotations_for_client(client_id, page, page_size)
+    return ApiResponse[ClientPaginatedResponse].of(SuccessStatus.OK, result=quotations)
 
 
 @router.get("/clients/{client_id}/quotations/date",
-            response_model=ClientPaginatedResponse,
+            response_model=ApiResponse[ClientPaginatedResponse],
             summary="거래처 견적서 기간에 따른 조회 ",
             description="거래처의 기간 별 모든 견적서를 조회 합니다. page -> 페이지 시작 번호, page_size -> 페이지 당 반환 개수")
 async def get_quotations(
@@ -90,11 +100,11 @@ async def get_quotations(
         end_date = today
     elif date_range_type == DateRangeType.CUSTOM:
         if not start_date or not end_date:
-            raise HTTPException(status_code=400, detail="시작일과 종료일 미입력")
+            raise GeneralException(ErrorStatus.REQUIRED_FIELD_MISSING)
         start_date = start_date.date()
         end_date = end_date.date()
 
-    return await quotation_service.get_paginated_quotations_by_date_range(
-        client_id, start_date, end_date, page, page_size
-    )
+    quotations = await quotation_service.get_paginated_quotations_by_date_range(client_id, start_date, end_date, page,
+                                                                                page_size)
+    return ApiResponse[ClientPaginatedResponse].of(SuccessStatus.OK, result=quotations)
 
