@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,9 +29,10 @@ class PastOrderRepository:
             await session.refresh(past_order)
             return past_order
 
-    # todo 1
-    async def get_by_id(self):
-        ...
+    async def get_by_id(self, past_order_id: int) -> Optional[PastOrder]:
+        async with self.session as session:
+            return await session.get(PastOrder, past_order_id)
+
 
     # todo 2
     async def get_by_client_id(self):

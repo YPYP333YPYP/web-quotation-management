@@ -65,6 +65,12 @@ class ErrorStatus(BaseCode):
     CLIENT_NOT_UPDATED = ("4004", "CLIENT가 업데이트 되지 않았습니다.", "CLIENT")
     CLIENT_NOT_CREATED = ("4005", "CLIENT가 생성 되지 않았습니다..", "CLIENT")
 
+    PAST_ORDER_NOT_FOUND = ("4001", "요청한 주문내역을 찾을 수 없습니다.", "PAST_ORDER")
+    PAST_ORDER_PRODUCT_DATA = ("4002", "유효하지 않은 주문내역 데이터입니다.", "PAST_ORDER")
+    PAST_ORDER_ALREADY_EXISTS = ("4003", "이미 존재하는 주문내역 입니다.", "PAST_ORDER")
+    PAST_ORDER_NOT_UPDATED = ("4004", "PAST_ORDER가 업데이트 되지 않았습니다.", "PAST_ORDER")
+    PAST_ORDER_NOT_CREATED = ("4005", "PAST_ORDER가 생성 되지 않았습니다..", "PAST_ORDER")
+
     # User related error statuses (10000-10999)
     USER_NOT_FOUND = ("4001", "요청한 사용자를 찾을 수 없습니다.", "USER")
     INVALID_USER_DATA = ("4002", "유효하지 않은 사용자 데이터입니다.", "USER")
