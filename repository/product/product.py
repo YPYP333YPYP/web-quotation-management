@@ -5,7 +5,6 @@ from fastapi import Depends
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.decorator.decorator import handle_db_exceptions
 from models.product import Product
 from core.db.database import async_get_db
 from sqlalchemy.future import select
@@ -15,11 +14,9 @@ class ProductRepository:
     def __init__(self, session: AsyncSession = Depends(async_get_db)):
         self.session = session
 
-    @handle_db_exceptions
     async def create_product(self, product: Product):
         self.session.add(product)
 
-    @handle_db_exceptions
     async def get_products_by_category(self, category: str) -> Sequence[Product]:
         async with self.session as session:
             stmt = select(Product).filter(Product.category == category)
@@ -27,7 +24,6 @@ class ProductRepository:
             products = result.scalars().all()
             return products
 
-    @handle_db_exceptions
     async def get_all_products(self):
         async with self.session as session:
             stmt = select(Product)
@@ -35,7 +31,6 @@ class ProductRepository:
             products = result.scalars().all()
             return products
 
-    @handle_db_exceptions
     async def update_product(self, product_id: int, new_data: Dict[str, Any]):
         async with self.session as session:
             product = await session.get(Product, product_id)
@@ -48,13 +43,11 @@ class ProductRepository:
             else:
                 return False
 
-    @handle_db_exceptions
     async def get_product_by_id(self, product_id: int) -> Optional[Product]:
         async with self.session as session:
             product = await session.get(Product, product_id)
             return product if product else None
 
-    @handle_db_exceptions
     async def exists_product_by_name(self, name: str) -> bool:
         async with self.session as session:
             product = await session.get(Product, name)
@@ -63,7 +56,6 @@ class ProductRepository:
             else:
                 return True
 
-    @handle_db_exceptions
     async def delete_product_by_id(self, product_id: int):
         async with self.session as session:
             stmt = select(Product).filter(Product.id == product_id)
@@ -74,7 +66,6 @@ class ProductRepository:
                 await session.delete(product)
                 await session.commit()
 
-    @handle_db_exceptions
     async def update_vegetable_product_price(self, product_id: int, price: int):
         async with self.session as session:
             product = await session.get(Product, product_id)
@@ -86,7 +77,6 @@ class ProductRepository:
             else:
                 raise ValueError(f"Product {product_id} does not exist")
 
-    @handle_db_exceptions
     async def update_vegetable_products_price(self, price_data: dict):
         async with self.session as session:
             updated_count = 0
@@ -107,7 +97,6 @@ class ProductRepository:
             await session.commit()
             return updated_count
 
-    @handle_db_exceptions
     async def get_products_by_prefix(self, name_prefix: str, limit: int) -> Sequence[Product]:
         async with self.session as session:
             query = (

@@ -7,24 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from core.response.api_response import ApiResponse
 from core.response.code.error_status import ErrorStatus
 from core.response.code.success_status import SuccessStatus
-from core.response.handler.exception_handler import ServiceException
-
-
-class DatabaseError(Exception):
-    def __init__(self, message: str):
-        self.message = message
-        super().__init__(self.message)
-
-
-def handle_db_exceptions(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        try:
-            return await func(*args, **kwargs)
-        except SQLAlchemyError as e:
-            raise DatabaseError(str(e))
-    return wrapper
-
+from core.response.handler.exception_handler import ServiceException, DatabaseException
 
 T = TypeVar('T', bound=BaseModel)
 
@@ -43,10 +26,13 @@ def handle_exceptions(response_model: Optional[Type[T]] = None):
                     return ApiResponse.on_success()
             except ServiceException as e:
                 return ApiResponse.on_failure(e.error_status)
-            except ValueError as e:
-                return ApiResponse.on_failure(ErrorStatus.INVALID_INPUT)
-            except Exception as e:
-                print(f"Unexpected error: {str(e)}")
+            except DatabaseException as e:
                 return ApiResponse.on_failure(e.error_status)
+            except Exception as e:
+                error_info = {
+                    "type": type(e).__name__,
+                    "message": str(e)
+                }
+                return ApiResponse.on_failure(ErrorStatus.INTERNAL_SERVER_ERROR, result=error_info)
         return wrapper
     return decorator
