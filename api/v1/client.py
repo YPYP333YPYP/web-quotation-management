@@ -6,8 +6,10 @@ from core.decorator.decorator import handle_exceptions
 from models import User
 from schemas.client import ClientRead, ClientCreate, DateRangeType, RegionType, ClientUpdate, ClientPaginatedResponse, \
     to_client_read
+from schemas.past_order import PastOrderInfo
 from service.client import ClientService
 from api.dependencies import get_current_user
+from service.past_order import PastOrderService
 from service.quotation import QuotationService
 
 from core.response.api_response import ApiResponse
@@ -114,3 +116,11 @@ async def get_quotations(
                                                                                 page_size)
     return quotations
 
+
+@router.get("/clients/{client_id}/past-order",
+            response_model=ApiResponse[List[PastOrderInfo]],
+            summary="거래처 주문 내역 조회",
+            description="거래처 id로 정해둔 주문 내역을 조회합니다")
+@handle_exceptions(List[PastOrderInfo])
+async def get_past_order_by_client_id(client_id: int, past_order_service: PastOrderService = Depends(PastOrderService)):
+    return await past_order_service.get_past_order_by_client_id(client_id)

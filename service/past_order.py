@@ -3,9 +3,10 @@ from fastapi import Depends
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
 from core.utils import string_to_list
+from models import past_order
 from repository.past_order.past_order import PastOrderRepository
 from repository.product.product import ProductRepository
-from schemas.past_order import PastOrderCreate, to_past_order_read
+from schemas.past_order import PastOrderCreate, to_past_order_read, to_past_order_info
 from schemas.product import to_product_read
 
 
@@ -26,3 +27,8 @@ class PastOrderService:
         products = [await self.product_repository.get_product_by_id(idx) for idx in product_idx]
         product_list = [to_product_read(product) for product in products]
         return to_past_order_read(past_order, product_list)
+
+    async def get_past_order_by_client_id(self, client_id: int):
+        past_orders = await self.past_order_repository.get_by_client_id(client_id)
+        result = [to_past_order_info(past_order) for past_order in past_orders]
+        return result

@@ -20,10 +20,22 @@ class PastOrderRead(BaseModel):
     created_at: datetime
 
 
+class PastOrderInfo(BaseModel):
+    past_order_id: int
+    name: str
+
+
 def to_past_order_read(past_order: PastOrder, product_list: List[ProductRead]) -> PastOrderRead:
     return PastOrderRead(
         past_order_id=past_order.id,
         name=past_order.name,
         product_list=product_list,
         created_at=past_order.created_at
+    )
+
+
+def to_past_order_info(past_order:PastOrder) -> PastOrderInfo:
+    return PastOrderInfo(
+        past_order_id=past_order.id,
+        name=past_order.name
     )

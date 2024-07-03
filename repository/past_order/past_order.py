@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Any, Sequence
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +9,7 @@ from core.decorator.decorator import handle_db_exceptions
 from core.utils import list_to_string
 from models.past_order import PastOrder
 from schemas.past_order import PastOrderCreate
+from sqlalchemy.future import select
 
 
 class PastOrderRepository:
@@ -29,11 +30,15 @@ class PastOrderRepository:
             await session.refresh(past_order)
             return past_order
 
+    @handle_db_exceptions()
     async def get_by_id(self, past_order_id: int) -> Optional[PastOrder]:
         async with self.session as session:
             return await session.get(PastOrder, past_order_id)
 
-
-    # todo 2
-    async def get_by_client_id(self):
-        ...
+    @handle_db_exceptions()
+    async def get_by_client_id(self, client_id: int) -> Sequence[PastOrder]:
+        async with self.session as session:
+            query = (select(PastOrder).filter(PastOrder.client_id == client_id))
+            result = await session.execute(query)
+            past_orders = result.scalars().all()
+            return past_orders
