@@ -1,4 +1,5 @@
 from fastapi import Request
+from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
 from core.response.api_response import ApiResponse
 from core.response.code.error_status import ErrorStatus
@@ -25,3 +26,14 @@ async def general_exception_handler(request: Request, exc: GeneralException):
         content=ApiResponse.on_failure(exc.error_status).dict(by_alias=True)
     )
 
+
+async def validation_exception_handler(request: Request, exc: ResponseValidationError):
+    error_info = {
+        "type": "VALIDATION ERROR",
+        "message": str(exc),
+        "details": exc.errors()
+    }
+    return JSONResponse(
+        status_code=422,
+        content=ApiResponse.on_failure(ErrorStatus.INVALID_OUTPUT, result=error_info).dict()
+    )

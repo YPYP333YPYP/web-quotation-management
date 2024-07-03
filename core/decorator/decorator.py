@@ -1,6 +1,7 @@
 from functools import wraps
 from typing import TypeVar, Type, Optional
 
+from fastapi.exceptions import ResponseValidationError
 from pydantic import BaseModel
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -10,7 +11,6 @@ from core.response.code.success_status import SuccessStatus
 from core.response.handler.exception_handler import ServiceException, DatabaseException
 
 T = TypeVar('T', bound=BaseModel)
-
 
 def handle_exceptions(response_model: Optional[Type[T]] = None):
     def decorator(func):
@@ -28,13 +28,13 @@ def handle_exceptions(response_model: Optional[Type[T]] = None):
                 return ApiResponse.on_failure(e.error_status)
             except DatabaseException as e:
                 error_info = {
-                    "type": type(e).__name__,
+                    "type": "DATABASE ERROR",
                     "message": str(e)
                 }
                 return ApiResponse.on_failure(ErrorStatus.DB_ERROR, result=error_info)
             except Exception as e:
                 error_info = {
-                    "type": type(e).__name__,
+                    "type": "INTERNAL ERROR",
                     "message": str(e)
                 }
                 return ApiResponse.on_failure(ErrorStatus.INTERNAL_SERVER_ERROR, result=error_info)

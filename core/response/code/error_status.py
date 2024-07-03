@@ -33,6 +33,7 @@ class ErrorStatus(BaseCode):
     INVALID_FORMAT = ("4002", "잘못된 데이터 형식입니다.", "VALIDATION")
     VALUE_TOO_LONG = ("4003", "입력 값이 너무 깁니다.", "VALIDATION")
     VALUE_TOO_SHORT = ("4004", "입력 값이 너무 짧습니다.", "VALIDATION")
+    INVALID_OUTPUT = ("4005", "출력값이 유효하지 않습니다.", "VALIDATION")
 
     # File Errors
     FILE_NOT_FOUND = ("5000", "파일을 찾을 수 없습니다.", "FILE")
