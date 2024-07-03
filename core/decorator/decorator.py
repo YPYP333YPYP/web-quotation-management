@@ -27,12 +27,28 @@ def handle_exceptions(response_model: Optional[Type[T]] = None):
             except ServiceException as e:
                 return ApiResponse.on_failure(e.error_status)
             except DatabaseException as e:
-                return ApiResponse.on_failure(e.error_status)
+                error_info = {
+                    "type": type(e).__name__,
+                    "message": str(e)
+                }
+                return ApiResponse.on_failure(ErrorStatus.DB_ERROR, result=error_info)
             except Exception as e:
                 error_info = {
                     "type": type(e).__name__,
                     "message": str(e)
                 }
                 return ApiResponse.on_failure(ErrorStatus.INTERNAL_SERVER_ERROR, result=error_info)
+        return wrapper
+    return decorator
+
+
+def handle_db_exceptions():
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            try:
+                return await func(*args, **kwargs)
+            except Exception as e:
+                raise DatabaseException(str(e))
         return wrapper
     return decorator

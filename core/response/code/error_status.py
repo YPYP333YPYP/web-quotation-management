@@ -25,10 +25,7 @@ class ErrorStatus(BaseCode):
     PASSWORDS_MUST_BE_DIFFERENT = ("2008", "현재 비밀번호와 과거 비밀번호는 달라야 합니다", "AUTH")
 
     # Database
-    DB_CONNECTION_ERROR = ("3000", "데이터베이스 연결 오류가 발생했습니다.", "DATABASE")
-    DB_QUERY_ERROR = ("3001", "데이터베이스 쿼리 실행 중 오류가 발생했습니다.", "DATABASE")
-    DB_INTEGRITY_ERROR = ("3002", "데이터베이스 무결성 제약 조건 위반이 발생했습니다.", "DATABASE")
-    DB_TIMEOUT_ERROR = ("3003", "데이터베이스 작업 시간이 초과되었습니다.", "DATABASE")
+    DB_ERROR = ("3000", "데이터베이스 작업 도중 에러가 발생했습니다.", "DATABASE")
 
     # Validation
     INVALID_INPUT = ("4000", "잘못된 입력 값입니다.", "VALIDATION")

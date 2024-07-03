@@ -15,7 +15,7 @@ class ServiceException(Exception):
 
 
 class DatabaseException(Exception):
-    def __init__(self, error_status: ErrorStatus):
+    def __init__(self, error_status: str):
         self.error_status = error_status
 
 
