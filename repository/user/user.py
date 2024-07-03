@@ -30,13 +30,11 @@ class UserRepository:
 
     async def update_user_password(self, user_id: int, hashed_password: str):
         async with self.session as session:
-            user = await self.get_by_id(user_id)
-            if user:
-                print(hashed_password)
-                user.hashed_password = hashed_password
-                await session.commit()
-                await session.refresh(user)
-                print(user.hashed_password)
+            async with session.begin():
+                user = await session.get(User,user_id)
+                if user:
+                    user.hashed_password = hashed_password
+                    await session.commit()
 
     async def update_client_id(self, user_id: int, client_id: int) -> None:
         async with self.session as session:
