@@ -16,7 +16,7 @@ class UserService:
     async def authenticate_user(self, email: str, password: str) -> User | None:
         user = await self.user_repository.get_by_email(email)
         if not user or not verify_password(password, user.hashed_password):
-            return None
+            raise ServiceException(ErrorStatus.INVALID_CREDENTIALS)
         return user
 
     async def create_user(self, user: UserCreate) -> User:
@@ -42,7 +42,6 @@ class UserService:
 
         if current_password == new_password:
             raise ServiceException(ErrorStatus.PASSWORDS_MUST_BE_DIFFERENT)
-
         hashed_password = get_password_hash(new_password)
         await self.user_repository.update_user_password(user_id, hashed_password)
 
