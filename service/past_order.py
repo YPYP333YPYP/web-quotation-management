@@ -36,3 +36,6 @@ class PastOrderService:
     async def update_past_order(self, past_order_id: int, update_past_order: dict):
         update_past_order["product_ids"] = list_to_string(update_past_order["product_ids"])
         await self.past_order_repository.update_past_order(past_order_id, update_past_order)
+
+    async def delete_past_order(self, past_order_id: int):
+        await self.past_order_repository.delete_past_order(past_order_id)

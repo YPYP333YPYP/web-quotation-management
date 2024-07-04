@@ -50,3 +50,10 @@ class PastOrderRepository:
             past_order.name = update_past_order["name"]
             past_order.product_ids = update_past_order["product_ids"]
             await session.commit()
+
+    @handle_db_exceptions()
+    async def delete_past_order(self, past_order_id: int):
+        async with self.session as session:
+            past_order = await session.get(PastOrder, past_order_id)
+            await session.delete(past_order)
+            await session.commit()

@@ -38,3 +38,13 @@ async def update_past_order(past_order_id: int, update_past_order: PastOrderUpda
     update_data = update_past_order.dict(exclude_unset=True)
     await past_order_service.update_past_order(past_order_id, update_data)
     return ApiResponse.on_success()
+
+
+@router.delete("/past-order/{past_order_id}/delete",
+               response_model=ApiResponse,
+               summary="주문 내역 삭제",
+               description="주문 내역을 삭제 합니다.")
+@handle_exceptions()
+async def delete_past_order(past_order_id: int, past_order_service: PastOrderService =Depends(PastOrderService)):
+    await past_order_service.delete_past_order(past_order_id)
+    return ApiResponse.on_success()
