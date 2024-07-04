@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from core.decorator.decorator import handle_exceptions
 from core.response.api_response import ApiResponse
-from schemas.past_order import PastOrderCreate, PastOrderRead
+from schemas.past_order import PastOrderCreate, PastOrderRead, PastOrderUpdate
 from service.past_order import PastOrderService
 
 router = APIRouter(tags=["past_order"])
@@ -27,3 +27,14 @@ async def create_past_order(past_order_form: PastOrderCreate,
 async def get_past_order(past_order_id: int, past_order_service: PastOrderService = Depends(PastOrderService)):
     return await past_order_service.get_past_order(past_order_id)
 
+
+@router.put("/past-order/{past_order_id}/update",
+            response_model=ApiResponse,
+            summary="주문 내역 업데이트",
+            description="주문 내역을 업데이트 합니다.")
+@handle_exceptions()
+async def update_past_order(past_order_id: int, update_past_order: PastOrderUpdate,
+                            past_order_service: PastOrderService = Depends(PastOrderService)):
+    update_data = update_past_order.dict(exclude_unset=True)
+    await past_order_service.update_past_order(past_order_id, update_data)
+    return ApiResponse.on_success()

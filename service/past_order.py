@@ -2,7 +2,7 @@ from fastapi import Depends
 
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
-from core.utils import string_to_list
+from core.utils import string_to_list, list_to_string
 from models import past_order
 from repository.past_order.past_order import PastOrderRepository
 from repository.product.product import ProductRepository
@@ -32,3 +32,7 @@ class PastOrderService:
         past_orders = await self.past_order_repository.get_by_client_id(client_id)
         result = [to_past_order_info(past_order) for past_order in past_orders]
         return result
+
+    async def update_past_order(self, past_order_id: int, update_past_order: dict):
+        update_past_order["product_ids"] = list_to_string(update_past_order["product_ids"])
+        await self.past_order_repository.update_past_order(past_order_id, update_past_order)

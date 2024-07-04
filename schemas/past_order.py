@@ -25,6 +25,11 @@ class PastOrderInfo(BaseModel):
     name: str
 
 
+class PastOrderUpdate(BaseModel):
+    name: str
+    product_ids: List[int]
+
+
 def to_past_order_read(past_order: PastOrder, product_list: List[ProductRead]) -> PastOrderRead:
     return PastOrderRead(
         past_order_id=past_order.id,

@@ -42,3 +42,11 @@ class PastOrderRepository:
             result = await session.execute(query)
             past_orders = result.scalars().all()
             return past_orders
+
+    @handle_db_exceptions()
+    async def update_past_order(self, past_order_id: int, update_past_order: dict):
+        async with self.session as session:
+            past_order = await session.get(PastOrder, past_order_id)
+            past_order.name = update_past_order["name"]
+            past_order.product_ids = update_past_order["product_ids"]
+            await session.commit()
