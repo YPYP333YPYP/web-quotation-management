@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-
+import logging
 from core.settings import MySQLSettings, JwtTokenSettings, RedisSettings
 
 load_dotenv()
@@ -21,4 +21,11 @@ jwt_settings = JwtTokenSettings(
 redis_settings = RedisSettings(
     REDIS_HOST=os.getenv('REDIS_HOST'),
     REDIS_PORT=int(os.getenv('REDIS_PORT'))
+)
+
+
+logging.basicConfig(
+    filename='error.log',
+    level=logging.ERROR,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
