@@ -3,10 +3,6 @@ from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
 from core.response.api_response import ApiResponse
 from core.response.code.error_status import ErrorStatus
-import logging
-
-logging.basicConfig(level=logging.ERROR)
-logger = logging.getLogger(__name__)
 
 
 class GeneralException(Exception):
@@ -25,7 +21,6 @@ class DatabaseException(Exception):
 
 
 async def general_exception_handler(request: Request, exc: GeneralException):
-    logger.error(f"비즈니스 로직 단계 에러: {exc.error_status.code} - {str(exc)}")
     return JSONResponse(
         status_code=int(exc.error_status.code),
         content=ApiResponse.on_failure(exc.error_status).dict(by_alias=True)
