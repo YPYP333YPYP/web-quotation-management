@@ -33,7 +33,6 @@ async def validation_exception_handler(request: Request, exc: ResponseValidation
         "message": str(exc),
         "details": exc.errors()
     }
-    logger.error(f"출력값 유효성 검증 에러: {error_info}")
     return JSONResponse(
         status_code=422,
         content=ApiResponse.on_failure(ErrorStatus.INVALID_OUTPUT, result=error_info).dict()
