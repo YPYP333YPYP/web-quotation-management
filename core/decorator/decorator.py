@@ -1,16 +1,13 @@
 import time
-import uuid
 from functools import wraps
 from typing import TypeVar, Type, Optional
 import logging
 from pydantic import BaseModel
-from fastapi import Request, Depends
 from fastapi.security import OAuth2PasswordBearer
-from jwt import PyJWTError, decode
-
-from core.config import jwt_settings
+from core.middleware import request_id_context, user_id_context, method_context, url_context
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 from core.response.api_response import ApiResponse
 from core.response.code.error_status import ErrorStatus
 from core.response.code.success_status import SuccessStatus
@@ -22,32 +19,15 @@ logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
-
 def handle_exceptions(response_model: Optional[Type[T]] = None):
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            request = None
-            for arg in args:
-                if isinstance(arg, Request):
-                    request = arg
-                    break
-            request_id = str(uuid.uuid4())
-
+            request_id = request_id_context.get()
+            user_id = user_id_context.get()
             start_time = time.time()
-
-            user_id = 'anonymous'
-
-            # todo 1 - 사용자 정보 가져 오는 방식 관련
-            # try:
-            #     token = await oauth2_scheme(request)
-            #     payload = decode(token, jwt_settings.SECRET_KEY, algorithms=[jwt_settings.ALGORITHM])
-            #     user_id = payload.get("sub_name")
-            # except PyJWTError:
-            #     logger.warning(f"Failed to decode token for request: {request_id}")
-
-            method = request.method if request else 'Unknown'
-            url = str(request.url) if request else 'Unknown'
+            method = method_context.get()
+            url = url_context.get()
 
             try:
                 result = await func(*args, **kwargs)
@@ -100,5 +80,7 @@ def handle_db_exceptions():
                 return await func(*args, **kwargs)
             except Exception as e:
                 raise DatabaseException(str(e))
+
         return wrapper
+
     return decorator

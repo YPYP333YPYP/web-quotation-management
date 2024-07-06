@@ -28,7 +28,7 @@ async def login_access_token(
     user = await user_service.authenticate_user(form_data.username, form_data.password)
     if not user:
         raise GeneralException(ErrorStatus.INVALID_CREDENTIALS)
-    access_token = create_access_token(data={"sub": user.email})
+    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
     token_info = Token(access_token=access_token, token_type="bearer")
     return token_info
 
