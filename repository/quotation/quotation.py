@@ -107,3 +107,11 @@ class QuotationRepository:
             quotations = result.scalars().all()
 
             return quotations, total
+
+    @handle_db_exceptions()
+    async def get_today_quotation_ids(self, today: date):
+        async with self.session as session:
+            query = (select(Quotation.id).filter(func.date(Quotation.created_at) == today))
+            result = await session.execute(query)
+            quotation_ids = result.scalars().all()
+            return quotation_ids

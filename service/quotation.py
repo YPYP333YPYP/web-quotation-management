@@ -1,4 +1,5 @@
 import urllib.parse
+import zipfile
 from datetime import datetime, date
 from math import ceil
 from typing import List, Any, Dict, Optional
@@ -155,7 +156,7 @@ class QuotationService:
         quotations = await self.quotation_repository.search_quotation(start_date, end_date, query)
         return quotations
 
-    async def extract_quotations(self, quotation_id):
+    async def extract_quotations(self, quotation_id: int, for_zip: bool = False):
         products = await self.get_quotation_products(quotation_id)
         quotation = await self.quotation_repository.get_quotation_by_id(quotation_id)
 
@@ -177,8 +178,13 @@ class QuotationService:
         workbook.save(output)
         output.seek(0)
         filename = f'{quotation.name} 견적서'
-        encoded_filename = urllib.parse.quote(filename, encoding='utf-8')
-        return output, encoded_filename
+        if not for_zip:
+            filename = urllib.parse.quote(filename, encoding='utf-8')
+
+        else:
+            filename = filename + '.xlsx'
+
+        return output, filename
 
     async def get_paginated_quotations_for_client(self, client_id: int, page: int = 1, page_size: int = 10):
 
@@ -231,3 +237,20 @@ class QuotationService:
             page_size=page_size,
             total_pages=total_pages
         )
+
+    async def extract_today_quotations_to_zip(self):
+        today = date.today()
+        quotation_ids = await self.quotation_repository.get_today_quotation_ids(today)
+
+        print(quotation_ids)
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for quotation_id in quotation_ids:
+                excel_buffer, filename = await self.extract_quotations(quotation_id, True)
+                zip_file.writestr(filename, excel_buffer.getvalue())
+
+        zip_buffer.seek(0)
+        today_str = today.strftime("%Y-%m-%d")
+        filename = f'minifood_{today_str}.zip'
+
+        return zip_buffer, filename

@@ -96,9 +96,28 @@ async def get_quotations_search(start: Optional[str] = Query(None, description="
             description="거래처 견적서를 excel 파일로 추출합니다.")
 async def extract_quotations_to_excel_file(quotation_id: int,
                                            quotation_service: QuotationService = Depends(QuotationService)):
-    output, filename = await quotation_service.extract_quotations(quotation_id)
+    output, filename = await quotation_service.extract_quotations(quotation_id, False)
     headers = {
         'Content-Disposition': f'attachment; filename*=UTF-8\'\'{filename}'
     }
     return StreamingResponse(output, headers=headers,
                              media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+
+@router.get("/quotations/extracts/today",
+            summary="오늘 날짜의 모든 견적서 excel 파일로 추출",
+            description="오늘 날짜의 모든 견적서를 excel 파일로 추출하고 zip으로 압축합니다.")
+async def extract_today_quotations_to_zip(
+        quotation_service: QuotationService = Depends(QuotationService)
+):
+    zip_buffer, filename = await quotation_service.extract_today_quotations_to_zip()
+
+    headers = {
+        'Content-Disposition': f'attachment; filename*=UTF-8\'\'{filename}'
+    }
+
+    return StreamingResponse(
+        zip_buffer,
+        headers=headers,
+        media_type='application/zip'
+    )
