@@ -4,7 +4,7 @@ from typing import TypeVar, Type, Optional
 import logging
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer
-from core.middleware import request_id_context, user_id_context, method_context, url_context
+from core.middleware import request_id_context, user_id_context, method_context, url_context, ip_context
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -28,12 +28,13 @@ def handle_exceptions(response_model: Optional[Type[T]] = None):
             start_time = time.time()
             method = method_context.get()
             url = url_context.get()
+            ip = ip_context.get()
 
             try:
                 result = await func(*args, **kwargs)
 
                 logger.info(
-                    f"RequestID: {request_id} | UserID: {user_id} | Method: {method} | URL: {url} | Duration: {time.time() - start_time:.2f}s | Status: Success")
+                    f"RequestID: {request_id} | UserID: {user_id} | IP: {ip} | Method: {method} | URL: {url} | Duration: {time.time() - start_time:.2f}s | Status: Success")
 
                 if isinstance(result, ApiResponse):
                     return result
@@ -43,15 +44,15 @@ def handle_exceptions(response_model: Optional[Type[T]] = None):
                     return ApiResponse.on_success()
             except GeneralException as e:
                 logger.error(
-                    f"RequestID: {request_id} | UserID: {user_id} | Method: {method} | URL: {url} | Duration: {time.time() - start_time:.2f}s | Error: GeneralException - {e.error_status.code} - {str(e)}")
+                    f"RequestID: {request_id} | UserID: {user_id} | IP: {ip} | Method: {method} | URL: {url} | Duration: {time.time() - start_time:.2f}s | Error: GeneralException - {e.error_status.code} - {str(e)}")
                 return ApiResponse.on_failure(e.error_status)
             except ServiceException as e:
                 logger.error(
-                    f"RequestID: {request_id} | UserID: {user_id} | Method: {method} | URL: {url} | Duration: {time.time() - start_time:.2f}s | Error: ServiceException - {e.error_status.code} - {str(e)}")
+                    f"RequestID: {request_id} | UserID: {user_id} | IP: {ip} | Method: {method} | URL: {url} | Duration: {time.time() - start_time:.2f}s | Error: ServiceException - {e.error_status.code} - {str(e)}")
                 return ApiResponse.on_failure(e.error_status)
             except DatabaseException as e:
                 logger.error(
-                    f"RequestID: {request_id} | UserID: {user_id} | Method: {method} | URL: {url} | Duration: {time.time() - start_time:.2f}s | Error: DatabaseException - {str(e)}")
+                    f"RequestID: {request_id} | UserID: {user_id} | IP: {ip} | Method: {method} | URL: {url} | Duration: {time.time() - start_time:.2f}s | Error: DatabaseException - {str(e)}")
                 error_info = {
                     "type": "DATABASE ERROR",
                     "message": str(e)
@@ -59,7 +60,7 @@ def handle_exceptions(response_model: Optional[Type[T]] = None):
                 return ApiResponse.on_failure(ErrorStatus.DB_ERROR, result=error_info)
             except Exception as e:
                 logger.critical(
-                    f"RequestID: {request_id} | UserID: {user_id} | Method: {method} | URL: {url} | Duration: {time.time() - start_time:.2f}s | Error: UnexpectedException - {type(e).__name__} - {str(e)}",
+                    f"RequestID: {request_id} | UserID: {user_id} | IP: {ip} | Method: {method} | URL: {url} | Duration: {time.time() - start_time:.2f}s | Error: UnexpectedException - {type(e).__name__} - {str(e)}",
                     exc_info=True)
                 error_info = {
                     "type": "INTERNAL ERROR",

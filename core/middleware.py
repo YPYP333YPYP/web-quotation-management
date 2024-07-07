@@ -15,6 +15,7 @@ request_id_context = ContextVar("request_id", default=None)
 user_id_context = ContextVar("user_id", default=None)
 method_context = ContextVar("method", default=None)
 url_context = ContextVar("url", default=None)
+ip_context = ContextVar("ip", default=None)
 
 dotenv.load_dotenv()
 
@@ -46,6 +47,9 @@ class RequestMiddleware(BaseHTTPMiddleware):
 
         method_context.set(request.method)
         url_context.set(str(request.url))
+
+        client_ip = request.client.host
+        ip_context.set(client_ip)
 
         response = await call_next(request)
         return response
