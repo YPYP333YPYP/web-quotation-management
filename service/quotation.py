@@ -242,7 +242,6 @@ class QuotationService:
         today = date.today()
         quotation_ids = await self.quotation_repository.get_today_quotation_ids(today)
 
-        print(quotation_ids)
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             for quotation_id in quotation_ids:
