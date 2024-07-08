@@ -1,11 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Sequence, List
 from fastapi import APIRouter, Depends, Query
 
 from core.decorator.decorator import handle_exceptions
 from models import User
 from schemas.client import ClientRead, ClientCreate, DateRangeType, RegionType, ClientUpdate, ClientPaginatedResponse, \
-    to_client_read
+    to_client_read, ClientCheckPreview
 from schemas.past_order import PastOrderInfo
 from service.client import ClientService
 from api.dependencies import get_current_user
@@ -124,3 +124,12 @@ async def get_quotations(
 @handle_exceptions(List[PastOrderInfo])
 async def get_past_order_by_client_id(client_id: int, past_order_service: PastOrderService = Depends(PastOrderService)):
     return await past_order_service.get_past_order_by_client_id(client_id)
+
+
+@router.get("/clients/{client_id}/check",
+            response_model=ApiResponse[ClientCheckPreview],
+            summary="거래처 해당 날짜 견적서 제출 여부 파악",
+            description="거래처의 해당 날짜의 견적서 제출 여부룰 조회 합니다.")
+@handle_exceptions(ClientCheckPreview)
+async def get_client_check_preview(client_id: int, input_date: date, client_service: ClientService = Depends(ClientService)):
+    return await client_service.get_client_check_preview(client_id, input_date)

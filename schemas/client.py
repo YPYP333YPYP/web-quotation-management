@@ -46,6 +46,11 @@ class DateRange(BaseModel):
     end_date: datetime
 
 
+class ClientCheckPreview(BaseModel):
+    client_id: int
+    status: bool
+
+
 class RegionType(str, Enum):
     NOWON = "노원"
     UIJEONGBU = "의정부"
@@ -57,4 +62,11 @@ def to_client_read(client: Client) -> ClientRead:
         name=client.name,
         region=client.region,
         address=client.address
+    )
+
+
+def to_client_check_preview(client: Client, status: bool) -> ClientCheckPreview:
+    return ClientCheckPreview(
+        client_id=client.id,
+        status=status
     )

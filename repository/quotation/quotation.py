@@ -115,3 +115,15 @@ class QuotationRepository:
             result = await session.execute(query)
             quotation_ids = result.scalars().all()
             return quotation_ids
+
+    @handle_db_exceptions()
+    async def get_quotation_by_client_and_date(self, client_id: int, input_date: date):
+        async with self.session as session:
+            query = select(Quotation).where(
+                and_(
+                    Quotation.client_id == client_id,
+                    func.date(Quotation.created_at) == input_date
+                )
+            )
+            result = await session.execute(query)
+            return result.scalar_one_or_none()
