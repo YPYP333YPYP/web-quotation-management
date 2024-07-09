@@ -143,3 +143,17 @@ class QuotationRepository:
             if quotation_product:
                 await session.delete(quotation_product)
                 await session.commit()
+
+    @handle_db_exceptions()
+    async def exist_quotation_by_client_id_and_today_date(self, client_id: int, input_date: date) -> bool:
+        async with self.session as session:
+            query = select(Quotation).where(
+                and_(
+                    Quotation.client_id == client_id,
+                    func.date(Quotation.created_at) == input_date
+                )
+            ).exists()
+
+            result = await session.execute(select(query))
+            quotation = result.scalar()
+            return quotation

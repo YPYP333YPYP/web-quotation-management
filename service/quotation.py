@@ -37,15 +37,19 @@ class QuotationService:
 
     async def create_quotation(self, quotation_data: Dict[str, Any]) -> Quotation:
         client_id = quotation_data.get("client_id")
+        input_date = quotation_data.get("created_at")
+
         client = await self.client_repository.get_client_by_id(client_id)
         if not client:
             raise ServiceException(ErrorStatus.CLIENT_NOT_FOUND)
 
-        now_datetime = datetime.now()
-        year = now_datetime.year
-        month = now_datetime.month
-        day = now_datetime.day
-        quotation_name = f"{year}/{month}/{day}-{client.name}"
+        if await self.quotation_repository.exist_quotation_by_client_id_and_today_date(client_id, input_date):
+            raise ServiceException(ErrorStatus.QUOTATION_ALREADY_EXISTS)
+
+        year = input_date.year
+        month = input_date.month
+        day = input_date.day
+        quotation_name = f"{year:04d}/{month:02d}/{day:02d}-{client.name}"
 
         quotation_data["total_price"] = 0
         quotation_data["name"] = quotation_name
