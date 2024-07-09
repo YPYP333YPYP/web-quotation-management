@@ -18,14 +18,14 @@ router = APIRouter(tags=["quotation"])
 
 
 @router.post("/quotations",
-             response_model=ApiResponse,
+             response_model=ApiResponse[QuotationRead],
              summary="견적서 생성",
              description="견적서를 생성합니다.")
-@handle_exceptions()
+@handle_exceptions(QuotationRead)
 async def create_quotation(quotation: QuotationCreate, quotation_service: QuotationService = Depends(QuotationService)):
     new_data = quotation.dict()
-    await quotation_service.create_quotation(new_data)
-    return ApiResponse.on_success()
+    quotation = await quotation_service.create_quotation(new_data)
+    return quotation
 
 
 @router.post("/quotations/products",

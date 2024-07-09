@@ -16,7 +16,11 @@ class QuotationRepository:
 
     @handle_db_exceptions()
     async def create_quotation(self, quotation: Quotation):
-        self.session.add(quotation)
+        async with self.session as session:
+            session.add(quotation)
+            await session.commit()
+            await session.refresh(quotation)
+            return quotation
 
     @handle_db_exceptions()
     async def get_quotation_by_id(self, quotation_id: int):

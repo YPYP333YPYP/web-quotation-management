@@ -18,7 +18,7 @@ from repository.product.product import ProductRepository
 from repository.quotation.quotation import QuotationRepository
 from repository.quotation.quotation_product import QuotationProductRepository
 from schemas.client import ClientPaginatedResponse
-from schemas.quotation import QuotationAdd, QuotationRead
+from schemas.quotation import QuotationAdd, QuotationRead, to_quotation_read
 
 import io
 from openpyxl import Workbook
@@ -35,7 +35,7 @@ class QuotationService:
         self.product_repository = product_repository
         self.client_repository = client_repository
 
-    async def create_quotation(self, quotation_data: Dict[str, Any]) -> Quotation:
+    async def create_quotation(self, quotation_data: Dict[str, Any]) -> QuotationRead:
         client_id = quotation_data.get("client_id")
         input_date = quotation_data.get("created_at")
 
@@ -55,7 +55,9 @@ class QuotationService:
         quotation_data["name"] = quotation_name
 
         quotation = Quotation(**quotation_data)
-        return await self.quotation_repository.create_quotation(quotation)
+        quotation_read = await self.quotation_repository.create_quotation(quotation)
+        result = to_quotation_read(quotation_read)
+        return result
 
     async def add_products_to_quotation(self, quotation_data: List[QuotationAdd]):
         tmp_list = []
