@@ -127,3 +127,19 @@ class QuotationRepository:
             )
             result = await session.execute(query)
             return result.scalar_one_or_none()
+
+    @handle_db_exceptions()
+    async def delete_quotation_product(self, quotation_id: int, product_id: int):
+        async with self.session as session:
+            query = select(QuotationProduct).where(
+                and_(
+                    QuotationProduct.quotation_id == quotation_id,
+                    QuotationProduct.product_id == product_id
+                )
+            )
+            result = await session.execute(query)
+            quotation_product = result.scalar_one_or_none()
+
+            if quotation_product:
+                await session.delete(quotation_product)
+                await session.commit()

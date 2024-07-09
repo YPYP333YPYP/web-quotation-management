@@ -22,7 +22,7 @@ router = APIRouter(tags=["quotation"])
              summary="견적서 생성",
              description="견적서를 생성합니다.")
 @handle_exceptions()
-async def create_quotation(quotation: QuotationCreate, quotation_service: QuotationService = Depends(QuotationService)) -> JSONResponse:
+async def create_quotation(quotation: QuotationCreate, quotation_service: QuotationService = Depends(QuotationService)):
     new_data = quotation.dict()
     await quotation_service.create_quotation(new_data)
     return ApiResponse.on_success()
@@ -34,7 +34,7 @@ async def create_quotation(quotation: QuotationCreate, quotation_service: Quotat
              description="견적서에 물품을 추가합니다.")
 @handle_exceptions()
 async def add_products_to_quotation(quotation: List[QuotationAdd],
-                                    quotation_service: QuotationService = Depends(QuotationService)) -> JSONResponse:
+                                    quotation_service: QuotationService = Depends(QuotationService)):
 
     await quotation_service.add_products_to_quotation(quotation)
     return ApiResponse.on_success()
@@ -55,6 +55,16 @@ async def update_quotation_product(quotation_id: int,
         raise GeneralException(ErrorStatus.QUOTATION_NOT_UPDATED)
     else:
         return ApiResponse.on_success()
+
+
+@router.delete("/quotations/{quotation_id}/{product_id}/delete",
+               response_model=ApiResponse,
+               summary="견적서 물품 삭제",
+               description="견적서의 물품을 삭제합니다.")
+@handle_exceptions()
+async def delete_quotation_product(quotation_id: int, product_id: int, quotation_service: QuotationService = Depends(QuotationService)):
+    await quotation_service.delete_quotation_product(quotation_id, product_id)
+    return ApiResponse.on_success()
 
 
 @router.get("/quotations/{quotation_id}",
