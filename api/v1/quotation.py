@@ -1,3 +1,4 @@
+from datetime import date
 from typing import List, Optional
 
 from fastapi import HTTPException, APIRouter, Depends, Query
@@ -108,9 +109,10 @@ async def extract_quotations_to_excel_file(quotation_id: int,
             summary="오늘 날짜의 모든 견적서 excel 파일로 추출",
             description="오늘 날짜의 모든 견적서를 excel 파일로 추출하고 zip으로 압축합니다.")
 async def extract_today_quotations_to_zip(
+        input_date: date,
         quotation_service: QuotationService = Depends(QuotationService)
 ):
-    zip_buffer, filename = await quotation_service.extract_today_quotations_to_zip()
+    zip_buffer, filename = await quotation_service.extract_today_quotations_to_zip(input_date)
 
     headers = {
         'Content-Disposition': f'attachment; filename*=UTF-8\'\'{filename}'

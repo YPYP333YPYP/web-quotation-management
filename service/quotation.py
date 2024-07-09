@@ -238,8 +238,8 @@ class QuotationService:
             total_pages=total_pages
         )
 
-    async def extract_today_quotations_to_zip(self):
-        today = date.today()
+    async def extract_today_quotations_to_zip(self, input_date: date):
+        today = input_date
         quotation_ids = await self.quotation_repository.get_today_quotation_ids(today)
 
         zip_buffer = io.BytesIO()
