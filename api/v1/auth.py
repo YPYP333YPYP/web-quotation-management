@@ -22,8 +22,8 @@ router = APIRouter(tags=["auth"])
              description="사용자 로그인 시 토큰을 발급합니다.")
 @handle_exceptions(Token)
 async def login_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    user_service: UserService = Depends(UserService)
+        form_data: OAuth2PasswordRequestForm = Depends(),
+        user_service: UserService = Depends(UserService)
 ):
     user = await user_service.authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -39,8 +39,8 @@ async def login_access_token(
              description="사용자 정보를 받아 회원 가입을 진행합니다.")
 @handle_exceptions(UserInDB)
 async def create_user(
-    user: UserCreate,
-    user_service: UserService = Depends(UserService)
+        user: UserCreate,
+        user_service: UserService = Depends(UserService)
 ):
     db_user = await user_service.get_user_by_email(user.email)
     if db_user:
@@ -69,9 +69,19 @@ async def change_password(
 ):
     try:
         await user_service.change_user_password(current_user.id, password_change.current_password,
-                                          password_change.new_password)
+                                                password_change.new_password)
     except ValueError as e:
         raise GeneralException(ErrorStatus.INVALID_INPUT)
 
     return ApiResponse.on_success()
 
+
+@router.patch("/users/deactivate",
+              response_model=ApiResponse,
+              summary="회원 비활성화",
+              description="유저의 상태를 비활성화 시킵니다.")
+@handle_exceptions()
+async def deactivate_user(current_user: User = Depends(get_current_user),
+                          user_service: UserService = Depends(UserService)):
+    await user_service.deactivate_user(current_user)
+    return ApiResponse.on_success()

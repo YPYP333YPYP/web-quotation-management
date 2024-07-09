@@ -1,5 +1,5 @@
 from fastapi import Depends
-from sqlalchemy import update
+from sqlalchemy import update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -46,4 +46,15 @@ class UserRepository:
         async with self.session as session:
             query = update(User).where(User.id == user_id).values(client_id=client_id)
             await session.execute(query)
+            await session.commit()
+
+    @handle_db_exceptions()
+    async def update_user_status(self, user_id: int):
+        async with self.session as session:
+            update_stmt = (
+                update(User)
+                .where(User.id == user_id)
+                .values(is_active=False, updated_at=func.now())
+            )
+            await session.execute(update_stmt)
             await session.commit()
