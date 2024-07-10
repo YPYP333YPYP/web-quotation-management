@@ -28,6 +28,16 @@ async def create_quotation(quotation: QuotationCreate, quotation_service: Quotat
     return quotation
 
 
+@router.delete("/quotations/{quotation_id}/delete",
+               response_model=ApiResponse,
+               summary="견적서 삭제",
+               description="견적서를 삭제합니다.")
+@handle_exceptions()
+async def delete_quotation(quotation_id: int, quotation_service: QuotationService = Depends(QuotationService)):
+    await quotation_service.delete_quotation(quotation_id)
+    return ApiResponse.on_success()
+
+
 @router.post("/quotations/products",
              response_model=ApiResponse,
              summary="견적서 물품 생성",

@@ -161,3 +161,10 @@ class QuotationRepository:
             result = await session.execute(select(query))
             quotation = result.scalar()
             return quotation
+
+    @handle_db_exceptions()
+    async def delete_quotation(self, quotation_id: int):
+        async with self.session as session:
+            quotation = session.get(Quotation, quotation_id)
+            await session.delete(quotation)
+            await session.commit()

@@ -262,3 +262,6 @@ class QuotationService:
 
     async def delete_quotation_product(self, quotation_id: int, product_id: int):
         await self.quotation_repository.delete_quotation_product(quotation_id, product_id)
+
+    async def delete_quotation(self, quotation_id: int):
+        await self.quotation_repository.delete_quotation(quotation_id)
