@@ -49,12 +49,12 @@ class UserRepository:
             await session.commit()
 
     @handle_db_exceptions()
-    async def update_user_status(self, user_id: int):
+    async def update_user_status(self, user_id: int, status: bool):
         async with self.session as session:
             update_stmt = (
                 update(User)
                 .where(User.id == user_id)
-                .values(is_active=False, updated_at=func.now())
+                .values(is_active=status, updated_at=func.now())
             )
             await session.execute(update_stmt)
             await session.commit()

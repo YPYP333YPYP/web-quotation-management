@@ -85,3 +85,14 @@ async def deactivate_user(current_user: User = Depends(get_current_user),
                           user_service: UserService = Depends(UserService)):
     await user_service.deactivate_user(current_user)
     return ApiResponse.on_success()
+
+
+@router.patch("/users/activate",
+              response_model=ApiResponse,
+              summary="회원 활성화",
+              description="유저의 상태를 활성화 합니다.")
+@handle_exceptions()
+async def activate_user(current_user: User = Depends(get_current_user),
+                        user_service: UserService = Depends(UserService)):
+    await user_service.activate_user(current_user)
+    return ApiResponse.on_success()

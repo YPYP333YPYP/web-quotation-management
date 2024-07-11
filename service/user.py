@@ -57,4 +57,11 @@ class UserService:
         if not user:
             raise ServiceException(ErrorStatus.USER_NOT_FOUND)
 
-        await self.user_repository.update_user_status(current_user.id)
+        await self.user_repository.update_user_status(current_user.id, False)
+
+    async def activate_user(self, current_user: User):
+        user = await self.user_repository.get_by_id(current_user.id)
+        if not user:
+            raise ServiceException(ErrorStatus.USER_NOT_FOUND)
+
+        await self.user_repository.update_user_status(current_user.id, True)
