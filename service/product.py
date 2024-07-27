@@ -139,6 +139,8 @@ class ProductService:
             )[:limit]
             products = fuzzy_matches
 
+        products = sorted(products, key=lambda x: x.name.lower())
+
         if products:
             await redis_client.setex(
                 cache_key,
