@@ -30,7 +30,6 @@ class ClientCreate(BaseModel):
 
 class ClientUpdate(BaseModel):
     name: str
-    region: str
     address: str
 
 

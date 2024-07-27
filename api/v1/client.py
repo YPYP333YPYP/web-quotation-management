@@ -31,6 +31,16 @@ async def get_clients_by_name(name: str, client_service: ClientService = Depends
     return result
 
 
+@router.patch("/clients/{client_id}/region",
+              response_model=ApiResponse,
+              summary="거래처 지역 선택",
+              description="거래처의 지역을 선택합니다.")
+@handle_exceptions()
+async def update_client_region(client_id: int, region: RegionType, client_service: ClientService = Depends(ClientService)):
+    await client_service.update_client_region(client_id, region)
+    return ApiResponse.on_success()
+
+
 @router.get("/clients/region",
             response_model=ApiResponse[Sequence[ClientRead]],
             summary="거래처 지역으로 조회",

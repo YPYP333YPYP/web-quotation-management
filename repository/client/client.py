@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
 from models import Client
+from schemas.client import RegionType
 
 
 class ClientRepository:
@@ -65,3 +66,13 @@ class ClientRepository:
             if client:
                 await session.delete(client)
                 await session.commit()
+
+    @handle_db_exceptions()
+    async def update_client_region(self, client_id: int, region: RegionType):
+        async with self.session as session:
+            stmt = select(Client).filter(Client.id == client_id)
+            result = await session.execute(stmt)
+            client = result.scalar_one_or_none()
+
+            client.region = region.value
+            await session.commit()

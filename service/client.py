@@ -8,7 +8,7 @@ from core.response.handler.exception_handler import GeneralException
 from models import Client
 from repository.client.client import ClientRepository
 from repository.quotation.quotation import QuotationRepository
-from schemas.client import to_client_check_preview
+from schemas.client import to_client_check_preview, RegionType, ClientUpdate, ClientCreate
 from service.user import UserService
 
 
@@ -26,19 +26,23 @@ class ClientService:
     async def get_clients_by_region(self, region: str) -> Sequence[Client]:
         return await self.client_repository.get_clients_by_region(region)
 
-    async def create_client(self, client_create, user_id):
+    async def create_client(self, client_create: ClientCreate, user_id: int):
         client_data = client_create.dict()
         client = Client(**client_data)
 
         response_client = await self.client_repository.create_client(client)
         await self.user_service.link_user_to_client(response_client.id, user_id)
 
-    async def delete_client(self, client_id):
+    async def delete_client(self, client_id: int):
         return await self.client_repository.delete_client_by_id(client_id)
 
-    async def update_client(self, client_id, client_update):
+    async def update_client(self, client_id: int, client_update: ClientUpdate):
         client_data = client_update.dict()
         return await self.client_repository.update_client(client_id, client_data)
+
+    async def update_client_region(self, client_id: int , region:RegionType):
+        await self.client_repository.update_client_region(client_id, region)
+
 
     async def get_client_check_preview(self, client_id: int, input_date: date):
         client = await self.client_repository.get_client_by_id(client_id)
