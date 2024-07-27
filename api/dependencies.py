@@ -2,10 +2,11 @@ from fastapi import Depends, HTTPException
 from jose import jwt, JWTError
 from core.config import jwt_settings
 from fastapi import Security
-from fastapi.security import APIKeyHeader
+from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
 
 from models import User
 from service.user import UserService
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 def verify_token(access_token=Security(APIKeyHeader(name="access-token"))):
@@ -14,6 +15,7 @@ def verify_token(access_token=Security(APIKeyHeader(name="access-token"))):
 
 async def get_current_user(
     token: str = Depends(verify_token),
+    # token: str = Depends(oauth2_scheme),
     user_service: UserService = Depends(UserService)
 ):
     credentials_exception = HTTPException(
