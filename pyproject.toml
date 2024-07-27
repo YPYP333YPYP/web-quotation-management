@@ -69,6 +69,8 @@ packaging = "^23.0"
 platformdirs = "^3.0"
 httpx = "0.27.0"
 pyjwt = "^2.8.0"
+sentry-sdk = "2.11.0"
+aiohttp = "3.9.5"
 
 [build-system]
 requires = ["poetry-core"]

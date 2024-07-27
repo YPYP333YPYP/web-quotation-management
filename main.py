@@ -10,7 +10,7 @@ from api import router
 from core.logging.config import listener
 from core.response.handler.exception_handler import GeneralException, general_exception_handler, \
     validation_exception_handler
-from core.middleware import RequestMiddleware
+from core.middleware import RequestMiddleware, URLPatternCheckMiddleware
 
 logger = logging.getLogger()
 
@@ -45,6 +45,11 @@ def get_application() -> FastAPI:
     application.add_exception_handler(GeneralException, general_exception_handler)
     application.add_exception_handler(ResponseValidationError, validation_exception_handler)
     application.add_middleware(RequestMiddleware)
+    application.add_middleware(
+        URLPatternCheckMiddleware,
+        url_pattern=r"^/api/v1/",
+        excluded_paths=["/health", "/metrics"],
+    )
 
     return application
 
