@@ -97,7 +97,7 @@ async def update_vegetable_product_price(file: UploadFile = File(...),
     return ApiResponse.on_success()
 
 
-@router.get("/products/search",
+@router.get("/products/search/recent",
             response_model=ApiResponse[List[ProductRead]],
             summary="검색제안/자동완성 기능",
             description="검색어가 포함된 물품을 조회합니다.")
@@ -110,8 +110,6 @@ async def search_products_by_prefix(
         current_user: User = Depends(get_current_user)
 ):
     products = await product_service.search_products_by_prefix(current_user, name_prefix, limit, cached_time)
-    if not products:
-        raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
     return products
 
 

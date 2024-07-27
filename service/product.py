@@ -118,11 +118,15 @@ class ProductService:
             raise ServiceException(ErrorStatus.FILE_UPLOAD_ERROR)
 
     async def search_products_by_prefix(self, current_user: User, name_prefix: str, limit: int, cached_time: int):
-        cache_key = f"search:{current_user.id}:{name_prefix}"
+        cache_key = f"search:{current_user.client_id}:{name_prefix}"
         cached_result = await redis_client.get(cache_key)
 
         if cached_result:
-            return [ProductRead.parse_raw(item) for item in json.loads(cached_result)]
+            try:
+                cached_items = json.loads(cached_result)
+                return [ProductRead.parse_raw(item) for item in cached_items]
+            except json.JSONDecodeError as e:
+                pass
 
         products = await self.product_repository.get_products_by_prefix(name_prefix, limit)
 
@@ -139,7 +143,7 @@ class ProductService:
             await redis_client.setex(
                 cache_key,
                 cached_time,
-                ','.join([ProductRead.from_orm(p).json() for p in products])
+                json.dumps([ProductRead.from_orm(p).json() for p in products])
             )
         return [ProductRead.from_orm(p) for p in products]
 
