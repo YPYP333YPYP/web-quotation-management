@@ -84,12 +84,10 @@ class URLPatternCheckMiddleware(BaseHTTPMiddleware):
             self,
             app,
             url_pattern: str = r"^/api/v1/",
-            excluded_paths=None,
+            excluded_paths: list = None,
             discord_webhook_url: str = os.getenv("DISCORD_WEB_HOOK")
     ):
         super().__init__(app)
-        if excluded_paths is None:
-            excluded_paths = ["/docs", "/"]
         self.url_pattern = url_pattern
         self.excluded_paths = excluded_paths or []
         self.discord_webhook_url = discord_webhook_url
