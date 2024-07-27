@@ -10,6 +10,9 @@ class ProductRead(BaseModel):
     unit: str
     price: float
 
+    class Config:
+        from_attributes = True
+
 
 class ProductCreate(BaseModel):
     category: str
