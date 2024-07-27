@@ -5,7 +5,7 @@ from fastapi import UploadFile, File, APIRouter, Depends, Query
 from api.dependencies import get_current_user
 from core.decorator.decorator import handle_exceptions
 from models import User
-from schemas.product import ProductRead, ProductCreate, to_product_read
+from schemas.product import ProductRead, ProductCreate, to_product_read, ProductCount
 from service.product import ProductService
 
 from core.response.api_response import ApiResponse
@@ -80,7 +80,8 @@ async def delete_product(product_id: int, product_service: ProductService = Depe
               summary="vegetable(야채) 물품 가격 직접 변경",
               description="야채 물품의 가격을 직접 변경합니다.")
 @handle_exceptions()
-async def update_vegetable_product_price(product_id: int, price: int, product_service: ProductService = Depends(ProductService)):
+async def update_vegetable_product_price(product_id: int, price: int,
+                                         product_service: ProductService = Depends(ProductService)):
     await product_service.update_vegetable_product_price(product_id, price)
     return ApiResponse.on_success()
 
@@ -90,24 +91,39 @@ async def update_vegetable_product_price(product_id: int, price: int, product_se
               summary="vegetable(야채) 물품 가격 엑셀 파일로 변경",
               description="야채 물품의 가격을 엑셀 파일을 통해 변경합니다.")
 @handle_exceptions()
-async def update_vegetable_product_price(file: UploadFile = File(...), product_service: ProductService = Depends(ProductService)):
+async def update_vegetable_product_price(file: UploadFile = File(...),
+                                         product_service: ProductService = Depends(ProductService)):
     await product_service.update_vegetable_product_price_from_file(file)
     return ApiResponse.on_success()
 
 
-@router.get("/products/search/",
+@router.get("/products/search",
             response_model=ApiResponse[List[ProductRead]],
             summary="검색제안/자동완성 기능",
             description="검색어가 포함된 물품을 조회합니다.")
 @handle_exceptions(List[ProductRead])
 async def search_products_by_prefix(
-    name_prefix: str = Query(..., min_length=1),
-    limit: int = Query(10, ge=1, le=100),
-    cached_time: int = Query(default=300),
-    product_service: ProductService = Depends(ProductService),
-    current_user: User = Depends(get_current_user)
+        name_prefix: str = Query(..., min_length=1),
+        limit: int = Query(10, ge=1, le=100),
+        cached_time: int = Query(default=300),
+        product_service: ProductService = Depends(ProductService),
+        current_user: User = Depends(get_current_user)
 ):
     products = await product_service.search_products_by_prefix(current_user, name_prefix, limit, cached_time)
     if not products:
         raise GeneralException(ErrorStatus.PRODUCT_NOT_FOUND)
+    return products
+
+
+@router.get("/products/search/purchases/recent",
+            response_model=ApiResponse[List[ProductCount]],
+            summary="최근 구매한 물품 리스트 조회",
+            description="최근에 구매했던 물픔을 조회 합니다.")
+@handle_exceptions(List[ProductCount])
+async def search_products_recent(
+        limit: int = Query(10, ge=1, le=100),
+        product_service: ProductService = Depends(ProductService),
+        current_user: User = Depends(get_current_user)
+):
+    products = await product_service.search_products_recent(limit, current_user)
     return products

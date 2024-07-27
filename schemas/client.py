@@ -25,7 +25,6 @@ class ClientRead(BaseModel):
 
 class ClientCreate(BaseModel):
     name: str
-    region: str
     address: str
 
 
@@ -52,8 +51,11 @@ class ClientCheckPreview(BaseModel):
 
 
 class RegionType(str, Enum):
-    NOWON = "노원"
-    UIJEONGBU = "의정부"
+    노원 = "노원"
+    의정부 = "의정부"
+    강남 = "강남"
+    건대 = "건대"
+    신촌= "신촌"
 
 
 def to_client_read(client: Client) -> ClientRead:

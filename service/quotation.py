@@ -11,7 +11,7 @@ from sqlalchemy.orm.base import _T_co
 
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
-from models import Quotation
+from models import Quotation, User
 from models.quotation_product import QuotationProduct
 from repository.client.client import ClientRepository
 from repository.product.product import ProductRepository
@@ -22,7 +22,7 @@ from schemas.quotation import QuotationAdd, QuotationRead, to_quotation_read
 
 import io
 from openpyxl import Workbook
-
+from core.db.redis import redis_client
 
 class QuotationService:
     def __init__(self,
@@ -59,7 +59,7 @@ class QuotationService:
         result = to_quotation_read(quotation_read)
         return result
 
-    async def add_products_to_quotation(self, quotation_data: List[QuotationAdd]):
+    async def add_products_to_quotation(self, quotation_data: List[QuotationAdd], current_user: User):
         tmp_list = []
         for qt in quotation_data:
             quotation_id = qt.quotation_id
@@ -74,6 +74,7 @@ class QuotationService:
             if quotation is None:
                 raise ServiceException(ErrorStatus.QUOTATION_NOT_FOUND)
 
+            # 견적서에 물품 중복 추가 금지
             quotation_product = await self.quotation_product_repository.get_quotation_product_by_quotation_id_and_product_id(
                 quotation_id=quotation_id,
                 product_id=product_id
@@ -87,6 +88,7 @@ class QuotationService:
                 price=product.price * quantity,
                 quantity=quantity,
             )
+            await redis_client.hincrby(f"user:{current_user.client_id}:products", product_id, 1)
             tmp_list.append(quotation_product)
         return await self.quotation_product_repository.bulk_create_quotation_product(tmp_list)
 

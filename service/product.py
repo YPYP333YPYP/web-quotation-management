@@ -1,10 +1,6 @@
 import json
 import os
-from datetime import datetime
-
-from dotenv import load_dotenv
-from fastapi import HTTPException
-from typing import List, Any, Coroutine, Sequence, Dict, Optional
+from typing import Any, Sequence, Dict, Optional
 
 import pandas as pd
 from fastapi import Depends, UploadFile
@@ -12,18 +8,14 @@ from fuzzywuzzy import fuzz
 from pydantic import ValidationError
 from sqlalchemy import func
 
-from core.config import redis_settings
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
 from models import User
 from repository.product.product import ProductRepository
 from models.product import Product
-from schemas.product import ProductRead
+from schemas.product import ProductRead, to_product_count
 
-import redis.asyncio as redis
-
-redis_client = redis.from_url(f"redis://{redis_settings.REDIS_HOST}", decode_responses=True)
-load_dotenv()
+from core.db.redis import redis_client
 
 
 def read_excel_file_about_product_list(file_path: str) -> list[Product]:
@@ -150,3 +142,9 @@ class ProductService:
                 ','.join([ProductRead.from_orm(p).json() for p in products])
             )
         return [ProductRead.from_orm(p) for p in products]
+
+    async def search_products_recent(self, limit: int, current_user: User):
+        product_counts = await redis_client.hgetall(f"user:{current_user.client_id}:products")
+        sorted_products = sorted(product_counts.items(), key=lambda x: int(x[1]), reverse=True)[:limit]
+        products_list = [to_product_count(await self.product_repository.get_product_by_id(x[0]), x[1]) for x in sorted_products]
+        return products_list

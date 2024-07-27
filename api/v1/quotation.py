@@ -4,7 +4,9 @@ from typing import List, Optional
 from fastapi import HTTPException, APIRouter, Depends, Query
 from starlette.responses import JSONResponse, StreamingResponse
 
+from api.dependencies import get_current_user
 from core.decorator.decorator import handle_exceptions
+from models import User
 from schemas.quotation import QuotationCreate, QuotationAdd, QuotationUpdate, QuotationRead, QuotationInfo, \
     to_quotation_read
 from service.quotation import QuotationService
@@ -44,9 +46,10 @@ async def delete_quotation(quotation_id: int, quotation_service: QuotationServic
              description="견적서에 물품을 추가합니다.")
 @handle_exceptions()
 async def add_products_to_quotation(quotation: List[QuotationAdd],
-                                    quotation_service: QuotationService = Depends(QuotationService)):
-
-    await quotation_service.add_products_to_quotation(quotation)
+                                    quotation_service: QuotationService = Depends(QuotationService),
+                                    current_user: User = Depends(get_current_user)
+                                    ):
+    await quotation_service.add_products_to_quotation(quotation, current_user)
     return ApiResponse.on_success()
 
 
@@ -143,3 +146,4 @@ async def extract_today_quotations_to_zip(
         headers=headers,
         media_type='application/zip'
     )
+

@@ -21,6 +21,14 @@ class ProductCreate(BaseModel):
     price: float
 
 
+class ProductCount(BaseModel):
+    id: int
+    category: str
+    name: str
+    unit: str
+    count: int
+
+
 def to_product_read(product: Product) -> ProductRead:
     return ProductRead(
         id=product.id,
@@ -28,4 +36,14 @@ def to_product_read(product: Product) -> ProductRead:
         name=product.name,
         unit=product.unit,
         price=product.price
+    )
+
+
+def to_product_count(product: ProductCount, count: int) -> ProductCount:
+    return ProductCount(
+        id=product.id,
+        category=product.category,
+        name=product.name,
+        unit=product.unit,
+        count=count
     )
