@@ -65,3 +65,9 @@ class UserService:
             raise ServiceException(ErrorStatus.USER_NOT_FOUND)
 
         await self.user_repository.update_user_status(current_user.id, True)
+
+    async def check_client_create(self, current_user: User) -> bool:
+        if current_user.client_id is None:
+            return False
+        else:
+            return True

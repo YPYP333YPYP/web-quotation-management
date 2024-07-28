@@ -96,3 +96,13 @@ async def activate_user(current_user: User = Depends(get_current_user),
                         user_service: UserService = Depends(UserService)):
     await user_service.activate_user(current_user)
     return ApiResponse.on_success()
+
+
+@router.get("/users/clients/check",
+            response_model=ApiResponse[bool],
+            summary="유저 거래처 생성 여부 조회",
+            description="유저가 거래처를 생성 했는지 여부를 조회 합니다.")
+@handle_exceptions(bool)
+async def check_clients(current_user: User = Depends(get_current_user), user_service: UserService = Depends(UserService)):
+    result = await user_service.check_client_create(current_user)
+    return ApiResponse.on_success(result)
