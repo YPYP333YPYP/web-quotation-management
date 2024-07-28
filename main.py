@@ -48,7 +48,7 @@ def get_application() -> FastAPI:
     application.add_middleware(
         URLPatternCheckMiddleware,
         url_pattern=r"^/api/v1/",
-        excluded_paths=["/health", "/metrics", "/docs", "/openapi.json", "/favicon.ico", "/"],
+        excluded_paths=["/health", "/metrics", "/docs", "/openapi.json", "/favicon.ico", "/", ""],
     )
 
     return application
