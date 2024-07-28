@@ -143,3 +143,13 @@ async def get_past_order_by_client_id(client_id: int, past_order_service: PastOr
 @handle_exceptions(ClientCheckPreview)
 async def get_client_check_preview(client_id: int, input_date: date, client_service: ClientService = Depends(ClientService)):
     return await client_service.get_client_check_preview(client_id, input_date)
+
+
+@router.patch("/clients/{client_id}/comment",
+              response_model=ApiResponse,
+              summary="거래처 특이사항 작성",
+              description="거래처의 특이사항을 작성합니다.")
+@handle_exceptions()
+async def update_client_comment(client_id: int, input_comment: str, client_service: ClientService = Depends(ClientService)):
+    await client_service.update_client_comment(client_id, input_comment)
+    return ApiResponse.on_success()

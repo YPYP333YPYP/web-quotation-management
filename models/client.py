@@ -14,7 +14,7 @@ class Client(Base):
     name: Mapped[str] = mapped_column(String(255), index=True)
     region: Mapped[str] = mapped_column(String(255), nullable=True)
     address: Mapped[str] = mapped_column(String(255))
-    comment: Mapped[str] = mapped_column(Text)
+    comment: Mapped[str] = mapped_column(Text, nullable=True)
     quotations = relationship("Quotation", back_populates="client")
     users = relationship("User", back_populates="client")
 

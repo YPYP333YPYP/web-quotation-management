@@ -40,9 +40,8 @@ class ClientService:
         client_data = client_update.dict()
         return await self.client_repository.update_client(client_id, client_data)
 
-    async def update_client_region(self, client_id: int , region:RegionType):
+    async def update_client_region(self, client_id: int, region: RegionType):
         await self.client_repository.update_client_region(client_id, region)
-
 
     async def get_client_check_preview(self, client_id: int, input_date: date):
         client = await self.client_repository.get_client_by_id(client_id)
@@ -54,3 +53,6 @@ class ClientService:
 
         result = to_client_check_preview(client, status)
         return result
+
+    async def update_client_comment(self, client_id: int, input_comment: str):
+        await self.client_repository.update_client_comment(client_id, input_comment)

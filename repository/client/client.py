@@ -76,3 +76,13 @@ class ClientRepository:
 
             client.region = region.value
             await session.commit()
+
+    @handle_db_exceptions()
+    async def update_client_comment(self, client_id, input_comment):
+        async with self.session as session:
+            stmt = select(Client).filter(Client.id == client_id)
+            result = await session.execute(stmt)
+            client = result.scalar_one_or_none()
+
+            client.comment = input_comment
+            await session.commit()
