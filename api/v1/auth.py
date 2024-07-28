@@ -9,7 +9,7 @@ from core.response.code.success_status import SuccessStatus
 from core.response.handler.exception_handler import GeneralException
 from core.security import create_access_token
 from models.user import User
-from schemas.user import UserCreate, UserInDB
+from schemas.user import UserCreate, UserInDB, UserWithClient
 from schemas.auth import Token, PasswordChange
 from service.user import UserService
 
@@ -49,12 +49,15 @@ async def create_user(
 
 
 @router.get("/users/me",
-            response_model=ApiResponse[UserInDB],
+            response_model=ApiResponse[UserWithClient],
             summary="내 정보 조회",
             description="내 정보를 조회 합니다.")
-@handle_exceptions(UserInDB)
+@handle_exceptions(UserWithClient)
 async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
+    if current_user.client_id is None:
+        raise GeneralException(ErrorStatus.CLIENT_NOT_CREATED)
+    else:
+        return current_user
 
 
 @router.put("/users/me/password",

@@ -18,3 +18,6 @@ class UserInDB(UserBase):
     class Config:
         from_attributes = True
 
+
+class UserWithClient(UserInDB):
+    client_id: int
