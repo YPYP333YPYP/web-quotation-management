@@ -1,14 +1,21 @@
 from datetime import datetime, date
+from enum import Enum
 from typing import Optional, List
 
 from pydantic import BaseModel
 
-from models import Quotation
+from models.quotation import Quotation
+
+
+class QuotationStatus(str, Enum):
+    CREATED = "CREATED"
+    COMPLETED = "COMPLETED"
 
 
 class QuotationCreate(BaseModel):
     client_id: int
     created_at: date
+    status: QuotationStatus = QuotationStatus.CREATED
 
 
 class QuotationAdd(BaseModel):
@@ -41,15 +48,19 @@ class QuotationRead(BaseModel):
     id: int
     name: str
     total_price: float
+    status: QuotationStatus
     created_at: datetime
     updated_at: Optional[datetime]
 
 
-def to_quotation_read(quotation: Quotation)->QuotationRead:
+def to_quotation_read(quotation: Quotation) -> QuotationRead:
     return QuotationRead(
         id=quotation.id,
         name=quotation.name,
         total_price=quotation.total_price,
+        status=quotation.status,
         created_at=quotation.created_at,
         updated_at=quotation.updated_at
     )
+
+
