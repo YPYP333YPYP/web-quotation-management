@@ -101,6 +101,16 @@ async def update_total_price(quotation_id: int, quotation_service: QuotationServ
     return updated_sum
 
 
+@router.patch("/quotations/{quotation_id}/particulars",
+              response_model=ApiResponse,
+              summary="견적서 특이사항 작성",
+              description="견적서의 특이사항을 작성합니다.")
+@handle_exceptions()
+async def update_particulars(quotation_id: int, particulars: str, quotation_service: QuotationService = Depends(QuotationService)):
+    await quotation_service.update_particulars(quotation_id, particulars)
+    return ApiResponse.on_success()
+
+
 @router.get("/quotations/search/info",
             response_model=ApiResponse[List[QuotationRead]],
             summary="견적서 정보 조회",

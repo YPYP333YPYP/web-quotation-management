@@ -168,3 +168,13 @@ class QuotationRepository:
             quotation = session.get(Quotation, quotation_id)
             await session.delete(quotation)
             await session.commit()
+
+    @handle_db_exceptions()
+    async def update_particulars(self, quotation_id, particulars):
+        async with self.session as session:
+            stmt = select(Quotation).filter(Quotation.id == quotation_id)
+            result = await session.execute(stmt)
+            quotation = result.scalar_one_or_none()
+
+            quotation.particulars = particulars
+            await session.commit()

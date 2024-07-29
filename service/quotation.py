@@ -267,3 +267,6 @@ class QuotationService:
 
     async def delete_quotation(self, quotation_id: int):
         await self.quotation_repository.delete_quotation(quotation_id)
+
+    async def update_particulars(self, quotation_id: int, particulars: str):
+        await self.quotation_repository.update_particulars(quotation_id, particulars)
