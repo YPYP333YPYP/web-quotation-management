@@ -268,3 +268,6 @@ class QuotationService:
 
     async def update_particulars(self, quotation_id: int, particulars: str):
         await self.quotation_repository.update_particulars(quotation_id, particulars)
+
+    async def update_status_completed(self, quotation_id: int):
+        await self.quotation_repository.update_status_completed(quotation_id)

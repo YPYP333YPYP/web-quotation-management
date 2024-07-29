@@ -8,6 +8,7 @@ from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
 from models import Quotation
 from models.quotation_product import QuotationProduct
+from schemas.quotation import QuotationStatus
 
 
 class QuotationRepository:
@@ -177,4 +178,14 @@ class QuotationRepository:
             quotation = result.scalar_one_or_none()
 
             quotation.particulars = particulars
+            await session.commit()
+
+    @handle_db_exceptions()
+    async def update_status_completed(self, quotation_id):
+        async with self.session as session:
+            stmt = select(Quotation).filter(Quotation.id == quotation_id)
+            result = await session.execute(stmt)
+            quotation = result.scalar_one_or_none()
+
+            quotation.status = QuotationStatus.COMPLETED.value
             await session.commit()
