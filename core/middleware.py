@@ -95,6 +95,9 @@ class URLPatternCheckMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
 
+        if path == "" or path == "/":
+            return await call_next(request)
+
         if any(path.startswith(excluded) for excluded in self.excluded_paths):
             return await call_next(request)
 
