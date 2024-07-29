@@ -5,7 +5,6 @@ from sqlalchemy import ForeignKey, Integer, DateTime, func, String, Text
 from core.db.database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship, class_mapper
 
-from schemas.quotation import QuotationStatus
 
 
 @dataclass
@@ -16,7 +15,7 @@ class Quotation(Base):
     client_id = mapped_column(Integer, ForeignKey('clients.id'), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     total_price: Mapped[int] = mapped_column(Integer, nullable=False)
-    status: Mapped[str] = mapped_column(String(30), default=QuotationStatus.CREATED.value, nullable=False)
+    status: Mapped[str] = mapped_column(String(30), default="CREATED", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.current_timestamp())
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     particulars: Mapped[str] = mapped_column(Text, nullable=True)

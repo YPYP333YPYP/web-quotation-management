@@ -142,13 +142,11 @@ class QuotationService:
         if not quotation:
             raise ServiceException(ErrorStatus.QUOTATION_NOT_FOUND)
 
-        if not products:
-            raise ServiceException(ErrorStatus.PRODUCT_NOT_FOUND)
-
         quotation_info = {
             "products": products,
             "name": quotation.name,
             "total": quotation.total_price,
+            "status": quotation.status,
             "created_at": quotation.created_at,
             "updated_at": quotation.updated_at
         }

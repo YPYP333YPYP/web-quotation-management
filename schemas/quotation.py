@@ -40,6 +40,7 @@ class QuotationInfo(BaseModel):
     products: List[QuotationProductRead]
     name: str
     total: float
+    status: str
     created_at: datetime
     updated_at: Optional[datetime]
 
@@ -48,7 +49,7 @@ class QuotationRead(BaseModel):
     id: int
     name: str
     total_price: float
-    status: QuotationStatus
+    status: str
     created_at: datetime
     updated_at: Optional[datetime]
 
