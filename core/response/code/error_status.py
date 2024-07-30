@@ -72,9 +72,8 @@ class ErrorStatus(BaseCode):
     PAST_ORDER_NOT_UPDATED = ("4004", "PAST_ORDER가 업데이트 되지 않았습니다.", "PAST_ORDER")
     PAST_ORDER_NOT_CREATED = ("4005", "PAST_ORDER가 생성 되지 않았습니다..", "PAST_ORDER")
 
-    # User related error statuses (10000-10999)
     USER_NOT_FOUND = ("4001", "요청한 사용자를 찾을 수 없습니다.", "USER")
     INVALID_USER_DATA = ("4002", "유효하지 않은 사용자 데이터입니다.", "USER")
     USER_ALREADY_EXISTS = ("4003", "이미 존재하는 사용자입니다.", "USER")
 
-    # 필요한 다른 에러 상태 코드들을 여기에 추가할 수 있습니다.
+    KAKAO_MESSAGE_NOT_SENT = ("4001", "카카오 메시지 전송에 실패했습니다.", "KAKAO")

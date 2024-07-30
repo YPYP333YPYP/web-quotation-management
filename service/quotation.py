@@ -23,17 +23,21 @@ from schemas.quotation import QuotationAdd, QuotationRead, to_quotation_read
 import io
 from openpyxl import Workbook
 from core.db.redis import redis_client
+from service.kakao import KakaoService
+
 
 class QuotationService:
     def __init__(self,
                  quotation_repository: QuotationRepository = Depends(QuotationRepository),
                  quotation_product_repository: QuotationProductRepository = Depends(QuotationProductRepository),
                  product_repository: ProductRepository = Depends(ProductRepository),
-                 client_repository: ClientRepository = Depends(ClientRepository)):
+                 client_repository: ClientRepository = Depends(ClientRepository),
+                 kakao_service: KakaoService = Depends(KakaoService)):
         self.quotation_repository = quotation_repository
         self.quotation_product_repository = quotation_product_repository
         self.product_repository = product_repository
         self.client_repository = client_repository
+        self.kakao_service = kakao_service
 
     async def create_quotation(self, quotation_data: Dict[str, Any]) -> QuotationRead:
         client_id = quotation_data.get("client_id")
@@ -270,4 +274,8 @@ class QuotationService:
         await self.quotation_repository.update_particulars(quotation_id, particulars)
 
     async def update_status_completed(self, quotation_id: int):
+        await self.kakao_service.send_quotation_completed_message(
+            quotation_id=quotation_id,
+            web_url=f"http://127.0.0.1:8000/api/v1/quotations/extract/{quotation_id}"
+        )
         await self.quotation_repository.update_status_completed(quotation_id)
