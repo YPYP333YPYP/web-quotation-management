@@ -50,6 +50,9 @@ class QuotationService:
         if await self.quotation_repository.exist_quotation_by_client_id_and_today_date(client_id, input_date):
             raise ServiceException(ErrorStatus.QUOTATION_ALREADY_EXISTS)
 
+        if quotation_data.get("created_at") < datetime.now().date():
+            raise ServiceException(ErrorStatus.QUOTATION_DATE_BEFORE_CURRENT)
+
         year = input_date.year
         month = input_date.month
         day = input_date.day

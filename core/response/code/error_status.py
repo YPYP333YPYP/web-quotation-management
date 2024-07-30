@@ -59,6 +59,7 @@ class ErrorStatus(BaseCode):
     QUOTATION_NOT_UPDATED = ("4004", "QUOTATION가 업데이트 되지 않았습니다.", "QUOTATION")
     QUOTATION_NOT_CREATED = ("4005", "QUOTATION가 생성 되지 않았습니다..", "QUOTATION")
     QUOTATION_PRODUCT_ALREADY_EXISTS = ("4006", "이미 견적서에 해당 물품이 추가 되었습니다", "QUOTATION")
+    QUOTATION_DATE_BEFORE_CURRENT = ("4007", "입력된 날짜는 현재 날짜보다 이전일 수 없습니다", "QUOTATION")
 
     CLIENT_NOT_FOUND = ("4001", "요청한 거래처를 찾을 수 없습니다.", "CLIENT")
     CLIENT_PRODUCT_DATA = ("4002", "유효하지 않은 거래처 데이터입니다.", "CLIENT")
