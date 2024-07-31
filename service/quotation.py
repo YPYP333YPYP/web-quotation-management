@@ -202,15 +202,7 @@ class QuotationService:
     async def get_paginated_quotations_for_client(self, client_id: int, page: int = 1, page_size: int = 10):
 
         quotations, total = await self.quotation_repository.get_quotations_by_client_id(client_id, page, page_size)
-        quotation_reads = [
-            QuotationRead(
-                id=q.id,
-                name=q.name,
-                total_price=q.total_price,
-                created_at=q.created_at,
-                updated_at=q.updated_at
-            ) for q in quotations
-        ]
+        quotation_reads = [to_quotation_read(x) for x in quotations]
 
         total_pages = ceil(total / page_size)
 
@@ -231,15 +223,7 @@ class QuotationService:
             page_size: int):
 
         quotations, total = await self.quotation_repository.get_quotations_by_data_range(client_id, start_date, end_date, page, page_size)
-        quotation_reads = [
-            QuotationRead(
-                id=q.id,
-                name=q.name,
-                total_price=q.total_price,
-                created_at=q.created_at,
-                updated_at=q.updated_at
-            ) for q in quotations
-        ]
+        quotation_reads = [to_quotation_read(x) for x in quotations]
 
         total_pages = ceil(total / page_size)
 
