@@ -166,7 +166,7 @@ class QuotationRepository:
     @handle_db_exceptions()
     async def delete_quotation(self, quotation_id: int):
         async with self.session as session:
-            quotation = session.get(Quotation, quotation_id)
+            quotation = await session.get(Quotation, quotation_id)
             await session.delete(quotation)
             await session.commit()
 
