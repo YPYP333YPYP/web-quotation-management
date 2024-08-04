@@ -5,13 +5,16 @@ from core.response.handler.exception_handler import ServiceException
 from core.security import get_password_hash, verify_password
 from fastapi import Depends
 from models.user import User
+from repository.client.client import ClientRepository
 from repository.user.user import UserRepository
-from schemas.user import UserCreate
+from schemas.user import UserCreate, UserWithClient
 
 
 class UserService:
-    def __init__(self, user_repository: UserRepository = Depends(UserRepository)):
+    def __init__(self, user_repository: UserRepository = Depends(UserRepository),
+                client_repository: ClientRepository = Depends(ClientRepository)):
         self.user_repository = user_repository
+        self.client_repository = client_repository
 
     async def authenticate_user(self, email: str, password: str) -> User | None:
         user = await self.user_repository.get_by_email(email)
@@ -71,4 +74,22 @@ class UserService:
             return False
         else:
             return True
+
+    async def get_user_and_client_info(self, current_user: User):
+        client = await self.client_repository.get_client_by_id(current_user.client_id)
+
+        if not client:
+            raise ServiceException(ErrorStatus.CLIENT_NOT_CREATED)
+
+        if client.region is None:
+            client.region = "미정"
+
+        return UserWithClient(
+            email=current_user.email,
+            id=current_user.id,
+            is_active=current_user.is_active,
+            client_id=client.id,
+            client_name=client.name,
+            client_region=client.region
+        )
 

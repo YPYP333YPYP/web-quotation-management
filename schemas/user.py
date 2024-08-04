@@ -21,3 +21,8 @@ class UserInDB(UserBase):
 
 class UserWithClient(UserInDB):
     client_id: int
+    client_name: str
+    client_region: str
+
+    class Config:
+        from_attributes = True

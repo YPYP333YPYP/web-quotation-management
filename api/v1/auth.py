@@ -53,11 +53,11 @@ async def create_user(
             summary="내 정보 조회",
             description="내 정보를 조회 합니다.")
 @handle_exceptions(UserWithClient)
-async def read_users_me(current_user: User = Depends(get_current_user)):
-    if current_user.client_id is None:
-        raise GeneralException(ErrorStatus.CLIENT_NOT_CREATED)
-    else:
-        return current_user
+async def read_users_me(current_user: User = Depends(get_current_user),
+                        user_service: UserService = Depends(UserService)):
+    result = await user_service.get_user_and_client_info(current_user)
+    return result
+
 
 
 @router.put("/users/me/password",
