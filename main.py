@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -5,12 +6,14 @@ from fastapi import FastAPI
 from fastapi.exceptions import ResponseValidationError
 from starlette.middleware.cors import CORSMiddleware
 import uvicorn
+from uvicorn import Config, Server
 
 from api import router
 from core.logging.config import listener
 from core.response.handler.exception_handler import GeneralException, general_exception_handler, \
     validation_exception_handler
 from core.middleware import RequestMiddleware, URLPatternCheckMiddleware
+from service.discord import send_discord_startup_message, send_discord_shutdown_message
 
 logger = logging.getLogger()
 
@@ -57,6 +60,16 @@ def get_application() -> FastAPI:
 app = get_application()
 
 
+async def run_server():
+    config = Config(app=app, host="127.0.0.1", port=8000, log_level="debug")
+    server = Server(config=config)
+
+    await send_discord_startup_message()
+
+    await server.serve()
+
+    await send_discord_shutdown_message()
+
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="debug")
+    asyncio.run(run_server())

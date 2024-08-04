@@ -16,6 +16,8 @@ from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import GeneralException
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 
+from service.discord import send_discord_alert
+
 dotenv.load_dotenv()
 
 sentry_sdk.init(
@@ -67,16 +69,6 @@ class RequestMiddleware(BaseHTTPMiddleware):
         return response
 
 
-async def send_discord_alert(webhook_url: str, message: str):
-    async with aiohttp.ClientSession() as session:
-        webhook_data = {
-            "content": message,
-            "username": "Error Bot"
-        }
-        async with session.post(webhook_url, data=json.dumps(webhook_data),
-                                headers={"Content-Type": "application/json"}) as response:
-            if response.status != 204:
-                print(f"Failed to send Discord alert. Status: {response.status}")
 
 
 class URLPatternCheckMiddleware(BaseHTTPMiddleware):
@@ -102,7 +94,7 @@ class URLPatternCheckMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         if not re.match(self.url_pattern, path):
-            error_message = f"Invalid URL accessed: {path}"
+            error_message = f"잘못된 접근 경고: {path}"
             sentry_sdk.capture_message(error_message, level="error")
 
             if self.discord_webhook_url:
