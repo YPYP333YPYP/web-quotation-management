@@ -28,7 +28,12 @@ async def lifespan(app: FastAPI):
         logging.error(f"Test error occurred: {str(e)}")
         print(f"Test error logged: {str(e)}")
 
+    await send_discord_startup_message()
+
     yield
+
+    await send_discord_shutdown_message()
+
     listener.stop()
 
 
@@ -64,12 +69,7 @@ async def run_server():
     config = Config(app=app, host="127.0.0.1", port=8000, log_level="debug")
     server = Server(config=config)
 
-    await send_discord_startup_message()
-
     await server.serve()
-
-    await send_discord_shutdown_message()
-
 
 if __name__ == "__main__":
     asyncio.run(run_server())
