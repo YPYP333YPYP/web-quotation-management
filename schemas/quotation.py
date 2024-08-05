@@ -29,7 +29,10 @@ class QuotationUpdate(BaseModel):
 
 
 class QuotationProductRead(BaseModel):
+    id: int
+    category: str
     product: str
+    unit: str
     quantity: int
     price: int
     created_at: datetime

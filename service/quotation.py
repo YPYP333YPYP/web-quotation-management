@@ -131,7 +131,10 @@ class QuotationService:
                 raise ServiceException(ErrorStatus.PRODUCT_NOT_FOUND)
 
             result_dict = {
+                "id": product.id,
+                "category": product.category,
                 "product": product.name,
+                "unit": product.unit,
                 "quantity": tmp_dict.get("quantity"),
                 "price": tmp_dict.get("price"),
                 "created_at": tmp_dict.get("created_at"),
