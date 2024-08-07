@@ -30,6 +30,20 @@ async def create_quotation(quotation: QuotationCreate, quotation_service: Quotat
     return quotation
 
 
+@router.put("/quotations/{quotation_id}/modify",
+             response_model=ApiResponse,
+             summary="견적서 수정",
+             description="견적서를 수정합니다.")
+@handle_exceptions()
+async def update_quotation(
+    quotation_id: int,
+    quotation_data: QuotationUpdate,
+    quotation_service: QuotationService = Depends(QuotationService)
+):
+    await quotation_service.update_quotation(quotation_id, quotation_data)
+    return ApiResponse.on_success()
+
+
 @router.delete("/quotations/{quotation_id}/delete",
                response_model=ApiResponse,
                summary="견적서 삭제",
@@ -53,7 +67,7 @@ async def add_products_to_quotation(quotation: List[QuotationAdd],
     return ApiResponse.on_success()
 
 
-@router.put("/quotations/{quotation_id}/{product_id}",
+@router.patch("/quotations/{quotation_id}/{product_id}",
             response_model=ApiResponse,
             summary="견적서 물품 수정",
             description="견적서의 물품을 수정합니다.")

@@ -9,6 +9,7 @@ from models.quotation import Quotation
 
 class QuotationStatus(str, Enum):
     CREATED = "CREATED"
+    UPDATED = "UPDATED"
     COMPLETED = "COMPLETED"
 
 
@@ -24,7 +25,7 @@ class QuotationAdd(BaseModel):
     quantity: int
 
 
-class QuotationUpdate(BaseModel):
+class QuotationProductUpdate(BaseModel):
     quantity: int
 
 
@@ -55,6 +56,21 @@ class QuotationRead(BaseModel):
     status: str
     created_at: datetime
     updated_at: Optional[datetime]
+
+
+class ProductInput(BaseModel):
+    id: int
+    price: int
+    quantity: int
+
+
+class QuotationUpdate(BaseModel):
+    client_id: int
+    name: str
+    total_price: int
+    status: str
+    particulars: Optional[str] = None
+    products: List[ProductInput]
 
 
 def to_quotation_read(quotation: Quotation) -> QuotationRead:

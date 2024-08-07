@@ -2,13 +2,13 @@ from datetime import date, datetime
 from typing import List, Sequence
 
 from fastapi import Depends
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
 from models import Quotation
 from models.quotation_product import QuotationProduct
-from schemas.quotation import QuotationStatus
+from schemas.quotation import QuotationStatus, QuotationUpdate
 
 
 class QuotationRepository:
@@ -22,6 +22,42 @@ class QuotationRepository:
             await session.commit()
             await session.refresh(quotation)
             return quotation
+
+    @handle_db_exceptions()
+    async def update_quotation(self, quotation_id: int, quotation_data: QuotationUpdate):
+        async with self.session as session:
+            async with session.begin():
+
+                stmt = (
+                    update(Quotation)
+                    .where(Quotation.id == quotation_id)
+                    .values(
+                        client_id=quotation_data.client_id,
+                        name=quotation_data.name,
+                        total_price=quotation_data.total_price,
+                        status=quotation_data.status,
+                        particulars=quotation_data.particulars,
+                        updated_at=func.now()
+                    )
+                )
+                await session.execute(stmt)
+
+                delete_stmt = delete(QuotationProduct).where(QuotationProduct.quotation_id == quotation_id)
+                await session.execute(delete_stmt)
+
+                for product in quotation_data.products:
+                    quotation_product = QuotationProduct(
+                        quotation_id=quotation_id,
+                        product_id=product.id,
+                        price=product.price,
+                        quantity=product.quantity
+                    )
+                    session.add(quotation_product)
+
+        async with self.session as session:
+            result = await session.execute(select(Quotation).filter(Quotation.id == quotation_id))
+            updated_quotation = result.scalar_one_or_none()
+            return updated_quotation
 
     @handle_db_exceptions()
     async def get_quotation_by_id(self, quotation_id: int):

@@ -18,7 +18,7 @@ from repository.product.product import ProductRepository
 from repository.quotation.quotation import QuotationRepository
 from repository.quotation.quotation_product import QuotationProductRepository
 from schemas.client import ClientPaginatedResponse
-from schemas.quotation import QuotationAdd, QuotationRead, to_quotation_read
+from schemas.quotation import QuotationAdd, QuotationRead, to_quotation_read, QuotationUpdate
 
 import io
 from openpyxl import Workbook
@@ -269,3 +269,10 @@ class QuotationService:
             web_url=f"http://127.0.0.1:8000/api/v1/quotations/extract/{quotation_id}"
         )
         await self.quotation_repository.update_status_completed(quotation_id)
+
+    async def update_quotation(self, quotation_id: int, quotation_data: QuotationUpdate):
+        existing_quotation = await self.quotation_repository.get_quotation_by_id(quotation_id)
+        if not existing_quotation:
+            raise ServiceException(ErrorStatus.QUOTATION_NOT_FOUND)
+
+        await self.quotation_repository.update_quotation(quotation_id, quotation_data)
