@@ -1,12 +1,14 @@
 from typing import Optional, Sequence, Dict, Any
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
-from models import Client
+from models import Client, Quotation, User
+from models.past_order import PastOrder
+from models.quotation_product import QuotationProduct
 from schemas.client import RegionType
 
 
@@ -59,6 +61,15 @@ class ClientRepository:
     @handle_db_exceptions()
     async def delete_client_by_id(self, client_id: int):
         async with self.session as session:
+            await session.execute(delete(QuotationProduct).where(QuotationProduct.quotation_id.in_(
+                select(Quotation.id).where(Quotation.client_id == client_id)
+            )))
+            await session.execute(delete(Quotation).where(Quotation.client_id == client_id))
+            await session.execute(delete(PastOrder).where(PastOrder.client_id == client_id))
+            await session.execute(delete(User).where(User.client_id == client_id))
+
+            await session.commit()
+
             stmt = select(Client).filter(Client.id == client_id)
             result = await session.execute(stmt)
             client = result.scalar_one_or_none()
