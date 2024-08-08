@@ -42,10 +42,10 @@ async def update_client_region(client_id: int, region: RegionType, client_servic
 
 
 @router.get("/clients/region",
-            response_model=ApiResponse[Sequence[ClientRead]],
+            response_model=ApiResponse[List[ClientRead]],
             summary="거래처 지역으로 조회",
             description="거래처 지역으로 거래처를 조회 합니다.")
-@handle_exceptions(Sequence[ClientRead])
+@handle_exceptions(List[ClientRead])
 async def get_clients_by_region(region: RegionType,
                                 client_service: ClientService = Depends(ClientService)):
     clients = await client_service.get_clients_by_region(region)

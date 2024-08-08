@@ -8,7 +8,7 @@ from core.response.handler.exception_handler import GeneralException
 from models import Client
 from repository.client.client import ClientRepository
 from repository.quotation.quotation import QuotationRepository
-from schemas.client import to_client_check_preview, RegionType, ClientUpdate, ClientCreate
+from schemas.client import to_client_check_preview, RegionType, ClientUpdate, ClientCreate, to_client_read, ClientRead
 from service.user import UserService
 
 
@@ -20,11 +20,13 @@ class ClientService:
         self.user_service = user_service
         self.quotation_repository = quotation_repository
 
-    async def get_clients_by_name(self, name: str) -> Sequence[Client]:
-        return await self.client_repository.get_clients_by_name(name)
+    async def get_clients_by_name(self, name: str) -> list[ClientRead]:
+        clients = await self.client_repository.get_clients_by_name(name)
+        return [to_client_read(x) for x in clients]
 
-    async def get_clients_by_region(self, region: str) -> Sequence[Client]:
-        return await self.client_repository.get_clients_by_region(region)
+    async def get_clients_by_region(self, region: str) -> list[ClientRead]:
+        clients = await self.client_repository.get_clients_by_region(region)
+        return [to_client_read(x) for x in clients]
 
     async def create_client(self, client_create: ClientCreate, user_id: int):
         client_data = client_create.dict()
