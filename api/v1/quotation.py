@@ -8,7 +8,7 @@ from api.dependencies import get_current_user
 from core.decorator.decorator import handle_exceptions
 from models import User
 from schemas.quotation import QuotationCreate, QuotationAdd, QuotationUpdate, QuotationRead, QuotationInfo, \
-    to_quotation_read
+    to_quotation_read, QuotationProductUpdate
 from service.quotation import QuotationService
 
 from core.response.api_response import ApiResponse
@@ -74,7 +74,7 @@ async def add_products_to_quotation(quotation: List[QuotationAdd],
 @handle_exceptions()
 async def update_quotation_product(quotation_id: int,
                                    product_id: int,
-                                   update_data: QuotationUpdate,
+                                   update_data: QuotationProductUpdate,
                                    quotation_service: QuotationService = Depends(QuotationService)):
     new_data = update_data.dict()
     updated_quotation_product = await quotation_service.update_quotation_product(quotation_id, product_id, new_data)
@@ -123,6 +123,7 @@ async def update_total_price(quotation_id: int, quotation_service: QuotationServ
 async def update_status_completed(quotation_id: int, quotation_service: QuotationService = Depends(QuotationService)):
     await quotation_service.update_status_completed(quotation_id)
     return ApiResponse.on_success()
+
 
 @router.patch("/quotations/{quotation_id}/particulars",
               response_model=ApiResponse,
