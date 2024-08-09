@@ -59,7 +59,7 @@ class ProductService:
     def __init__(self, product_repository: ProductRepository = Depends(ProductRepository)):
         self.product_repository = product_repository
 
-    async def upload_products(self, file: UploadFile ):
+    async def upload_products(self, file: UploadFile):
         try:
             EXCEL_FILE_PATH = os.getenv('EXCEL_FILE_PATH')
             file_path = os.path.join(EXCEL_FILE_PATH, file.filename)
@@ -117,40 +117,15 @@ class ProductService:
         except Exception as e:
             raise ServiceException(ErrorStatus.FILE_UPLOAD_ERROR)
 
-    async def search_products_by_prefix(self, current_user: User, name_prefix: str, limit: int, cached_time: int):
-        cache_key = f"search:{current_user.client_id}:{name_prefix}"
-        cached_result = await redis_client.get(cache_key)
-
-        if cached_result:
-            try:
-                cached_items = json.loads(cached_result)
-                return [ProductRead.parse_raw(item) for item in cached_items]
-            except json.JSONDecodeError as e:
-                pass
-
+    async def search_products_by_prefix(self, name_prefix: str, limit: int):
         products = await self.product_repository.get_products_by_prefix(name_prefix, limit)
-
-        if not products:
-            all_products = await self.product_repository.get_all_products()
-            fuzzy_matches = sorted(
-                [p for p in all_products if fuzz.partial_ratio(name_prefix.lower(), p.name.lower()) > 75],
-                key=lambda x: fuzz.partial_ratio(name_prefix.lower(), x.name.lower()),
-                reverse=True
-            )[:limit]
-            products = fuzzy_matches
-
         products = sorted(products, key=lambda x: x.name.lower())
 
-        if products:
-            await redis_client.setex(
-                cache_key,
-                cached_time,
-                json.dumps([ProductRead.from_orm(p).json() for p in products])
-            )
         return [ProductRead.from_orm(p) for p in products]
 
     async def search_products_recent(self, limit: int, current_user: User):
         product_counts = await redis_client.hgetall(f"user:{current_user.client_id}:products")
         sorted_products = sorted(product_counts.items(), key=lambda x: int(x[1]), reverse=True)[:limit]
-        products_list = [to_product_count(await self.product_repository.get_product_by_id(x[0]), x[1]) for x in sorted_products]
+        products_list = [to_product_count(await self.product_repository.get_product_by_id(x[0]), x[1]) for x in
+                         sorted_products]
         return products_list

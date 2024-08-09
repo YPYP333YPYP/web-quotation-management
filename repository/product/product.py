@@ -112,7 +112,7 @@ class ProductRepository:
         async with self.session as session:
             query = (
                 select(Product)
-                .where(func.lower(Product.name).like(f"%{name_prefix.lower()}"))
+                .where(func.lower(Product.name).like(f"%{name_prefix.lower()}%"))
                 .order_by(func.length(Product.name))
                 .limit(limit)
             )

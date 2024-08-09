@@ -105,11 +105,9 @@ async def update_vegetable_product_price(file: UploadFile = File(...),
 async def search_products_by_prefix(
         name_prefix: str = Query(..., min_length=1),
         limit: int = Query(10, ge=1, le=100),
-        cached_time: int = Query(default=300),
         product_service: ProductService = Depends(ProductService),
-        current_user: User = Depends(get_current_user)
 ):
-    products = await product_service.search_products_by_prefix(current_user, name_prefix, limit, cached_time)
+    products = await product_service.search_products_by_prefix(name_prefix, limit)
     return products
 
 
