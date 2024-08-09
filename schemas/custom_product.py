@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from models.custom_product import CustomProduct
+
 
 class CustomProductCreate(BaseModel):
     name: str
@@ -32,3 +34,17 @@ class CustomProductUpdate(BaseModel):
     category: Optional[str] = None
     unit: Optional[str] = None
     price: Optional[int] = None
+
+
+def to_custom_product_read(custom_product: CustomProduct):
+    return CustomProductRead(
+        id=custom_product.id,
+        name=custom_product.name,
+        image_url=custom_product.image_url,
+        description=custom_product.description,
+        category=custom_product.category,
+        unit=custom_product.unit,
+        price=custom_product.price,
+        created_at=custom_product.created_at,
+        updated_at=custom_product.updated_at
+    )

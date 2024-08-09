@@ -46,3 +46,12 @@ async def update_custom_product(custom_product_id: int, update_data: CustomProdu
 async def delete_custom_product(custom_product_id: int,
                                 custom_product_service: CustomProductService = Depends(CustomProductService)):
     await custom_product_service.delete_custom_product(custom_product_id)
+
+
+@router.get("/custom-products",
+            response_model=ApiResponse[list[CustomProductRead]],
+            summary="모든 자사 제품 조회",
+            description="모든 자사 제품을 조회합니다.")
+@handle_exceptions(list[CustomProductRead])
+async def get_all_custom_products(custom_product_service: CustomProductService = Depends(CustomProductService)):
+    return await custom_product_service.get_all_custom_products()

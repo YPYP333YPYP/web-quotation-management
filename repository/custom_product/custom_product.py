@@ -1,14 +1,14 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Sequence
 
 from fastapi import Depends
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
 from models.custom_product import CustomProduct
 from schemas.custom_product import CustomProductUpdate
-from service.custom_product import CustomProductCreate
 
 
 class CustomProductRepository:
@@ -16,7 +16,7 @@ class CustomProductRepository:
         self.session = session
 
     @handle_db_exceptions()
-    async def create_custom_product(self, custom_product_data: CustomProductCreate) -> CustomProduct:
+    async def create_custom_product(self, custom_product_data) -> CustomProduct:
         async with self.session as session:
             custom_product = CustomProduct(
                 name=custom_product_data.name,
@@ -56,3 +56,9 @@ class CustomProductRepository:
             if custom_product:
                 await session.delete(custom_product)
                 await session.commit()
+
+    @handle_db_exceptions()
+    async def get_all(self) -> Sequence[CustomProduct]:
+        async with self.session as session:
+            result = await session.execute(select(CustomProduct))
+            return result.scalars().all()
