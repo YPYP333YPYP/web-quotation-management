@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,3 +31,8 @@ class CustomProductRepository:
             await session.commit()
             await session.refresh(custom_product)
             return custom_product
+
+    @handle_db_exceptions()
+    async def get_by_id(self, custom_product_id: int) -> Optional[CustomProduct]:
+        async with self.session as session:
+            return await session.get(CustomProduct, custom_product_id)
