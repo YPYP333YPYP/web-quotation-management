@@ -3,7 +3,7 @@ from fastapi import Depends
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
 from repository.custom_product.custom_product import CustomProductRepository
-from schemas.custom_product import CustomProductCreate, CustomProductRead
+from schemas.custom_product import CustomProductCreate, CustomProductRead, CustomProductUpdate
 
 
 class CustomProductService:
@@ -18,3 +18,6 @@ class CustomProductService:
         if not custom_product:
             raise ServiceException(ErrorStatus.CUSTOM_PRODUCT_NOT_FOUND)
         return custom_product
+
+    async def update_custom_product(self, custom_product_id: int, update_data: CustomProductUpdate):
+        return await self.custom_product_repository.update_custom_product(custom_product_id, update_data)

@@ -23,3 +23,12 @@ class CustomProductRead(BaseModel):
     price: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+
+
+class CustomProductUpdate(BaseModel):
+    name: Optional[str] = None
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    unit: Optional[str] = None
+    price: Optional[int] = None
