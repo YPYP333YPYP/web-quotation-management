@@ -17,7 +17,9 @@ class ProductRepository:
 
     @handle_db_exceptions()
     async def create_product(self, product: Product):
-        self.session.add(product)
+        async with self.session as session:
+            session.add(product)
+            await session.commit()
 
     @handle_db_exceptions()
     async def get_products_by_category(self, category: str) -> Sequence[Product]:
@@ -42,7 +44,7 @@ class ProductRepository:
             if product:
                 for key, value in new_data.items():
                     setattr(product, key, value)
-                product.updated_at = datetime.utcnow()
+                product.updated_at = datetime.now()
                 await session.commit()
                 return True
             else:
@@ -52,6 +54,13 @@ class ProductRepository:
     async def get_product_by_id(self, product_id: int) -> Optional[Product]:
         async with self.session as session:
             product = await session.get(Product, product_id)
+            return product if product else None
+
+    @handle_db_exceptions()
+    async def get_product_by_name(self, product_name: str) -> Optional[Product]:
+        async with self.session as session:
+            result = await session.execute(select(Product).where(Product.name == product_name))
+            product = result.scalar_one_or_none()
             return product if product else None
 
     @handle_db_exceptions()
@@ -80,7 +89,7 @@ class ProductRepository:
             product = await session.get(Product, product_id)
             if product:
                 product.price = price
-                product.updated_at = datetime.utcnow()
+                product.updated_at = datetime.now()
                 await session.commit()
                 return True
             else:
@@ -97,7 +106,7 @@ class ProductRepository:
 
                     if product:
                         product.price = new_price
-                        product.updated_at = datetime.utcnow()
+                        product.updated_at = datetime.now()
                         updated_count += 1
                     else:
                         raise ValueError((f"Product not found: {product_name}"))

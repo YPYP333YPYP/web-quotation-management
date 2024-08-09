@@ -1,12 +1,11 @@
-import json
 import os
+from datetime import datetime
 from typing import Any, Sequence, Dict, Optional
 
 import pandas as pd
+import pytz
 from fastapi import Depends, UploadFile
-from fuzzywuzzy import fuzz
 from pydantic import ValidationError
-from sqlalchemy import func
 
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
@@ -18,7 +17,7 @@ from schemas.product import ProductRead, to_product_count
 from core.db.redis import redis_client
 
 
-def read_excel_file_about_product_list(file_path: str) -> list[Product]:
+def read_excel_file_about_product_list(file_path: str) -> list[Dict]:
     data = list()
     xls = pd.ExcelFile(file_path)
     for sheet_name in xls.sheet_names:
@@ -35,8 +34,7 @@ def read_excel_file_about_product_list(file_path: str) -> list[Product]:
                     'price': price,
                     'category': category
                 }
-                product = Product(**product_data)
-                data.append(product)
+                data.append(product_data)
             except ValidationError as e:
                 raise ServiceException(ErrorStatus.INVALID_VALUE)
     return data
@@ -65,12 +63,18 @@ class ProductService:
             file_path = os.path.join(EXCEL_FILE_PATH, file.filename)
             with open(file_path, "wb") as buffer:
                 buffer.write(await file.read())
-            products = read_excel_file_about_product_list(file_path)
-
-            for product in products:
-                await self.product_repository.create_product(product)
+            product_datas = read_excel_file_about_product_list(file_path)
+            for product_data in product_datas:
+                print(product_data)
+                product = await self.product_repository.get_product_by_name(product_data["name"])
+                if product:
+                    await self.product_repository.update_product(product.id, product_data)
+                else:
+                    product = Product(**product_data)
+                    await self.product_repository.create_product(product)
 
         except Exception as e:
+            print(e)
             raise ServiceException(ErrorStatus.FILE_UPLOAD_ERROR)
 
     async def get_products_by_category(self, category: str) -> Sequence[Product]:
@@ -79,7 +83,7 @@ class ProductService:
     async def update_product(self, product_id: int, new_data: Dict[str, Any]) -> Optional[Product]:
 
         product = new_data
-        product["updated_at"] = func.now()
+
         if not new_data:
             return None
 

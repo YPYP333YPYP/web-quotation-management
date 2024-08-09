@@ -79,7 +79,7 @@ class QuotationRepository:
 
             if quotation and total_price is not None:
                 quotation.total_price = total_price
-                quotation.updated_at = datetime.utcnow()
+                quotation.updated_at = datetime.now()
                 await session.commit()
             return total_price
 

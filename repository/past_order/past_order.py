@@ -23,7 +23,7 @@ class PastOrderRepository:
                 client_id=past_order_data.client_id,
                 name=past_order_data.name,
                 product_ids=list_to_string(past_order_data.product_ids),
-                updated_at=datetime.utcnow()
+                updated_at=datetime.now()
             )
             session.add(past_order)
             await session.commit()
