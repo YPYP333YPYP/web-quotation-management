@@ -21,3 +21,6 @@ class CustomProductService:
 
     async def update_custom_product(self, custom_product_id: int, update_data: CustomProductUpdate):
         return await self.custom_product_repository.update_custom_product(custom_product_id, update_data)
+
+    async def delete_custom_product(self, custom_product_id: int):
+        await self.custom_product_repository.delete_custom_product(custom_product_id)

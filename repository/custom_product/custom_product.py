@@ -48,3 +48,11 @@ class CustomProductRepository:
                 custom_product.updated_at = datetime.now()
                 await session.commit()
                 return custom_product
+
+    @handle_db_exceptions()
+    async def delete_custom_product(self, custom_product_id: int):
+        async with self.session as session:
+            custom_product = await session.get(CustomProduct, custom_product_id)
+            if custom_product:
+                await session.delete(custom_product)
+                await session.commit()

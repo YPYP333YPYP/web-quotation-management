@@ -29,9 +29,20 @@ async def get_custom_product(custom_product_id: int,
 
 
 @router.put("/custom-products/{custom_product_id}/update",
-            response_model=CustomProductRead,
+            response_model=ApiResponse,
             summary="자사 제품 수정",
             description="자사 제품을 수정합니다.")
+@handle_exceptions()
 async def update_custom_product(custom_product_id: int, update_data: CustomProductUpdate,
                                 custom_product_service: CustomProductService = Depends(CustomProductService)):
     return await custom_product_service.update_custom_product(custom_product_id, update_data)
+
+
+@router.delete("/custom-products/{custom_product_id}/delete",
+               response_model=ApiResponse,
+               summary="자사 제품 삭제",
+               description="자사 제품을 삭제합니다.")
+@handle_exceptions()
+async def delete_custom_product(custom_product_id: int,
+                                custom_product_service: CustomProductService = Depends(CustomProductService)):
+    await custom_product_service.delete_custom_product(custom_product_id)
