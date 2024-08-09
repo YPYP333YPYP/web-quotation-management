@@ -1,8 +1,8 @@
 from datetime import date
 from typing import List, Optional
 
-from fastapi import HTTPException, APIRouter, Depends, Query
-from starlette.responses import JSONResponse, StreamingResponse
+from fastapi import APIRouter, Depends, Query
+from starlette.responses import  StreamingResponse
 
 from api.dependencies import get_current_user
 from core.decorator.decorator import handle_exceptions

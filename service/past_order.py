@@ -3,7 +3,6 @@ from fastapi import Depends
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
 from core.utils import string_to_list, list_to_string
-from models import past_order
 from repository.past_order.past_order import PastOrderRepository
 from repository.product.product import ProductRepository
 from schemas.past_order import PastOrderCreate, to_past_order_read, to_past_order_info

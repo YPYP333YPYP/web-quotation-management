@@ -5,7 +5,6 @@ from api.dependencies import get_current_user
 from core.decorator.decorator import handle_exceptions
 from core.response.api_response import ApiResponse
 from core.response.code.error_status import ErrorStatus
-from core.response.code.success_status import SuccessStatus
 from core.response.handler.exception_handler import GeneralException
 from core.security import create_access_token
 from models.user import User
@@ -57,7 +56,6 @@ async def read_users_me(current_user: User = Depends(get_current_user),
                         user_service: UserService = Depends(UserService)):
     result = await user_service.get_user_and_client_info(current_user)
     return result
-
 
 
 @router.put("/users/me/password",

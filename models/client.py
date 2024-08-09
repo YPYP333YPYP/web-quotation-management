@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 from sqlalchemy import String, Text
 from core.db.database import Base

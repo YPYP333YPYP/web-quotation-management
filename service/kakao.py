@@ -4,9 +4,6 @@ import os
 import aiohttp
 import dotenv
 
-from core.response.code.error_status import ErrorStatus
-from core.response.handler.exception_handler import ServiceException
-
 dotenv.load_dotenv()
 
 

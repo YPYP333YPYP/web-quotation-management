@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, Query
 from datetime import datetime
-from sqlalchemy.orm import Session
 from typing import List
 
 from core.decorator.decorator import handle_exceptions

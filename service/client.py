@@ -1,5 +1,4 @@
 from datetime import date
-from typing import List, Sequence
 
 from fastapi import Depends
 

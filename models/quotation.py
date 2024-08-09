@@ -6,7 +6,6 @@ from core.db.database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship, class_mapper
 
 
-
 @dataclass
 class Quotation(Base):
     __tablename__ = 'quotations'

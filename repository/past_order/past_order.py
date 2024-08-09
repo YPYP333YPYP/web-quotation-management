@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List, Any, Sequence
+from typing import Optional, Sequence
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession

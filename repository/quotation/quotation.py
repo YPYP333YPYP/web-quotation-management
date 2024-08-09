@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import List, Sequence
+from typing import Sequence
 
 from fastapi import Depends
 from sqlalchemy import select, func, and_, update, delete

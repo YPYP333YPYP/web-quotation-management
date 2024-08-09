@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, date
-from typing import Sequence, List
+from typing import List
 from fastapi import APIRouter, Depends, Query
 
 from core.decorator.decorator import handle_exceptions

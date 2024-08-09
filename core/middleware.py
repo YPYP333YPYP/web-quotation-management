@@ -1,4 +1,3 @@
-import json
 import re
 import jwt
 import uuid
@@ -8,7 +7,6 @@ import sentry_sdk
 
 from fastapi import Request
 from jwt import InvalidTokenError
-from sentry_sdk.integrations import aiohttp
 from starlette.middleware.base import BaseHTTPMiddleware
 from contextvars import ContextVar
 from starlette.responses import JSONResponse
@@ -67,8 +65,6 @@ class RequestMiddleware(BaseHTTPMiddleware):
 
         response = await call_next(request)
         return response
-
-
 
 
 class URLPatternCheckMiddleware(BaseHTTPMiddleware):

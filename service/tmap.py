@@ -1,6 +1,6 @@
 import requests
 
-from core.config import tmap_api_key
+tmap_api_key = None
 
 
 class TmapService:

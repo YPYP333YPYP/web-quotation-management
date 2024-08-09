@@ -8,7 +8,6 @@ from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import GeneralException
 
 
-
 async def send_discord_alert(webhook_url: str, message: str):
     async with aiohttp.ClientSession() as session:
         webhook_data = {
