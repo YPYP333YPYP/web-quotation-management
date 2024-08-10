@@ -12,7 +12,7 @@ from api import router
 from core.logging.config import listener
 from core.response.handler.exception_handler import GeneralException, general_exception_handler, \
     validation_exception_handler
-from core.middleware import RequestMiddleware, URLPatternCheckMiddleware
+from core.middleware import RequestMiddleware, URLPatternCheckMiddleware, BlacklistMiddleware
 from service.discord import send_discord_startup_message, send_discord_shutdown_message
 
 logger = logging.getLogger()
@@ -58,6 +58,7 @@ def get_application() -> FastAPI:
         url_pattern=r"^/api/v1/",
         excluded_paths=["/health", "/metrics", "/docs", "/openapi.json", "/favicon.ico"],
     )
+    application.add_middleware(BlacklistMiddleware)
 
     return application
 

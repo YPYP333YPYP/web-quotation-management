@@ -5,7 +5,7 @@ import os
 import dotenv
 import sentry_sdk
 
-from fastapi import Request
+from fastapi import Request, FastAPI
 from jwt import InvalidTokenError
 from starlette.middleware.base import BaseHTTPMiddleware
 from contextvars import ContextVar
@@ -14,6 +14,7 @@ from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import GeneralException
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 
+from core.utils import get_user_id_from_token, load_blacklist
 from service.discord import send_discord_alert
 
 dotenv.load_dotenv()
@@ -28,23 +29,6 @@ user_id_context = ContextVar("user_id", default=None)
 method_context = ContextVar("method", default=None)
 url_context = ContextVar("url", default=None)
 ip_context = ContextVar("ip", default=None)
-
-dotenv.load_dotenv()
-
-
-def get_user_id_from_token(token):
-    if not token:
-        return None
-
-    try:
-        secret_key = os.environ.get("SECRET_KEY")
-        algorithm = os.environ.get("ALGORITHM")
-        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
-        user_id = payload.get('user_id')
-
-        return user_id
-    except InvalidTokenError:
-        raise GeneralException(ErrorStatus.INVALID_TOKEN)
 
 
 class RequestMiddleware(BaseHTTPMiddleware):
@@ -98,5 +82,22 @@ class URLPatternCheckMiddleware(BaseHTTPMiddleware):
 
             return JSONResponse(status_code=404, content={"error": "Not Found"})
 
+        response = await call_next(request)
+        return response
+
+
+class BlacklistMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app: FastAPI, blacklist_file: str = "blacklist.txt"):
+        super().__init__(app)
+        self.blacklist_patterns = load_blacklist(blacklist_file)
+
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+        for pattern in self.blacklist_patterns:
+            if re.match(pattern, path):
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "Access to this resource is forbidden."}
+                )
         response = await call_next(request)
         return response

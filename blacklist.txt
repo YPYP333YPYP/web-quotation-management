@@ -1,0 +1,8 @@
+/solr/admin/info/system
+/v2/_catalog
+/cgi-bin/authLogin\.cgi
+/query
+/solr/admin/cores
+/phpMyAdmin-.*/scripts/setup\.php
+//api.ipify.org
+/.env
