@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, Query
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 from core.decorator.decorator import handle_exceptions
 from core.response.api_response import ApiResponse
-from schemas.statistic import TopEntity, OverallStatistics
+from schemas.statistic import TopEntity, OverallStatistics, DailyTotal
 from service.statistic import StatisticsService
 
 router = APIRouter(tags=["statistic"])
@@ -56,3 +56,18 @@ async def get_top_products(
     result = [TopEntity(**product) for product in top_products]
     return ApiResponse.on_success(result)
 
+
+@router.get("/statistics/daily-quotation-totals",
+            response_model=ApiResponse[List[DailyTotal]],
+            summary="일별 견적서 총액 가져오기",
+            description="현재일부터 2달전까지의 견적서 일별 총액을 조회합니다.")
+@handle_exceptions(List[DailyTotal])
+async def get_daily_quotation_totals(
+        statistics_service: StatisticsService = Depends(StatisticsService)
+):
+
+    end_date = datetime.now().date()
+    start_date = (end_date.replace(day=1) - timedelta(days=1)).replace(day=1)
+
+    daily_totals = await statistics_service.get_daily_quotation_totals(start_date, end_date)
+    return ApiResponse.on_success(daily_totals)

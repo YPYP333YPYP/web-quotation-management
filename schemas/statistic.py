@@ -1,7 +1,7 @@
 from typing import List
 
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, date
 
 
 class ClientStatistics(BaseModel):
@@ -35,3 +35,8 @@ class OverallStatistics(BaseModel):
     client_statistics: List[ClientStatistics]
     product_statistics: List[ProductStatistics]
     daily_trend: List[DailyTrend]
+
+
+class DailyTotal(BaseModel):
+    date: date
+    total: float

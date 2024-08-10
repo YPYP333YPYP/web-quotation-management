@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlalchemy import func, select
 
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from typing import List, Dict
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -66,3 +66,26 @@ class StatisticsRepository:
                 )
                 rows = result.mappings().all()
                 return [dict(row) for row in rows]
+
+    @handle_db_exceptions()
+    async def get_daily_quotation_totals(self, start_date: date, end_date: date):
+        async with self.session as session:
+            async with session.begin():
+                stmt = (
+                    select(
+                        func.date(Quotation.created_at).label('date'),
+                        func.sum(Quotation.total_price).label('total')
+                    )
+                    .filter(Quotation.created_at.between(start_date, end_date))
+                    .group_by(func.date(Quotation.created_at))
+                    .order_by(func.date(Quotation.created_at))
+                )
+
+                results = await session.execute(stmt)
+                daily_totals = results.all()
+        all_dates = [(start_date + timedelta(days=i)) for i in range((end_date - start_date).days + 1)]
+        totals_dict = {d.date: d.total for d in daily_totals}
+        return [
+            {'date': d, 'total': totals_dict.get(d, 0)}
+            for d in all_dates
+        ]
