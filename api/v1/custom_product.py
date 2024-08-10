@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 
 from core.decorator.decorator import handle_exceptions
@@ -15,8 +17,17 @@ router = APIRouter(tags=["custom_product"])
 @handle_exceptions()
 async def create_custom_product(custom_product_form: CustomProductCreate,
                                 custom_product_service: CustomProductService = Depends(CustomProductService)):
-    return await custom_product_service.create_custom_product(custom_product_form)
+    await custom_product_service.create_custom_product(custom_product_form)
 
+
+@router.post("/custom-products/bulk",
+             response_model=ApiResponse,
+             summary="자사 제품 여러 개 생성",
+             description="자사 제품을 여러 개 생성합니다.")
+@handle_exceptions()
+async def create_custom_product(custom_product_form: List[CustomProductCreate],
+                                custom_product_service: CustomProductService = Depends(CustomProductService)):
+    await custom_product_service.create_custom_product_bulk(custom_product_form)
 
 @router.get("/custom-products/{custom_product_id}",
             response_model=ApiResponse[CustomProductRead],

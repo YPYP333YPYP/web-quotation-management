@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, List
 
 from fastapi import Depends
 
@@ -14,7 +14,11 @@ class CustomProductService:
         self.custom_product_repository = custom_product_repository
 
     async def create_custom_product(self, custom_product_data: CustomProductCreate):
-        return await self.custom_product_repository.create_custom_product(custom_product_data)
+        await self.custom_product_repository.create_custom_product(custom_product_data)
+
+    async def create_custom_product_bulk(self, custom_product_form: List[CustomProductCreate]):
+        for custom_product_data in custom_product_form:
+            await self.create_custom_product(custom_product_data)
 
     async def get_custom_product(self, custom_product_id: int) -> CustomProductRead:
         custom_product = await self.custom_product_repository.get_by_id(custom_product_id)
