@@ -90,7 +90,7 @@ jobs:
             existing_pid=\$(lsof -ti:8000)
             if [ ! -z "\$existing_pid" ]; then
               echo "Killing existing process on port 8000 (PID: \$existing_pid)"
-              kill -9 \$existing_pid
+              kill -9 $existing_pid || echo "Failed to kill process with PID: $existing_pid"
               sleep 2
             else
               echo "No process found on port 8000"
