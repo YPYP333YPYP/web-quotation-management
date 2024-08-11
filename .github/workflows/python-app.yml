@@ -92,6 +92,8 @@ jobs:
               echo "Killing existing process on port 8000 (PID: \$existing_pid)"
               kill -9 \$existing_pid
               sleep 2
+            else
+              echo "No process found on port 8000"
             fi
           
             echo "Starting application in background..."
