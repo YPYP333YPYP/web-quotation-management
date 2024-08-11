@@ -86,24 +86,35 @@ jobs:
             echo "Running database migrations..."
             poetry run alembic upgrade head
           
-           echo "Checking for existing process on port 8000..."
-           existing_pid=$(lsof -ti:8000)
-           if [ -n "$existing_pid" ]; then
+            echo "Checking for existing process on port 8000..."
+            existing_pid=$(lsof -ti:8000)
+            if [ -n "$existing_pid" ]; then
               echo "Killing existing process on port 8000 (PID: $existing_pid)"
               kill -9 "$existing_pid" || echo "Failed to kill process"
               sleep 2
-           else
+            else
               echo "No process found on port 8000"
-           fi
+            fi
             
-           echo "Waiting for application to start..."
-           sleep 5
+            echo "Waiting for application to start..."
+            sleep 5
           
-           echo "Starting application in background..."
-           nohup poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload > app.log 2>&1 &
+            echo "Starting application in background..."
+            nohup poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload > app.log 2>&1 &
           
-           echo "Waiting for application to start..."
-           sleep 5
-    
-           echo "Deployment completed successfully."
+            echo "Waiting for application to start..."
+            sleep 5
+            
+            echo "Checking if application is running..."
+            if pgrep -f "uvicorn main:app" > /dev/null; then
+              echo "Application is running."
+              echo "Recent log entries:"
+              tail -n 5 app.log
+            else
+              echo "Application failed to start."
+              echo "Log contents:"
+              cat app.log
+            fi
+            
+            echo "Deployment completed successfully."
           EOF
