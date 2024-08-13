@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -18,9 +20,9 @@ class UserInDB(UserBase):
 
 
 class UserWithClient(UserInDB):
-    client_id: int
-    client_name: str
-    client_region: str
+    client_id: Optional[int]
+    client_name: Optional[str]
+    client_region: Optional[str]
 
     class Config:
         from_attributes = True
