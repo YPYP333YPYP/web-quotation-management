@@ -7,7 +7,7 @@ from core.response.api_response import ApiResponse
 from schemas.statistic import TopEntity, OverallStatistics, DailyTotal
 from service.statistic import StatisticsService
 
-router = APIRouter(tags=["statistic"])
+router = APIRouter(tags=["7. statistic"])
 
 
 @router.get("/statistics",

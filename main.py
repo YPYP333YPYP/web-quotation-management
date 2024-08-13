@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.exceptions import ResponseValidationError
+from fastapi.openapi.docs import get_swagger_ui_html
 from starlette.middleware.cors import CORSMiddleware
 import uvicorn
 from uvicorn import Config, Server
@@ -38,7 +39,16 @@ async def lifespan(app: FastAPI):
 
 
 def get_application() -> FastAPI:
-    application = FastAPI(lifespan=lifespan)
+    application = FastAPI(lifespan=lifespan,
+                          swagger_ui_parameters={
+                            "deepLinking": True,
+                            "displayRequestDuration": True,
+                            "docExpansion": "none",
+                            "operationsSorter": "method",
+                            "filter": True,
+                            "tagsSorter": "alpha",
+                            "syntaxHighlight.theme": "tomorrow-night",
+    })
     application.include_router(router)
 
     origins = ["*"]
@@ -59,6 +69,10 @@ def get_application() -> FastAPI:
         excluded_paths=["/health", "/metrics", "/docs", "/openapi.json", "/favicon.ico"],
     )
     application.add_middleware(BlacklistMiddleware)
+
+
+
+
 
     return application
 

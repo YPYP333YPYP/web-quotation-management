@@ -7,7 +7,7 @@ from core.response.api_response import ApiResponse
 from schemas.custom_product import CustomProductCreate, CustomProductRead, CustomProductUpdate
 from service.custom_product import CustomProductService
 
-router = APIRouter(tags=["custom_product"])
+router = APIRouter(tags=["6. custom_product"])
 
 
 @router.post("/custom-products",

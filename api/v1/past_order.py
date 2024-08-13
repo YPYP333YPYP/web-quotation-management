@@ -5,7 +5,7 @@ from core.response.api_response import ApiResponse
 from schemas.past_order import PastOrderCreate, PastOrderRead, PastOrderUpdate
 from service.past_order import PastOrderService
 
-router = APIRouter(tags=["past_order"])
+router = APIRouter(tags=["5. past_order"])
 
 
 @router.post("/past-order",

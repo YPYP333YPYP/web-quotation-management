@@ -12,7 +12,7 @@ from schemas.user import UserCreate, UserInDB, UserWithClient
 from schemas.auth import Token, PasswordChange
 from service.user import UserService
 
-router = APIRouter(tags=["auth"])
+router = APIRouter(tags=["1. auth"])
 
 
 @router.post("/token",

@@ -16,7 +16,7 @@ from core.response.code.error_status import ErrorStatus
 from core.response.code.success_status import SuccessStatus
 from core.response.handler.exception_handler import GeneralException
 
-router = APIRouter(tags=["quotation"])
+router = APIRouter(tags=["4. quotation"])
 
 
 @router.post("/quotations",

@@ -12,7 +12,7 @@ from core.response.api_response import ApiResponse
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import GeneralException
 
-router = APIRouter(tags=["product"])
+router = APIRouter(tags=["3. product"])
 
 
 @router.post("/products/upload",

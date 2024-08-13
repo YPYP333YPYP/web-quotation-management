@@ -17,7 +17,7 @@ from core.response.code.error_status import ErrorStatus
 from core.response.code.success_status import SuccessStatus
 from core.response.handler.exception_handler import GeneralException
 
-router = APIRouter(tags=["client"])
+router = APIRouter(tags=["2. client"])
 
 
 @router.get("/clients/name/{name}",
