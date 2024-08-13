@@ -264,10 +264,10 @@ class QuotationService:
         await self.quotation_repository.update_particulars(quotation_id, particulars)
 
     async def update_status_completed(self, quotation_id: int):
-        await self.kakao_service.send_quotation_completed_message(
-            quotation_id=quotation_id,
-            web_url=f"http://127.0.0.1:8000/api/v1/quotations/extract/{quotation_id}"
-        )
+        # await self.kakao_service.send_quotation_completed_message(
+        #     quotation_id=quotation_id,
+        #     web_url=f"http://127.0.0.1:8000/api/v1/quotations/extract/{quotation_id}"
+        # )
         await self.quotation_repository.update_status_completed(quotation_id)
 
     async def update_quotation(self, quotation_id: int, quotation_data: QuotationUpdate):
