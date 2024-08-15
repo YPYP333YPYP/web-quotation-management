@@ -13,6 +13,10 @@ class FAQCreate(FAQBase):
     ...
 
 
+class FAQUpdate(FAQBase):
+    ...
+
+
 class FAQRead(FAQBase):
     id: int
     created_at: datetime

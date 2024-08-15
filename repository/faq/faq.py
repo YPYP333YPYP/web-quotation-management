@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db.database import async_get_db
@@ -31,3 +31,11 @@ class FAQRepository:
         async with self.session.begin as session:
             result = await session.execute(select(FAQ))
             return result.scalars().all()
+
+    @handle_db_exceptions()
+    async def update_faq(self, faq_id: int, faq_data: dict) -> Optional[FAQ]:
+        await self.session.execute(
+            update(FAQ).where(FAQ.id == faq_id).values(**faq_data)
+        )
+        await self.session.commit()
+        return await self.get_faq_by_id(faq_id)

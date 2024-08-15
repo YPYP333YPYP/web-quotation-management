@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 
 from core.decorator.decorator import handle_exceptions
 from core.response.api_response import ApiResponse
-from schemas.faq import FAQCreate, FAQRead
+from schemas.faq import FAQCreate, FAQRead, FAQUpdate
 from service.faq import FAQService
 
 router = APIRouter(tags=["9. faq"])
@@ -37,3 +37,13 @@ async def get_faq(faq_id: int, faq_service: FAQService = Depends(FAQService)):
 @handle_exceptions(List[FAQRead])
 async def get_all_faqs(faq_service: FAQService = Depends(FAQService)):
     return await faq_service.get_all_faqs()
+
+
+@router.put("/faqs/{faq_id}",
+            response_model=ApiResponse,
+            summary="FAQ 수정",
+            description="FAQ를 수정합니다.")
+@handle_exceptions()
+async def update_faq(faq_id: int, faq_data: FAQUpdate, faq_service: FAQService = Depends(FAQService)):
+    await faq_service.update_faq(faq_id, faq_data)
+    return ApiResponse.on_success()
