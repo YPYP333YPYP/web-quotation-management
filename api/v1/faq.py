@@ -47,3 +47,13 @@ async def get_all_faqs(faq_service: FAQService = Depends(FAQService)):
 async def update_faq(faq_id: int, faq_data: FAQUpdate, faq_service: FAQService = Depends(FAQService)):
     await faq_service.update_faq(faq_id, faq_data)
     return ApiResponse.on_success()
+
+
+@router.delete("/faqs/{faq_id}",
+               response_model=ApiResponse,
+               summary="FAQ 삭제",
+               description="FAQ를 삭제합니다.")
+@handle_exceptions()
+async def delete_faq(faq_id: int, faq_service: FAQService = Depends(FAQService)):
+    await faq_service.delete_faq(faq_id)
+    return ApiResponse.on_success()

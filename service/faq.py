@@ -26,8 +26,15 @@ class FAQService:
     async def get_all_faqs(self) -> List[FAQ]:
         return await self.faq_repository.get_all_faqs()
 
-    async def update_faq(self, faq_id: int, faq_data: FAQUpdate) -> Optional[FAQ]:
-        faq = await self.faq_repository.update_faq(faq_id, faq_data.dict())
+    async def update_faq(self, faq_id: int, faq_data: FAQUpdate):
+        faq = await self.faq_repository.get_faq_by_id(faq_id)
         if not faq:
             raise GeneralException(ErrorStatus.FAQ_NOT_FOUND)
-        return faq
+        await self.faq_repository.update_faq(faq_id, faq_data.dict())
+
+    async def delete_faq(self, faq_id: int):
+        faq = await self.faq_repository.get_faq_by_id(faq_id)
+        if not faq:
+            raise GeneralException(ErrorStatus.FAQ_NOT_FOUND)
+        await self.faq_repository.delete_faq(faq_id)
+
