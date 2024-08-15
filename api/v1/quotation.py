@@ -115,7 +115,7 @@ async def update_total_price(quotation_id: int, quotation_service: QuotationServ
     return updated_sum
 
 
-@router.patch("/quotations/{quotation_id}/confirmation",
+@router.patch("/quotations/{quotation_id}/quotation/check",
             response_model=ApiResponse,
             summary="견적서 작성 확정",
             description="작성한 견적서를 확정 합니다.")
@@ -125,7 +125,7 @@ async def update_status_completed(quotation_id: int, quotation_service: Quotatio
     return ApiResponse.on_success()
 
 
-@router.patch("/quotations/{quotation_id}/particulars",
+@router.patch("/quotations/{quotation_id}/particulars/update",
               response_model=ApiResponse,
               summary="견적서 특이사항 작성",
               description="견적서의 특이사항을 작성합니다.")
