@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
-from models import FAQ
+from models.FAQ import FAQ
 
 
 class FAQRepository:
@@ -15,26 +15,26 @@ class FAQRepository:
 
     @handle_db_exceptions()
     async def create_faq(self, faq: FAQ):
-        async with self.session.begin as session:
+        async with self.session as session:
             session.add(faq)
             await session.commit()
             await session.refresh(faq)
 
     @handle_db_exceptions()
     async def get_faq_by_id(self, faq_id: int) -> Optional[FAQ]:
-        async with self.session.begin as session:
+        async with self.session as session:
             result = await session.execute(select(FAQ).filter(FAQ.id == faq_id))
             return result.scalar_one_or_none()
 
     @handle_db_exceptions()
-    async def get_all_faqs(self) -> List[FAQ]:
-        async with self.session.begin as session:
+    async def get_all_faqs(self):
+        async with self.session as session:
             result = await session.execute(select(FAQ))
             return result.scalars().all()
 
     @handle_db_exceptions()
     async def update_faq(self, faq_id: int, faq_data: dict):
-        async with self.session.begin as session:
+        async with self.session as session:
             await session.execute(
                 update(FAQ).where(FAQ.id == faq_id).values(**faq_data)
             )
@@ -42,7 +42,7 @@ class FAQRepository:
 
     @handle_db_exceptions()
     async def delete_faq(self, faq_id: int):
-        async with self.session.begin as session:
+        async with self.session as session:
             await session.execute(
                 delete(FAQ).where(FAQ.id == faq_id)
             )

@@ -23,7 +23,7 @@ class FAQService:
             raise GeneralException(ErrorStatus.FAQ_NOT_FOUND)
         return faq
 
-    async def get_all_faqs(self) -> List[FAQ]:
+    async def get_all_faqs(self):
         return await self.faq_repository.get_all_faqs()
 
     async def update_faq(self, faq_id: int, faq_data: FAQUpdate):

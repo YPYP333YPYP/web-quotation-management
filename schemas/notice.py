@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -15,10 +16,10 @@ class NoticeCreate(NoticeBase):
 class NoticeRead(NoticeBase):
     id: int
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class NoticeUpdate(NoticeBase):
