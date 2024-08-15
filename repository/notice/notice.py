@@ -1,6 +1,6 @@
 from typing import Optional, List, Sequence
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi import Depends
@@ -31,5 +31,13 @@ class NoticeRepository:
     @handle_db_exceptions()
     async def get_all_notices(self) -> Sequence[Notice]:
         async with self.session as session:
-            result = await self.session.execute(select(Notice))
+            result = await session.execute(select(Notice))
             return result.scalars().all()
+
+    @handle_db_exceptions()
+    async def update_notice(self, notice_id: int, notice_data: dict):
+        async with self.session as session:
+            await session.execute(
+                update(Notice).where(Notice.id == notice_id).values(**notice_data)
+            )
+            await session.commit()

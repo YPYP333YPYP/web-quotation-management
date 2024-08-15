@@ -19,3 +19,7 @@ class NoticeRead(NoticeBase):
 
     class Config:
         orm_mode = True
+
+
+class NoticeUpdate(NoticeBase):
+    ...

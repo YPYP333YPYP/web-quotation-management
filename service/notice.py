@@ -6,7 +6,7 @@ from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
 from models.notice import Notice
 from repository.notice.notice import NoticeRepository
-from schemas.notice import NoticeCreate
+from schemas.notice import NoticeCreate, NoticeUpdate
 
 
 class NoticeService:
@@ -26,3 +26,9 @@ class NoticeService:
 
     async def get_all_notices(self) -> Sequence[Notice]:
         return await self.notice_repository.get_all_notices()
+
+    async def update_notice(self, notice_id: int, notice_data: NoticeUpdate) -> Optional[Notice]:
+        notice = await self.notice_repository.get_notice_by_id(notice_id)
+        if not notice:
+            raise ServiceException(ErrorStatus.NOTICE_NOT_FOUND)
+        return await self.notice_repository.update_notice(notice_id, notice_data.dict())
