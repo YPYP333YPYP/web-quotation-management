@@ -39,4 +39,4 @@ class OverallStatistics(BaseModel):
 
 class DailyTotal(BaseModel):
     date: date
-    total: float
+    status: str

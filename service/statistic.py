@@ -28,7 +28,23 @@ class StatisticsService:
 
     async def get_daily_quotation_totals(self, start_date: date, end_date: date):
         daily_totals = await self.statistic_repository.get_daily_quotation_totals(start_date, end_date)
-        result = [DailyTotal(date=total['date'], total=total['total']) for total in daily_totals]
+        total_sum = sum(total['total'] for total in daily_totals)
+        average = total_sum / 3
+
+        def determine_status(value):
+            if value < average:
+                return "하"
+            elif value < 2 * average:
+                return "중"
+            else:
+                return "상"
+
+        result = [
+            DailyTotal(
+                date=total['date'],
+                status=determine_status(total['total'])
+            ) for total in daily_totals
+        ]
         return result
 
 
