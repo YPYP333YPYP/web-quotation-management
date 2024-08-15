@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import Depends
 from sqlalchemy import select
@@ -25,3 +25,9 @@ class FAQRepository:
         async with self.session.begin as session:
             result = await session.execute(select(FAQ).filter(FAQ.id == faq_id))
             return result.scalar_one_or_none()
+
+    @handle_db_exceptions()
+    async def get_all_faqs(self) -> List[FAQ]:
+        async with self.session.begin as session:
+            result = await session.execute(select(FAQ))
+            return result.scalars().all()

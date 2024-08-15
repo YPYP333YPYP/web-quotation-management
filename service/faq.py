@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import Depends
 
@@ -22,3 +22,6 @@ class FAQService:
         if not faq:
             raise GeneralException(ErrorStatus.FAQ_NOT_FOUND)
         return faq
+
+    async def get_all_faqs(self) -> List[FAQ]:
+        return await self.faq_repository.get_all_faqs()
