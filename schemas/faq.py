@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -9,3 +11,12 @@ class FAQBase(BaseModel):
 
 class FAQCreate(FAQBase):
     ...
+
+
+class FAQRead(FAQBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
