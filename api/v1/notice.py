@@ -47,3 +47,13 @@ async def get_all_notices(notice_service: NoticeService = Depends(NoticeService)
 async def update_notice(notice_id: int, notice_data: NoticeUpdate, notice_service: NoticeService = Depends(NoticeService)):
     await notice_service.update_notice(notice_id, notice_data)
     return ApiResponse.on_success()
+
+
+@router.delete("/notices/{notice_id}",
+               response_model=ApiResponse,
+               summary="공지사항 삭제",
+               description="공지사항을 삭제합니다.")
+@handle_exceptions()
+async def delete_notice(notice_id: int, notice_service: NoticeService = Depends(NoticeService)):
+    await notice_service.delete_notice(notice_id)
+    return ApiResponse.on_success()

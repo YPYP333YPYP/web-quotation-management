@@ -32,3 +32,6 @@ class NoticeService:
         if not notice:
             raise ServiceException(ErrorStatus.NOTICE_NOT_FOUND)
         return await self.notice_repository.update_notice(notice_id, notice_data.dict())
+
+    async def delete_notice(self, notice_id: int):
+        await self.notice_repository.delete_notice(notice_id)

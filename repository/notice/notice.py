@@ -1,6 +1,6 @@
 from typing import Optional, List, Sequence
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi import Depends
@@ -41,3 +41,11 @@ class NoticeRepository:
                 update(Notice).where(Notice.id == notice_id).values(**notice_data)
             )
             await session.commit()
+
+    @handle_db_exceptions()
+    async def delete_notice(self, notice_id: int):
+        async with self.session as session:
+            await session.execute(
+                delete(Notice).where(Notice.id == notice_id)
+            )
+            await self.session.commit()
