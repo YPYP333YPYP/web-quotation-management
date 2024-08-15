@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,3 +27,9 @@ class NoticeRepository:
         async with self.session as session:
             result = await session.execute(select(Notice).filter(Notice.id == notice_id))
             return result.scalar_one_or_none()
+
+    @handle_db_exceptions()
+    async def get_all_notices(self) -> Sequence[Notice]:
+        async with self.session as session:
+            result = await self.session.execute(select(Notice))
+            return result.scalars().all()

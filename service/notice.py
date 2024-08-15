@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Sequence
 
 from fastapi import Depends
 
@@ -23,3 +23,6 @@ class NoticeService:
         if not notice:
             raise ServiceException(ErrorStatus.NOTICE_NOT_FOUND)
         return notice
+
+    async def get_all_notices(self) -> Sequence[Notice]:
+        return await self.notice_repository.get_all_notices()
