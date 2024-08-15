@@ -1,3 +1,6 @@
+from typing import Optional
+
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi import Depends
@@ -18,3 +21,9 @@ class NoticeRepository:
             await session.commit()
             await session.refresh(notice)
             return notice
+
+    @handle_db_exceptions()
+    async def get_notice_by_id(self, notice_id: int) -> Optional[Notice]:
+        async with self.session as session:
+            result = await session.execute(select(Notice).filter(Notice.id == notice_id))
+            return result.scalar_one_or_none()

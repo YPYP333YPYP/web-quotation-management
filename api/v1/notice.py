@@ -17,3 +17,11 @@ async def create_notice(notice_data: NoticeCreate, notice_service: NoticeService
     await notice_service.create_notice(notice_data)
     return ApiResponse.on_success()
 
+
+@router.get("/notices/{notice_id}",
+            response_model=NoticeRead,
+            summary="공지사항 조회",
+            description="ID로 공지사항을 조회합니다.")
+async def get_notice(notice_id: int, notice_service: NoticeService = Depends(NoticeService)):
+    notice = await notice_service.get_notice_by_id(notice_id)
+    return notice

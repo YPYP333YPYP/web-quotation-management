@@ -82,3 +82,6 @@ class ErrorStatus(BaseCode):
     DISCORD_MESSAGE_NOT_SENT = ("4001", "디스코드 메시지 전송에 실패했습니다.", "DISCORD")
 
     CUSTOM_PRODUCT_NOT_FOUND = ("4001", "요청한 자사 제품을 찾을 수 없습니다.", "CUSTOM_PRODUCT")
+
+    NOTICE_NOT_FOUND = ("4001", "요청한 공지사항을 찾을 수 없습니다.", "NOTICE")
+
