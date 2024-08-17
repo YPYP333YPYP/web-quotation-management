@@ -6,3 +6,8 @@
 /phpMyAdmin-.*/scripts/setup\.php
 //api.ipify.org
 /.env
+/cgi-bin/main_manage.cgi
+/HNAP1/
+/login
+/sitemap.xml
+/robots.txt
