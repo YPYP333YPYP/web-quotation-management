@@ -47,7 +47,7 @@ def get_application() -> FastAPI:
                             "operationsSorter": "method",
                             "filter": True,
                             "tagsSorter": "alpha",
-                            "syntaxHighlight.theme": "tomorrow-night",
+                            "syntaxHighlight.theme": "xcode",
     })
     application.include_router(router)
 
