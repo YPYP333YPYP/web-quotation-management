@@ -88,6 +88,7 @@ class UserService:
             email=current_user.email,
             id=current_user.id,
             is_active=current_user.is_active,
+            is_admin=current_user.is_admin,
             client_id=client.id,
             client_name=client.name,
             client_region=client.region
