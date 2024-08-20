@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends, Query
 from datetime import datetime, timedelta
 from typing import List
 
+from api.dependencies import get_current_user
 from core.decorator.decorator import handle_exceptions
 from core.response.api_response import ApiResponse
+from models import User
 from schemas.statistic import TopEntity, OverallStatistics, DailyTotal
 from service.statistic import StatisticsService
 
@@ -18,7 +20,8 @@ router = APIRouter(tags=["7. statistic"])
 async def get_statistics(
     start_date: datetime = Query(...),
     end_date: datetime = Query(...),
-    statistics_service: StatisticsService = Depends(StatisticsService)
+    statistics_service: StatisticsService = Depends(StatisticsService),
+    current_user: User = Depends(get_current_user)
 ):
     statistics = await statistics_service.get_overall_statistics(start_date, end_date)
     result = OverallStatistics(**statistics)
@@ -34,7 +37,8 @@ async def get_top_clients(
     start_date: datetime = Query(...),
     end_date: datetime = Query(...),
     limit: int = Query(5, ge=1, le=20),
-    statistics_service: StatisticsService = Depends(StatisticsService)
+    statistics_service: StatisticsService = Depends(StatisticsService),
+    current_user: User = Depends(get_current_user)
 ):
     top_clients = await statistics_service.get_top_clients(start_date, end_date, limit)
     result = [TopEntity(**client) for client in top_clients]
@@ -50,7 +54,8 @@ async def get_top_products(
     start_date: datetime = Query(...),
     end_date: datetime = Query(...),
     limit: int = Query(5, ge=1, le=20),
-    statistics_service: StatisticsService = Depends(StatisticsService)
+    statistics_service: StatisticsService = Depends(StatisticsService),
+    current_user: User = Depends(get_current_user)
 ):
     top_products = await statistics_service.get_top_products(start_date, end_date, limit)
     result = [TopEntity(**product) for product in top_products]
@@ -63,7 +68,8 @@ async def get_top_products(
             description="현재일부터 2달전까지의 견적서 일별 총액을 조회합니다.")
 @handle_exceptions(List[DailyTotal])
 async def get_daily_quotation_totals(
-        statistics_service: StatisticsService = Depends(StatisticsService)
+        statistics_service: StatisticsService = Depends(StatisticsService),
+        current_user: User = Depends(get_current_user)
 ):
 
     end_date = datetime.now().date()

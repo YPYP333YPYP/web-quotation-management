@@ -25,7 +25,9 @@ router = APIRouter(tags=["2. client"])
             summary="거래처 명으로 조회",
             description="거래처 명으로 거래처를 조회 합니다.")
 @handle_exceptions(List[ClientRead])
-async def get_clients_by_name(name: str, client_service: ClientService = Depends(ClientService)):
+async def get_clients_by_name(name: str,
+                              client_service: ClientService = Depends(ClientService),
+                              current_user: User = Depends(get_current_user)):
     clients = await client_service.get_clients_by_name(name)
     result = [to_client_read(client) for client in clients]
     return result
@@ -36,7 +38,10 @@ async def get_clients_by_name(name: str, client_service: ClientService = Depends
               summary="거래처 지역 선택",
               description="거래처의 지역을 선택합니다.")
 @handle_exceptions()
-async def update_client_region(client_id: int, region: RegionType, client_service: ClientService = Depends(ClientService)):
+async def update_client_region(client_id: int,
+                               region: RegionType,
+                               client_service: ClientService = Depends(ClientService),
+                               current_user: User = Depends(get_current_user)):
     await client_service.update_client_region(client_id, region)
     return ApiResponse.on_success()
 
@@ -47,7 +52,8 @@ async def update_client_region(client_id: int, region: RegionType, client_servic
             description="거래처 지역으로 거래처를 조회 합니다.")
 @handle_exceptions(List[ClientRead])
 async def get_clients_by_region(region: RegionType,
-                                client_service: ClientService = Depends(ClientService)):
+                                client_service: ClientService = Depends(ClientService),
+                                current_user: User = Depends(get_current_user)):
     clients = await client_service.get_clients_by_region(region)
     return clients
 
@@ -57,7 +63,8 @@ async def get_clients_by_region(region: RegionType,
              summary="거래처 생성",
              description="새로운 거래처를 생성합니다.")
 @handle_exceptions()
-async def create_client(client: ClientCreate, client_service: ClientService = Depends(ClientService),
+async def create_client(client: ClientCreate,
+                        client_service: ClientService = Depends(ClientService),
                         current_user: User = Depends(get_current_user)):
     await client_service.create_client(client, current_user.id)
     return ApiResponse.on_success()
@@ -68,7 +75,10 @@ async def create_client(client: ClientCreate, client_service: ClientService = De
             summary="거래처 수정",
             description="거래처 정보를 수정합니다.")
 @handle_exceptions()
-async def update_client(client_id: int, client: ClientUpdate, client_service: ClientService = Depends(ClientService)):
+async def update_client(client_id: int,
+                        client: ClientUpdate,
+                        client_service: ClientService = Depends(ClientService),
+                        current_user: User = Depends(get_current_user)):
     await client_service.update_client(client_id, client)
     return ApiResponse.on_success()
 
@@ -78,7 +88,9 @@ async def update_client(client_id: int, client: ClientUpdate, client_service: Cl
                summary="거래처 삭제",
                description="거래처를 삭제합니다.")
 @handle_exceptions()
-async def delete_client(client_id: int, client_service: ClientService = Depends(ClientService)):
+async def delete_client(client_id: int,
+                        client_service: ClientService = Depends(ClientService),
+                        current_user: User = Depends(get_current_user)):
     await client_service.delete_client(client_id)
     return ApiResponse.on_success()
 
@@ -89,7 +101,8 @@ async def delete_client(client_id: int, client_service: ClientService = Depends(
             description="거래처의 모든 견적서를 조회 합니다. page -> 페이지 시작 번호, page_size -> 페이지 당 반환 개수")
 @handle_exceptions(ClientPaginatedResponse)
 async def get_quotations(client_id: int, quotation_service: QuotationService = Depends(QuotationService),
-                         page: int = Query(1, ge=1), page_size: int = Query(10, ge=1, le=100)):
+                         page: int = Query(1, ge=1), page_size: int = Query(10, ge=1, le=100),
+                         current_user: User = Depends(get_current_user)):
     quotations = await quotation_service.get_paginated_quotations_for_client(client_id, page, page_size)
     return quotations
 
@@ -106,7 +119,8 @@ async def get_quotations(
         end_date: datetime = Query(None, description="CUSTOM 선택 시 종료일 (YYYY-MM-DD)"),
         page: int = Query(1, ge=1, description="페이지 번호"),
         page_size: int = Query(10, ge=1, le=100, description="페이지 사이즈"),
-        quotation_service: QuotationService = Depends(QuotationService)
+        quotation_service: QuotationService = Depends(QuotationService),
+        current_user: User = Depends(get_current_user)
 ):
     today = datetime.now().date()
 
@@ -132,7 +146,9 @@ async def get_quotations(
             summary="거래처 주문 내역 조회",
             description="거래처 id로 정해둔 주문 내역을 조회합니다")
 @handle_exceptions(List[PastOrderInfo])
-async def get_past_order_by_client_id(client_id: int, past_order_service: PastOrderService = Depends(PastOrderService)):
+async def get_past_order_by_client_id(client_id: int,
+                                      past_order_service: PastOrderService = Depends(PastOrderService),
+                                      current_user: User = Depends(get_current_user)):
     return await past_order_service.get_past_order_by_client_id(client_id)
 
 
@@ -141,7 +157,10 @@ async def get_past_order_by_client_id(client_id: int, past_order_service: PastOr
             summary="거래처 해당 날짜 견적서 제출 여부 파악",
             description="거래처의 해당 날짜의 견적서 제출 여부룰 조회 합니다.")
 @handle_exceptions(ClientCheckPreview)
-async def get_client_check_preview(client_id: int, input_date: date, client_service: ClientService = Depends(ClientService)):
+async def get_client_check_preview(client_id: int,
+                                   input_date: date,
+                                   client_service: ClientService = Depends(ClientService),
+                                   current_user: User = Depends(get_current_user)):
     return await client_service.get_client_check_preview(client_id, input_date)
 
 
@@ -150,6 +169,9 @@ async def get_client_check_preview(client_id: int, input_date: date, client_serv
               summary="거래처 특이사항 작성",
               description="거래처의 특이사항을 작성합니다.")
 @handle_exceptions()
-async def update_client_comment(client_id: int, input_comment: str, client_service: ClientService = Depends(ClientService)):
+async def update_client_comment(client_id: int,
+                                input_comment: str,
+                                client_service: ClientService = Depends(ClientService),
+                                current_user: User = Depends(get_current_user)):
     await client_service.update_client_comment(client_id, input_comment)
     return ApiResponse.on_success()

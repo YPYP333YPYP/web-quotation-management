@@ -20,7 +20,9 @@ router = APIRouter(tags=["3. product"])
              summary="물건 견적서 파일 업로드",
              description="물건 견적서 excel 파일을 업로드해서 Product 모델로 저장합니다.")
 @handle_exceptions()
-async def upload_excel(file: UploadFile = File(...), product_service: ProductService = Depends(ProductService)):
+async def upload_excel(file: UploadFile = File(...),
+                       product_service: ProductService = Depends(ProductService),
+                       current_user: User = Depends(get_current_user)):
     await product_service.upload_products(file)
     return ApiResponse.on_success()
 
@@ -30,7 +32,9 @@ async def upload_excel(file: UploadFile = File(...), product_service: ProductSer
             summary="분류 별 물품 조회",
             description="분류 별 물품을 조회 합니다. ")
 @handle_exceptions(Sequence[ProductRead])
-async def get_products_by_category(category: str, product_service: ProductService = Depends(ProductService)):
+async def get_products_by_category(category: str,
+                                   product_service: ProductService = Depends(ProductService),
+                                   current_user: User = Depends(get_current_user)):
     products = await product_service.get_products_by_category(category)
     result = [to_product_read(product) for product in products]
     if result is None or len(result) == 0:
@@ -44,7 +48,8 @@ async def get_products_by_category(category: str, product_service: ProductServic
             description="물품 번호에 해당하는 물품의 정보를 수정합니다.")
 @handle_exceptions(ProductRead)
 async def update_product(product_id: int, product_data: ProductCreate,
-                         product_service: ProductService = Depends(ProductService)):
+                         product_service: ProductService = Depends(ProductService),
+                         current_user: User = Depends(get_current_user)):
     new_data = product_data.dict()
     updated_product = await product_service.update_product(product_id, new_data)
     result = to_product_read(updated_product)
@@ -59,7 +64,9 @@ async def update_product(product_id: int, product_data: ProductCreate,
              summary="물품 추가 생성",
              description="견적서 물품을 추가 생성 합니다.")
 @handle_exceptions()
-async def create_product(product: ProductCreate, product_service: ProductService = Depends(ProductService)):
+async def create_product(product: ProductCreate,
+                         product_service: ProductService = Depends(ProductService),
+                         current_user: User = Depends(get_current_user)):
     new_data = product.dict()
     await product_service.create_product(new_data)
     return ApiResponse.on_success()
@@ -70,7 +77,9 @@ async def create_product(product: ProductCreate, product_service: ProductService
                summary="물품 삭제",
                description="견적서 물품을 삭제 합니다.")
 @handle_exceptions()
-async def delete_product(product_id: int, product_service: ProductService = Depends(ProductService)):
+async def delete_product(product_id: int,
+                         product_service: ProductService = Depends(ProductService),
+                         current_user: User = Depends(get_current_user)):
     await product_service.delete_product(product_id)
     return ApiResponse.on_success()
 
@@ -81,7 +90,8 @@ async def delete_product(product_id: int, product_service: ProductService = Depe
               description="야채 물품의 가격을 직접 변경합니다.")
 @handle_exceptions()
 async def update_vegetable_product_price(product_id: int, price: int,
-                                         product_service: ProductService = Depends(ProductService)):
+                                         product_service: ProductService = Depends(ProductService),
+                                         current_user: User = Depends(get_current_user)):
     await product_service.update_vegetable_product_price(product_id, price)
     return ApiResponse.on_success()
 
@@ -92,7 +102,8 @@ async def update_vegetable_product_price(product_id: int, price: int,
               description="야채 물품의 가격을 엑셀 파일을 통해 변경합니다.")
 @handle_exceptions()
 async def update_vegetable_product_price(file: UploadFile = File(...),
-                                         product_service: ProductService = Depends(ProductService)):
+                                         product_service: ProductService = Depends(ProductService),
+                                         current_user: User = Depends(get_current_user)):
     await product_service.update_vegetable_product_price_from_file(file)
     return ApiResponse.on_success()
 
@@ -106,6 +117,7 @@ async def search_products_by_prefix(
         name_prefix: str = Query(..., min_length=1),
         limit: int = Query(10, ge=1, le=100),
         product_service: ProductService = Depends(ProductService),
+        current_user: User = Depends(get_current_user)
 ):
     products = await product_service.search_products_by_prefix(name_prefix, limit)
     return products

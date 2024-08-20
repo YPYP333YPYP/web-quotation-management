@@ -24,7 +24,9 @@ router = APIRouter(tags=["4. quotation"])
              summary="견적서 생성",
              description="견적서를 생성합니다.")
 @handle_exceptions(QuotationRead)
-async def create_quotation(quotation: QuotationCreate, quotation_service: QuotationService = Depends(QuotationService)):
+async def create_quotation(quotation: QuotationCreate,
+                           quotation_service: QuotationService = Depends(QuotationService),
+                           current_user: User = Depends(get_current_user)):
     new_data = quotation.dict()
     quotation = await quotation_service.create_quotation(new_data)
     return quotation
@@ -38,7 +40,8 @@ async def create_quotation(quotation: QuotationCreate, quotation_service: Quotat
 async def update_quotation(
     quotation_id: int,
     quotation_data: QuotationUpdate,
-    quotation_service: QuotationService = Depends(QuotationService)
+    quotation_service: QuotationService = Depends(QuotationService),
+    current_user: User = Depends(get_current_user)
 ):
     await quotation_service.update_quotation(quotation_id, quotation_data)
     return ApiResponse.on_success()
@@ -49,7 +52,9 @@ async def update_quotation(
                summary="견적서 삭제",
                description="견적서를 삭제합니다.")
 @handle_exceptions()
-async def delete_quotation(quotation_id: int, quotation_service: QuotationService = Depends(QuotationService)):
+async def delete_quotation(quotation_id: int,
+                           quotation_service: QuotationService = Depends(QuotationService),
+                           current_user: User = Depends(get_current_user)):
     await quotation_service.delete_quotation(quotation_id)
     return ApiResponse.on_success()
 
@@ -75,7 +80,8 @@ async def add_products_to_quotation(quotation: List[QuotationAdd],
 async def update_quotation_product(quotation_id: int,
                                    product_id: int,
                                    update_data: QuotationProductUpdate,
-                                   quotation_service: QuotationService = Depends(QuotationService)):
+                                   quotation_service: QuotationService = Depends(QuotationService),
+                                   current_user: User = Depends(get_current_user)):
     new_data = update_data.dict()
     updated_quotation_product = await quotation_service.update_quotation_product(quotation_id, product_id, new_data)
     if not updated_quotation_product:
@@ -89,7 +95,10 @@ async def update_quotation_product(quotation_id: int,
                summary="견적서 물품 삭제",
                description="견적서의 물품을 삭제합니다.")
 @handle_exceptions()
-async def delete_quotation_product(quotation_id: int, product_id: int, quotation_service: QuotationService = Depends(QuotationService)):
+async def delete_quotation_product(quotation_id: int,
+                                   product_id: int,
+                                   quotation_service: QuotationService = Depends(QuotationService),
+                                   current_user: User = Depends(get_current_user)):
     await quotation_service.delete_quotation_product(quotation_id, product_id)
     return ApiResponse.on_success()
 
@@ -100,7 +109,8 @@ async def delete_quotation_product(quotation_id: int, product_id: int, quotation
             description="견적서의 주문 물품, 이름, 총 금액, 생성 일, 수정 일 정보를 조회 합니다.")
 @handle_exceptions(QuotationInfo)
 async def get_quotation_products(quotation_id: int,
-                                 quotation_service: QuotationService = Depends(QuotationService)) -> QuotationInfo:
+                                 quotation_service: QuotationService = Depends(QuotationService),
+                                 current_user: User = Depends(get_current_user)) -> QuotationInfo:
     quotation = await quotation_service.get_quotation_info(quotation_id)
     return quotation
 
@@ -110,7 +120,9 @@ async def get_quotation_products(quotation_id: int,
             summary="견적서 합계 금액 업데이트",
             description="견적서의 합계 금액을 업데이트 합니다.")
 @handle_exceptions(int)
-async def update_total_price(quotation_id: int, quotation_service: QuotationService = Depends(QuotationService)):
+async def update_total_price(quotation_id: int,
+                             quotation_service: QuotationService = Depends(QuotationService),
+                             current_user: User = Depends(get_current_user)):
     updated_sum = await quotation_service.update_total_price(quotation_id)
     return updated_sum
 
@@ -120,7 +132,9 @@ async def update_total_price(quotation_id: int, quotation_service: QuotationServ
             summary="견적서 작성 확정",
             description="작성한 견적서를 확정 합니다.")
 @handle_exceptions()
-async def update_status_completed(quotation_id: int, quotation_service: QuotationService = Depends(QuotationService)):
+async def update_status_completed(quotation_id: int,
+                                  quotation_service: QuotationService = Depends(QuotationService),
+                                  current_user: User = Depends(get_current_user)):
     await quotation_service.update_status_completed(quotation_id)
     return ApiResponse.on_success()
 
@@ -130,7 +144,10 @@ async def update_status_completed(quotation_id: int, quotation_service: Quotatio
               summary="견적서 특이사항 작성",
               description="견적서의 특이사항을 작성합니다.")
 @handle_exceptions()
-async def update_particulars(quotation_id: int, particulars: str, quotation_service: QuotationService = Depends(QuotationService)):
+async def update_particulars(quotation_id: int,
+                             particulars: str,
+                             quotation_service: QuotationService = Depends(QuotationService),
+                             current_user: User = Depends(get_current_user)):
     await quotation_service.update_particulars(quotation_id, particulars)
     return ApiResponse.on_success()
 
@@ -143,7 +160,8 @@ async def update_particulars(quotation_id: int, particulars: str, quotation_serv
 async def get_quotations_search(start: Optional[str] = Query(None, description="시작일('2024-01-01' 형식)"),
                                 end: Optional[str] = Query(None, description="종료일('2024-01-01' 형식)"),
                                 query: Optional[str] = Query(None, description="검색어"),
-                                quotation_service: QuotationService = Depends(QuotationService)):
+                                quotation_service: QuotationService = Depends(QuotationService),
+                                current_user: User = Depends(get_current_user)):
     quotations = await quotation_service.get_quotation_search(start, end, query)
     result = [to_quotation_read(quotation) for quotation in quotations]
     return ApiResponse[List[QuotationRead]].of(SuccessStatus.OK, result=result)
@@ -153,7 +171,8 @@ async def get_quotations_search(start: Optional[str] = Query(None, description="
             summary="견적서 excel 파일로 추출",
             description="거래처 견적서를 excel 파일로 추출합니다.")
 async def extract_quotations_to_excel_file(quotation_id: int,
-                                           quotation_service: QuotationService = Depends(QuotationService)):
+                                           quotation_service: QuotationService = Depends(QuotationService),
+                                           current_user: User = Depends(get_current_user)):
     output, filename = await quotation_service.extract_quotations(quotation_id, False)
     headers = {
         'Content-Disposition': f'attachment; filename*=UTF-8\'\'{filename}'
@@ -167,7 +186,8 @@ async def extract_quotations_to_excel_file(quotation_id: int,
             description="오늘 날짜의 모든 견적서를 excel 파일로 추출하고 zip으로 압축합니다.")
 async def extract_today_quotations_to_zip(
         input_date: date,
-        quotation_service: QuotationService = Depends(QuotationService)
+        quotation_service: QuotationService = Depends(QuotationService),
+        current_user: User = Depends(get_current_user)
 ):
     zip_buffer, filename = await quotation_service.extract_today_quotations_to_zip(input_date)
 
