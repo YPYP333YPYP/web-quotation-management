@@ -6,18 +6,25 @@ from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import GeneralException
 from models import Client
 from repository.client.client import ClientRepository
+from repository.product.product import ProductRepository
 from repository.quotation.quotation import QuotationRepository
+from repository.quotation.quotation_product import QuotationProductRepository
 from schemas.client import to_client_check_preview, RegionType, ClientUpdate, ClientCreate, to_client_read, ClientRead
+from schemas.quotation import QuotationRecentInfo
 from service.user import UserService
 
 
 class ClientService:
     def __init__(self, client_repository: ClientRepository = Depends(ClientRepository),
                  user_service: UserService = Depends(UserService),
-                 quotation_repository: QuotationRepository = Depends(QuotationRepository)):
+                 quotation_repository: QuotationRepository = Depends(QuotationRepository),
+                 product_repository: ProductRepository = Depends(ProductRepository),
+                 quotation_product_repository: QuotationProductRepository = Depends(QuotationProductRepository)):
         self.client_repository = client_repository
         self.user_service = user_service
         self.quotation_repository = quotation_repository
+        self.product_repository = product_repository
+        self.quotation_product_repository = quotation_product_repository
 
     async def get_clients_by_name(self, name: str) -> list[ClientRead]:
         clients = await self.client_repository.get_clients_by_name(name)
@@ -57,3 +64,21 @@ class ClientService:
 
     async def update_client_comment(self, client_id: int, input_comment: str):
         await self.client_repository.update_client_comment(client_id, input_comment)
+
+    async def get_client_quotation_info_recent(self, client_id: int):
+        quotations, _ = await self.quotation_repository.get_quotations_by_client_id(client_id)
+
+        recent_quotations = sorted(quotations, key=lambda x: x.created_at, reverse=True)[:3]
+        result = []
+        for quotation in recent_quotations:
+            quotation_products = await self.quotation_product_repository.get_quotation_products_by_quotation_id(quotation.id)
+            product_list = [await self.product_repository.get_product_by_id(x.product_id) for x in quotation_products]
+            products = product_list[:5]
+            recent_info = QuotationRecentInfo(
+                products=products,
+                date=quotation.created_at.date()
+            )
+
+            result.append(recent_info)
+        return result
+

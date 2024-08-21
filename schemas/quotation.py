@@ -73,6 +73,11 @@ class QuotationUpdate(BaseModel):
     products: List[ProductInput]
 
 
+class QuotationRecentInfo(BaseModel):
+    products: List[str]
+    date: date
+
+
 def to_quotation_read(quotation: Quotation) -> QuotationRead:
     return QuotationRead(
         id=quotation.id,

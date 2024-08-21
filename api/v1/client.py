@@ -7,6 +7,7 @@ from models import User
 from schemas.client import ClientRead, ClientCreate, DateRangeType, RegionType, ClientUpdate, ClientPaginatedResponse, \
     to_client_read, ClientCheckPreview
 from schemas.past_order import PastOrderInfo
+from schemas.quotation import QuotationRecentInfo
 from service.client import ClientService
 from api.dependencies import get_current_user
 from service.past_order import PastOrderService
@@ -175,3 +176,13 @@ async def update_client_comment(client_id: int,
                                 current_user: User = Depends(get_current_user)):
     await client_service.update_client_comment(client_id, input_comment)
     return ApiResponse.on_success()
+
+
+@router.get("/clients/{client_id}/recent/purchase",
+            response_model=ApiResponse[List[QuotationRecentInfo]],
+            summary="거래처의 최근 견적서 정보 조회",
+            description="거래처의 최근에 작성한 견적서의 정보를 조회합니다.")
+@handle_exceptions(List[QuotationRecentInfo])
+async def get_client_quotation_info_recent(client_id: int, client_service: ClientService = Depends(ClientService)):
+    result = await client_service.get_client_quotation_info_recent(client_id)
+    return result
