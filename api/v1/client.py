@@ -183,6 +183,8 @@ async def update_client_comment(client_id: int,
             summary="거래처의 최근 견적서 정보 조회",
             description="거래처의 최근에 작성한 견적서의 정보를 조회합니다.")
 @handle_exceptions(List[QuotationRecentInfo])
-async def get_client_quotation_info_recent(client_id: int, client_service: ClientService = Depends(ClientService)):
+async def get_client_quotation_info_recent(client_id: int,
+                                           client_service: ClientService = Depends(ClientService),
+                                           current_user: User = Depends(get_current_user)):
     result = await client_service.get_client_quotation_info_recent(client_id)
     return result
