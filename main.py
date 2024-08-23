@@ -70,10 +70,6 @@ def get_application() -> FastAPI:
     )
     application.add_middleware(BlacklistMiddleware)
 
-
-
-
-
     return application
 
 
