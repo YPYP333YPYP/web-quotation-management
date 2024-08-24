@@ -74,8 +74,9 @@ class ClientService:
             quotation_products = await self.quotation_product_repository.get_quotation_products_by_quotation_id(quotation.id)
             product_list = [await self.product_repository.get_product_by_id(x.product_id) for x in quotation_products]
             products = product_list[:5]
+            product_name = [x.name for x in products]
             recent_info = QuotationRecentInfo(
-                products=products,
+                products= product_name,
                 date=quotation.created_at.date()
             )
 
