@@ -38,10 +38,9 @@ class QuotationProductRepository:
     @handle_db_exceptions()
     async def get_quotation_products_by_quotation_id(self, quotation_id: int):
         async with self.session as session:
-            quotation_products = await session.execute(
-                select(QuotationProduct).filter_by(quotation_id=quotation_id)
-            )
-            return quotation_products.fetchall()
+            stmt = select(QuotationProduct).filter_by(quotation_id=quotation_id)
+            result = await session.execute(stmt)
+            return result.scalars().all()
 
     @handle_db_exceptions()
     async def get_quotation_product_by_quotation_id_and_product_id(self, quotation_id: int, product_id: int) -> Optional[QuotationProduct]:
