@@ -3,7 +3,7 @@ from datetime import date
 from fastapi import Depends
 
 from core.response.code.error_status import ErrorStatus
-from core.response.handler.exception_handler import GeneralException
+from core.response.handler.exception_handler import GeneralException, ServiceException
 from models import Client
 from repository.client.client import ClientRepository
 from repository.product.product import ProductRepository
@@ -67,7 +67,8 @@ class ClientService:
 
     async def get_client_quotation_info_recent(self, client_id: int):
         quotations, _ = await self.quotation_repository.get_quotations_by_client_id(client_id)
-
+        if len(quotations) == 0:
+            raise ServiceException(ErrorStatus.QUOTATION_NOT_FOUND)
         recent_quotations = sorted(quotations, key=lambda x: x.created_at, reverse=True)[:3]
         result = []
         for quotation in recent_quotations:
@@ -76,7 +77,7 @@ class ClientService:
             products = product_list[:5]
             product_name = [x.name for x in products]
             recent_info = QuotationRecentInfo(
-                products= product_name,
+                products=product_name,
                 date=quotation.created_at.date()
             )
 
