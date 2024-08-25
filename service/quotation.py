@@ -114,15 +114,13 @@ class QuotationService:
                 quotation_id, product_id)
             return updated_quotation_product
 
-    async def get_quotation_products(self, quotation_id: int) -> list[
-        dict[str, InstrumentedAttribute[_T_co] | _T_co | Any]]:
+    async def get_quotation_products(self, quotation_id: int):
         quotation_products = await self.quotation_product_repository.get_quotation_products_by_quotation_id(
             quotation_id)
-
         result_list = []
 
         for quotation_product in quotation_products:
-            tmp_dict = quotation_product[0].to_dict()
+            tmp_dict = quotation_product.to_dict()
 
             product_id = tmp_dict.get("product_id")
             product = await self.product_repository.get_product_by_id(product_id)
