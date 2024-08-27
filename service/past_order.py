@@ -38,3 +38,6 @@ class PastOrderService:
 
     async def delete_past_order(self, past_order_id: int):
         await self.past_order_repository.delete_past_order(past_order_id)
+
+    async def add_product_past_order(self, past_order_id: int, product_id: int):
+        await self.past_order_repository.update_past_order_products(past_order_id, product_id)

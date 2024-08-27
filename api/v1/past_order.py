@@ -56,3 +56,17 @@ async def delete_past_order(past_order_id: int,
                             current_user: User = Depends(get_current_user)):
     await past_order_service.delete_past_order(past_order_id)
     return ApiResponse.on_success()
+
+
+@router.patch("/past-order/{past_order_id}/{product_id}/update",
+              response_model=ApiResponse,
+              summary="주문 내역 부분 업데이트",
+              description="주문 내역에 물품을 추가합니다.")
+@handle_exceptions()
+async def add_product_past_order(past_order_id: int,
+                                 product_id: int,
+                                 past_order_service: PastOrderService = Depends(PastOrderService),
+                                 # current_user: User = Depends(get_current_user)
+                                 ):
+    await past_order_service.add_product_past_order(past_order_id, product_id)
+    return ApiResponse.on_success()

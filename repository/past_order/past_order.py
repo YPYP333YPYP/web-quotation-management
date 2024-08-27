@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
-from core.utils import list_to_string
+from core.utils import list_to_string, string_to_list
 from models.past_order import PastOrder
 from schemas.past_order import PastOrderCreate
 from sqlalchemy.future import select
@@ -56,4 +56,13 @@ class PastOrderRepository:
         async with self.session as session:
             past_order = await session.get(PastOrder, past_order_id)
             await session.delete(past_order)
+            await session.commit()
+
+    @handle_db_exceptions()
+    async def update_past_order_products(self, past_order_id: int, product_id: int):
+        async with self.session as session:
+            past_order = await session.get(PastOrder, past_order_id)
+            product_list = string_to_list(past_order.product_ids)
+            product_list.append(product_id)
+            past_order.product_ids = list_to_string(product_list)
             await session.commit()
