@@ -11,3 +11,6 @@
 /login
 /sitemap.xml
 /robots.txt
+/metadata
+/fhir-server/api/v4/metadata
+/fhir/metadata
