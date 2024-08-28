@@ -40,4 +40,19 @@ class PastOrderService:
         await self.past_order_repository.delete_past_order(past_order_id)
 
     async def add_product_past_order(self, past_order_id: int, product_id: int):
-        await self.past_order_repository.update_past_order_products(past_order_id, product_id)
+        past_order = await self.past_order_repository.get_by_id(past_order_id)
+        if past_order is None:
+            raise ServiceException(ErrorStatus.PAST_ORDER_NOT_FOUND)
+        product_list = string_to_list(past_order.product_ids)
+        if product_id in product_list:
+            raise ServiceException(ErrorStatus.PAST_ORDER_ALREADY_CONTAIN_PRODUCT)
+        await self.past_order_repository.update_past_order_product(past_order_id, product_id)
+
+    async def remove_product_past_order(self, past_order_id: int, product_id: int):
+        past_order = await self.past_order_repository.get_by_id(past_order_id)
+        if past_order is None:
+            raise ServiceException(ErrorStatus.PAST_ORDER_NOT_FOUND)
+        product_list = string_to_list(past_order.product_ids)
+        if product_id not in product_list:
+            raise ServiceException(ErrorStatus.PAST_ORDER_NOT_CONTAIN_PRODUCT)
+        await self.past_order_repository.delete_path_order_product(past_order_id, product_id)

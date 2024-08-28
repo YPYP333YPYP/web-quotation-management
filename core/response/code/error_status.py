@@ -51,13 +51,13 @@ class ErrorStatus(BaseCode):
     INVALID_PRODUCT_DATA = ("4002", "유효하지 않은 상품 데이터입니다.", "PRODUCT")
     PRODUCT_ALREADY_EXISTS = ("4003", "이미 존재하는 상품입니다.", "PRODUCT")
     PRODUCT_NOT_UPDATED = ("4004", "Product가 업데이트 되지 않았습니다.", "PRODUCT")
-    PRODUCT_NOT_CREATED = ("4005", "Product가 생성 되지 않았습니다..", "PRODUCT")
+    PRODUCT_NOT_CREATED = ("4005", "Product가 생성 되지 않았습니다.", "PRODUCT")
 
     QUOTATION_NOT_FOUND = ("4001", "요청한 견적서를 찾을 수 없습니다.", "QUOTATION")
     QUOTATION_PRODUCT_DATA = ("4002", "유효하지 않은 견적서 데이터입니다.", "QUOTATION")
     QUOTATION_ALREADY_EXISTS = ("4003", "이미 존재하는 견적서입니다.", "QUOTATION")
     QUOTATION_NOT_UPDATED = ("4004", "QUOTATION가 업데이트 되지 않았습니다.", "QUOTATION")
-    QUOTATION_NOT_CREATED = ("4005", "QUOTATION가 생성 되지 않았습니다..", "QUOTATION")
+    QUOTATION_NOT_CREATED = ("4005", "QUOTATION가 생성 되지 않았습니다.", "QUOTATION")
     QUOTATION_PRODUCT_ALREADY_EXISTS = ("4006", "이미 견적서에 해당 물품이 추가 되었습니다", "QUOTATION")
     QUOTATION_DATE_BEFORE_CURRENT = ("4007", "입력된 날짜는 현재 날짜보다 이전일 수 없습니다", "QUOTATION")
 
@@ -65,13 +65,15 @@ class ErrorStatus(BaseCode):
     CLIENT_PRODUCT_DATA = ("4002", "유효하지 않은 거래처 데이터입니다.", "CLIENT")
     CLIENT_ALREADY_EXISTS = ("4003", "이미 존재하는 거래처입니다.", "CLIENT")
     CLIENT_NOT_UPDATED = ("4004", "CLIENT가 업데이트 되지 않았습니다.", "CLIENT")
-    CLIENT_NOT_CREATED = ("4005", "CLIENT가 생성 되지 않았습니다..", "CLIENT")
+    CLIENT_NOT_CREATED = ("4005", "CLIENT가 생성 되지 않았습니다.", "CLIENT")
 
     PAST_ORDER_NOT_FOUND = ("4001", "요청한 주문내역을 찾을 수 없습니다.", "PAST_ORDER")
     PAST_ORDER_PRODUCT_DATA = ("4002", "유효하지 않은 주문내역 데이터입니다.", "PAST_ORDER")
     PAST_ORDER_ALREADY_EXISTS = ("4003", "이미 존재하는 주문내역 입니다.", "PAST_ORDER")
     PAST_ORDER_NOT_UPDATED = ("4004", "PAST_ORDER가 업데이트 되지 않았습니다.", "PAST_ORDER")
-    PAST_ORDER_NOT_CREATED = ("4005", "PAST_ORDER가 생성 되지 않았습니다..", "PAST_ORDER")
+    PAST_ORDER_NOT_CREATED = ("4005", "PAST_ORDER가 생성 되지 않았습니다.", "PAST_ORDER")
+    PAST_ORDER_NOT_CONTAIN_PRODUCT = ("4006", "PAST_ORDER에 해당 PRODUCT가 존재하지 않습니다", "PAST_ORDER")
+    PAST_ORDER_ALREADY_CONTAIN_PRODUCT = ("4007", "PAST_ORDER에 해당 PRODUCT가 이미 존재합니다.", "PAST_ORDER")
 
     USER_NOT_FOUND = ("4001", "요청한 사용자를 찾을 수 없습니다.", "USER")
     INVALID_USER_DATA = ("4002", "유효하지 않은 사용자 데이터입니다.", "USER")

@@ -59,10 +59,21 @@ class PastOrderRepository:
             await session.commit()
 
     @handle_db_exceptions()
-    async def update_past_order_products(self, past_order_id: int, product_id: int):
+    async def update_past_order_product(self, past_order_id: int, product_id: int):
         async with self.session as session:
             past_order = await session.get(PastOrder, past_order_id)
             product_list = string_to_list(past_order.product_ids)
             product_list.append(product_id)
             past_order.product_ids = list_to_string(product_list)
             await session.commit()
+            await session.refresh(past_order)
+
+    @handle_db_exceptions()
+    async def delete_path_order_product(self, past_order_id: int, product_id: int):
+        async with self.session as session:
+            past_order = await session.get(PastOrder, past_order_id)
+            product_list = string_to_list(past_order.product_ids)
+            product_list.remove(product_id)
+            past_order.product_ids = list_to_string(product_list)
+            await session.commit()
+            await session.refresh(past_order)
