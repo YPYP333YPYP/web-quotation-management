@@ -80,7 +80,7 @@ async def add_product_past_order(past_order_id: int,
 async def remove_product_past_order(past_order_id: int,
                                     product_id: int,
                                     past_order_service: PastOrderService = Depends(PastOrderService),
-                                    # current_user: User = Depends(get_current_user)
+                                    current_user: User = Depends(get_current_user)
                                     ):
     await past_order_service.remove_product_past_order(past_order_id, product_id)
     return ApiResponse.on_success()

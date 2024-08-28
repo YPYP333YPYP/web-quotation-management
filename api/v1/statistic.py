@@ -21,7 +21,6 @@ async def get_statistics(
     start_date: datetime = Query(...),
     end_date: datetime = Query(...),
     statistics_service: StatisticsService = Depends(StatisticsService),
-    current_user: User = Depends(get_current_user)
 ):
     statistics = await statistics_service.get_overall_statistics(start_date, end_date)
     result = OverallStatistics(**statistics)
@@ -38,7 +37,6 @@ async def get_top_clients(
     end_date: datetime = Query(...),
     limit: int = Query(5, ge=1, le=20),
     statistics_service: StatisticsService = Depends(StatisticsService),
-    current_user: User = Depends(get_current_user)
 ):
     top_clients = await statistics_service.get_top_clients(start_date, end_date, limit)
     result = [TopEntity(**client) for client in top_clients]
@@ -55,7 +53,6 @@ async def get_top_products(
     end_date: datetime = Query(...),
     limit: int = Query(5, ge=1, le=20),
     statistics_service: StatisticsService = Depends(StatisticsService),
-    current_user: User = Depends(get_current_user)
 ):
     top_products = await statistics_service.get_top_products(start_date, end_date, limit)
     result = [TopEntity(**product) for product in top_products]
@@ -69,7 +66,6 @@ async def get_top_products(
 @handle_exceptions(List[DailyTotal])
 async def get_daily_quotation_totals(
         statistics_service: StatisticsService = Depends(StatisticsService),
-        current_user: User = Depends(get_current_user)
 ):
 
     end_date = datetime.now().date()
