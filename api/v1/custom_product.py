@@ -39,8 +39,7 @@ async def create_custom_product(custom_product_form: List[CustomProductCreate],
             description="자사 제품을 조회합니다.")
 @handle_exceptions(CustomProductRead)
 async def get_custom_product(custom_product_id: int,
-                             custom_product_service: CustomProductService = Depends(CustomProductService),
-                             current_user: User = Depends(get_current_user)):
+                             custom_product_service: CustomProductService = Depends(CustomProductService)):
     return await custom_product_service.get_custom_product(custom_product_id)
 
 
@@ -71,6 +70,5 @@ async def delete_custom_product(custom_product_id: int,
             summary="모든 자사 제품 조회",
             description="모든 자사 제품을 조회합니다.")
 @handle_exceptions(list[CustomProductRead])
-async def get_all_custom_products(custom_product_service: CustomProductService = Depends(CustomProductService),
-                                  current_user: User = Depends(get_current_user)):
+async def get_all_custom_products(custom_product_service: CustomProductService = Depends(CustomProductService)):
     return await custom_product_service.get_all_custom_products()
