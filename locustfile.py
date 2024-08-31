@@ -37,11 +37,14 @@ class OrderServiceUser(HttpUser):
                 try:
                     response_data = json.loads(response.text)
                     if response_data["isSuccess"]:
+                        print("응답 성공")
                         self.token = response.json().get("result").get("access_token")
                         response.success()
                     else:
+                        print(response_data)
                         response.failure("API 응답 실패")
                 except json.JSONDecodeError as e:
+                    print(response)
                     response.failure("응답 파싱 실패")
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
@@ -69,10 +72,15 @@ class OrderServiceUser(HttpUser):
                 try:
                     response_data = json.loads(response.text)
                     if response_data["isSuccess"]:
+                        print("응답 성공")
+                        quotation_id = response_data["result"]["id"]
+                        self.add_products_to_quotation(quotation_id)
                         response.success()
                     else:
+                        print(response_data)
                         response.failure("API 응답 실패")
                 except json.JSONDecodeError as e:
+                    print(response)
                     response.failure("응답 파싱 실패")
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
@@ -90,13 +98,16 @@ class OrderServiceUser(HttpUser):
 
         with self.client.post(f"/api/v1/quotations/products", headers=headers, json=items, catch_response=True) as response:
             if response.status_code == 200:
+                print("응답 성공")
                 try:
                     response_data = json.loads(response.text)
                     if response_data["isSuccess"]:
                         response.success()
                     else:
+                        print(response_data)
                         response.failure("API 응답 실패")
                 except json.JSONDecodeError as e:
+                    print(response)
                     response.failure("응답 파싱 실패")
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
