@@ -1,3 +1,4 @@
+import json
 import os
 import random
 from datetime import date
@@ -26,18 +27,24 @@ class OrderServiceUser(HttpUser):
             "username": os.getenv("TEST_USERNAME"),
             "password": os.getenv("TEST_PASSWORD"),
         }
-
-        response = self.client.post(
-            "/api/v1/token",
-            headers=headers,
-            data=urlencode(data)
-        )
-
-        if response.code == 200:
-            self.token = response.json().get("result").get("access_token")
-            print(f"Login successful, token: {self.token}")
-        else:
-            print(f"Login failed: {response.status_code}, {response.text}")
+        with self.client.post(
+                "/api/v1/token",
+                headers=headers,
+                data=urlencode(data),
+                catch_response=True
+        ) as response:
+            if response.status_code == 200:
+                try:
+                    response_data = json.loads(response.text)
+                    if response_data["isSuccess"]:
+                        self.token = response.json().get("result").get("access_token")
+                        response.success()
+                    else:
+                        response.failure("API 응답 실패")
+                except json.JSONDecodeError as e:
+                    response.failure("응답 파싱 실패")
+            else:
+                response.failure(f"HTTP 상태 코드: {response.status_code}")
 
     def get_headers(self):
         return {
@@ -56,9 +63,40 @@ class OrderServiceUser(HttpUser):
             "created_at": str(date.today()),
             "status": "CREATED"
         }
-        response = self.client.post("/api/v1/quotations", headers=headers, json=data)
-        if response.code == 200:
-            print(f"Quotation created successfully: {response.json()}")
-        else:
-            print(f"Failed to create quotation: {response.status_code}, {response.text}")
 
+        with self.client.post("/api/v1/quotations", headers=headers, json=data, catch_response=True) as response:
+            if response.status_code == 200:
+                try:
+                    response_data = json.loads(response.text)
+                    if response_data["isSuccess"]:
+                        response.success()
+                    else:
+                        response.failure("API 응답 실패")
+                except json.JSONDecodeError as e:
+                    response.failure("응답 파싱 실패")
+            else:
+                response.failure(f"HTTP 상태 코드: {response.status_code}")
+
+    def add_products_to_quotation(self, quotation_id):
+        headers = self.get_headers()
+
+        number_items = random.randint(1, 10)
+        items = [{
+            "quotation_id": quotation_id,
+            "product_id": random.randint(1, 1000),
+            "quantity": random.randint(1, 10)
+        }
+            for _ in range(number_items)]
+
+        with self.client.post(f"/api/v1/quotations/products", headers=headers, json=items, catch_response=True) as response:
+            if response.status_code == 200:
+                try:
+                    response_data = json.loads(response.text)
+                    if response_data["isSuccess"]:
+                        response.success()
+                    else:
+                        response.failure("API 응답 실패")
+                except json.JSONDecodeError as e:
+                    response.failure("응답 파싱 실패")
+            else:
+                response.failure(f"HTTP 상태 코드: {response.status_code}")
