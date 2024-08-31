@@ -56,7 +56,6 @@ class OrderServiceUser(HttpUser):
             "Content-Type": "application/json"
         }
 
-    @task(3)
     def create_quotation(self):
         if not self.token:
             return
@@ -73,8 +72,6 @@ class OrderServiceUser(HttpUser):
                     response_data = json.loads(response.text)
                     if response_data["isSuccess"]:
                         print("응답 성공")
-                        quotation_id = response_data["result"]["id"]
-                        self.add_products_to_quotation(quotation_id)
                         response.success()
                     else:
                         print(response_data)
@@ -85,12 +82,13 @@ class OrderServiceUser(HttpUser):
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
-    def add_products_to_quotation(self, quotation_id):
+    @task(3)
+    def add_products_to_quotation(self):
         headers = self.get_headers()
 
         number_items = random.randint(1, 10)
         items = [{
-            "quotation_id": quotation_id,
+            "quotation_id": random.randint(1, 100),
             "product_id": random.randint(1, 1000),
             "quantity": random.randint(1, 10)
         }
