@@ -73,6 +73,7 @@ class OrderServiceUser(HttpUser):
                     if response_data["isSuccess"]:
                         print("응답 성공")
                         response.success()
+                        return response_data["result"]["id"]
                     else:
                         print(response_data)
                         response.failure("API 응답 실패")
@@ -82,13 +83,12 @@ class OrderServiceUser(HttpUser):
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
-    @task(3)
-    def add_products_to_quotation(self):
+    def add_products_to_quotation(self, quotation_id):
         headers = self.get_headers()
 
         number_items = random.randint(1, 10)
         items = [{
-            "quotation_id": random.randint(1, 100),
+            "quotation_id": quotation_id,
             "product_id": random.randint(1, 1000),
             "quantity": random.randint(1, 10)
         }
@@ -129,4 +129,11 @@ class OrderServiceUser(HttpUser):
                     response.failure("응답 파싱 실패")
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
+
+    @task(1)
+    def complex_scenario(self):
+        quotation_id = self.create_quotation()
+        if quotation_id:
+            self.add_products_to_quotation(quotation_id)
+            self.view_quotation()
 
