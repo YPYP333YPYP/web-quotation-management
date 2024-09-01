@@ -109,3 +109,24 @@ class OrderServiceUser(HttpUser):
                     response.failure("응답 파싱 실패")
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
+
+    def view_quotation(self):
+        headers = self.get_headers()
+        quotation_id = random.randint(1, 100)
+
+        with self.client.get(f"/api/v1/quotations/{quotation_id}", headers=headers, catch_response=True) as response:
+            if response.status_code == 200:
+                print("응답 성공")
+                try:
+                    response_data = json.loads(response.text)
+                    if response_data["isSuccess"]:
+                        response.success()
+                    else:
+                        print(response_data)
+                        response.failure("API 응답 실패")
+                except json.JSONDecodeError as e:
+                    print(response)
+                    response.failure("응답 파싱 실패")
+            else:
+                response.failure(f"HTTP 상태 코드: {response.status_code}")
+
