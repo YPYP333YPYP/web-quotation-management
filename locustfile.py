@@ -137,3 +137,79 @@ class OrderServiceUser(HttpUser):
             self.add_products_to_quotation(quotation_id)
             self.view_quotation()
 
+
+# 고객이 주문 내역 생성 후 주문내역에 물품 추가 이후 주문 내역 정보 조회
+class PastOrderServiceUser(HttpUser):
+    wait_time = between(1, 3)
+    token = None
+
+    def on_start(self):
+        self.login()
+
+    def login(self):
+        headers = {
+            "accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        data = {
+            "username": os.getenv("TEST_USERNAME"),
+            "password": os.getenv("TEST_PASSWORD"),
+        }
+        with self.client.post(
+                "/api/v1/token",
+                headers=headers,
+                data=urlencode(data),
+                catch_response=True
+        ) as response:
+            if response.status_code == 200:
+                try:
+                    response_data = json.loads(response.text)
+                    if response_data["isSuccess"]:
+                        print("응답 성공")
+                        self.token = response.json().get("result").get("access_token")
+                        response.success()
+                    else:
+                        print(response_data)
+                        response.failure("API 응답 실패")
+                except json.JSONDecodeError as e:
+                    print(response)
+                    response.failure("응답 파싱 실패")
+            else:
+                response.failure(f"HTTP 상태 코드: {response.status_code}")
+
+    def get_headers(self):
+        return {
+            "accept": "application/json",
+            "access-token": self.token,
+            "Content-Type": "application/json"
+        }
+
+    def create_past_order(self):
+        if not self.token:
+            return
+        headers = self.get_headers()
+
+        random_client_id = random.randint(1, 100)
+
+        data = {
+            "client_id": random_client_id,
+            "name": f"past-order-{random_client_id}",
+            "product_ids": []
+        }
+
+        with self.client.post("/api/v1/past-order", headers=headers, json=data, catch_response=True) as response:
+            if response.status_code == 200:
+                try:
+                    response_data = json.loads(response.text)
+                    if response_data["isSuccess"]:
+                        print("응답 성공")
+                        response.success()
+                        return response_data["result"]["id"]
+                    else:
+                        print(response_data)
+                        response.failure("API 응답 실패")
+                except json.JSONDecodeError as e:
+                    print(response)
+                    response.failure("응답 파싱 실패")
+            else:
+                response.failure(f"HTTP 상태 코드: {response.status_code}")
