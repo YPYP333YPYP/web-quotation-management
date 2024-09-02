@@ -36,6 +36,14 @@ class PastOrderRepository:
             return await session.get(PastOrder, past_order_id)
 
     @handle_db_exceptions()
+    async def get_by_name(self, past_order_name: str) -> Optional[PastOrder]:
+        async with self.session as session:
+            stmt = select(PastOrder).filter(PastOrder.name == past_order_name)
+            result = await session.execute(stmt)
+            past_order = result.scalar_one_or_none()
+            return past_order
+
+    @handle_db_exceptions()
     async def get_by_client_id(self, client_id: int) -> Sequence[PastOrder]:
         async with self.session as session:
             query = (select(PastOrder).filter(PastOrder.client_id == client_id))
