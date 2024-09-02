@@ -11,15 +11,15 @@ router = APIRouter(tags=["5. past_order"])
 
 
 @router.post("/past-order",
-             response_model=ApiResponse,
+             response_model=ApiResponse[int],
              summary="주문 내역 생성",
              description="과거에 주문 했던 내역을 프레임 형태로 DB에 저장합니다.")
-@handle_exceptions()
+@handle_exceptions(int)
 async def create_past_order(past_order_form: PastOrderCreate,
                             past_order_service: PastOrderService = Depends(PastOrderService),
                             current_user: User = Depends(get_current_user)):
-    await past_order_service.create_past_order(past_order_form)
-    return ApiResponse.on_success()
+    past_order_id = await past_order_service.create_past_order(past_order_form)
+    return past_order_id
 
 
 @router.get("/past-order/{past_order_id}",

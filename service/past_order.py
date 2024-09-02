@@ -16,7 +16,9 @@ class PastOrderService:
         self.product_repository = product_repository
 
     async def create_past_order(self, past_order_data: PastOrderCreate):
-        return await self.past_order_repository.create_past_order(past_order_data)
+        past_order = await self.past_order_repository.create_past_order(past_order_data)
+        past_order_id = past_order.id
+        return past_order_id
 
     async def get_past_order(self, past_order_id: int):
         past_order = await self.past_order_repository.get_by_id(past_order_id)
