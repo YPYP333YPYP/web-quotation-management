@@ -94,3 +94,6 @@ class UserService:
             client_region=client.region
         )
 
+    async def check_password(self, password: str, user: User):
+        return await self.user_repository.check_password(user.id, password)
+

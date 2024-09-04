@@ -5,6 +5,7 @@ from sqlalchemy.future import select
 
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
+from core.security import verify_password
 from models.user import User
 
 
@@ -58,3 +59,12 @@ class UserRepository:
             )
             await session.execute(update_stmt)
             await session.commit()
+
+    @handle_db_exceptions()
+    async def check_password(self, user_id:int, password: str):
+        async with self.session as session:
+            stmt = select(User).filter(User.id == user_id)
+            result = await session.execute(stmt)
+            user = result.scalar_one_or_none()
+
+            return verify_password(password, user.hashed_password)

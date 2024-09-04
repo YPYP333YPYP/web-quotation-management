@@ -77,6 +77,20 @@ async def change_password(
     return ApiResponse.on_success()
 
 
+@router.get("/users/me/password/check",
+            response_model=ApiResponse[bool],
+            summary="비밀번호 일치 여부 조회",
+            description="비밀번호가 일치하는지 여부를 조회합니다.")
+@handle_exceptions(bool)
+async def check_password(
+        password: str,
+        current_user: User = Depends(get_current_user),
+        user_service: UserService = Depends(UserService)
+):
+    flag = await user_service.check_password(password, current_user)
+    return flag
+
+
 @router.patch("/users/deactivate",
               response_model=ApiResponse,
               summary="회원 비활성화",
