@@ -134,6 +134,7 @@ class OrderServiceBehavior(TaskSet):
             self.view_quotation(quotation_id)
 
 
+# 고객이 주문 내역 생성 후 물품 추가 이후 주문 내역 정보 조회
 class PastOrderServiceBehavior(TaskSet):
     token = None
 
