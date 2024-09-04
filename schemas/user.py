@@ -24,6 +24,7 @@ class UserWithClient(UserInDB):
     client_id: Optional[int]
     client_name: Optional[str]
     client_region: Optional[str]
+    client_address: Optional[str]
 
     class Config:
         from_attributes = True

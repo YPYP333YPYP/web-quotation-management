@@ -91,7 +91,8 @@ class UserService:
             is_admin=current_user.is_admin,
             client_id=client.id,
             client_name=client.name,
-            client_region=client.region
+            client_region=client.region,
+            client_address=client.address
         )
 
     async def check_password(self, password: str, user: User):
