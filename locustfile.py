@@ -305,6 +305,27 @@ class SearchProductBehaviour(TaskSet):
             "Content-Type": "application/json"
         }
 
+    def get_product_by_category(self):
+        headers = self.get_headers()
+
+        categories = ["공산", "냉장", "냉동", "야채"]
+        rd_idx = random.randint(0, len(categories) - 1)
+        with self.client.get(f"/api/v1/products/{categories[rd_idx]}", headers=headers, catch_response=True) as response:
+            if response.status_code == 200:
+                print("응답 성공")
+                try:
+                    response_data = json.loads(response.text)
+                    if response_data["isSuccess"]:
+                        response.success()
+                    else:
+                        print(response_data)
+                        response.failure("API 응답 실패")
+                except json.JSONDecodeError as e:
+                    print(response)
+                    response.failure("응답 파싱 실패")
+            else:
+                response.failure(f"HTTP 상태 코드: {response.status_code}")
+
 
 class WebsiteUser(HttpUser):
     tasks = [OrderServiceBehavior, PastOrderServiceBehavior]
