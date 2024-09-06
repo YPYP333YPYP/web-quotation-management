@@ -84,3 +84,7 @@ class ClientService:
             result.append(recent_info)
         return result
 
+    async def get_clients_all(self):
+        clients = await self.client_repository.get_clients_all()
+        return [to_client_read(x) for x in clients]
+

@@ -97,3 +97,12 @@ class ClientRepository:
 
             client.comment = input_comment
             await session.commit()
+
+    @handle_db_exceptions()
+    async def get_clients_all(self):
+        async with self.session as session:
+            stmt = select(Client)
+            result = await session.execute(stmt)
+            clients = result.scalars()
+
+            return clients

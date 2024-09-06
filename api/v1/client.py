@@ -20,6 +20,16 @@ from core.response.handler.exception_handler import GeneralException
 
 router = APIRouter(tags=["2. client"])
 
+@router.get("/clients/all",
+            response_model=ApiResponse[List[ClientRead]],
+            summary="모든 거래처 정보 조회",
+            description="모든 거래처 정보를 조회 합니다.")
+@handle_exceptions(List[ClientRead])
+async def get_clients_all(client_service: ClientService = Depends(ClientService),
+                          current_user: User = Depends(get_current_user)):
+    result = await client_service.get_clients_all()
+    return result
+
 
 @router.get("/clients/name/{name}",
             response_model=ApiResponse[List[ClientRead]],
@@ -188,3 +198,5 @@ async def get_client_quotation_info_recent(client_id: int,
                                            current_user: User = Depends(get_current_user)):
     result = await client_service.get_client_quotation_info_recent(client_id)
     return result
+
+
