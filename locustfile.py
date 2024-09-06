@@ -260,6 +260,52 @@ class PastOrderServiceBehavior(TaskSet):
             self.view_quotation(past_order_id)
 
 
+# 고객이 물품을 검색 (카테고리, 접두사, 최근구매)
+class SearchProductBehaviour(TaskSet):
+    token = None
+
+    def on_start(self):
+        self.login()
+
+    def login(self):
+        headers = {
+            "accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        data = {
+            "username": os.getenv("TEST_USERNAME"),
+            "password": os.getenv("TEST_PASSWORD"),
+        }
+        with self.client.post(
+                "/api/v1/token",
+                headers=headers,
+                data=urlencode(data),
+                catch_response=True
+        ) as response:
+            if response.status_code == 200:
+                try:
+                    response_data = json.loads(response.text)
+                    if response_data["isSuccess"]:
+                        print("응답 성공")
+                        self.token = response.json().get("result").get("access_token")
+                        response.success()
+                    else:
+                        print(response_data)
+                        response.failure("API 응답 실패")
+                except json.JSONDecodeError as e:
+                    print(response)
+                    response.failure("응답 파싱 실패")
+            else:
+                response.failure(f"HTTP 상태 코드: {response.status_code}")
+
+    def get_headers(self):
+        return {
+            "accept": "application/json",
+            "access-token": self.token,
+            "Content-Type": "application/json"
+        }
+
+
 class WebsiteUser(HttpUser):
     tasks = [OrderServiceBehavior, PastOrderServiceBehavior]
     wait_time = between(1, 3)
