@@ -367,8 +367,13 @@ class SearchProductBehaviour(TaskSet):
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
+    @task(1)
+    def complex_scenario(self):
+        self.get_product_by_prefix()
+        self.get_product_by_recent_purchase()
+        self.get_product_by_category()
 
 
 class WebsiteUser(HttpUser):
-    tasks = [OrderServiceBehavior, PastOrderServiceBehavior]
+    tasks = [OrderServiceBehavior, PastOrderServiceBehavior, SearchProductBehaviour]
     wait_time = between(1, 3)
