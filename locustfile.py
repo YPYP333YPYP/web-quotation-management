@@ -347,6 +347,27 @@ class SearchProductBehaviour(TaskSet):
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
+    def get_product_by_recent_purchase(self):
+        headers = self.get_headers()
+
+        with self.client.get(f"/api/v1/products/purchases/recent", headers=headers,
+                             catch_response=True) as response:
+            if response.status_code == 200:
+                print("응답 성공")
+                try:
+                    response_data = json.loads(response.text)
+                    if response_data["isSuccess"]:
+                        response.success()
+                    else:
+                        print(response_data)
+                        response.failure("API 응답 실패")
+                except json.JSONDecodeError as e:
+                    print(response)
+                    response.failure("응답 파싱 실패")
+            else:
+                response.failure(f"HTTP 상태 코드: {response.status_code}")
+
+
 
 class WebsiteUser(HttpUser):
     tasks = [OrderServiceBehavior, PastOrderServiceBehavior]
