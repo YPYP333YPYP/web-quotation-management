@@ -6,7 +6,7 @@ from core.decorator.decorator import handle_exceptions
 from core.response.api_response import ApiResponse
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import GeneralException
-from core.security import create_access_token
+from core.security import create_access_token, create_refresh_token, refresh_access_token
 from models.user import User
 from schemas.user import UserCreate, UserInDB, UserWithClient
 from schemas.auth import Token, PasswordChange
@@ -28,8 +28,19 @@ async def login_access_token(
     if not user:
         raise GeneralException(ErrorStatus.INVALID_CREDENTIALS)
     access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
-    token_info = Token(access_token=access_token, token_type="bearer")
+    refresh_token = create_refresh_token(data={"sub": user.email, "user_id": user.id})
+    token_info = Token(access_token=access_token, refresh_token= refresh_token, token_type="bearer")
     return token_info
+
+
+@router.post("/token/refresh",
+             response_model=ApiResponse[str],
+             summary="액세스 토큰 재발급",
+             description="리프레시 토큰으로 액세스 토큰을 재발급 받습니다.")
+@handle_exceptions(str)
+async def refresh_token(refresh_token: str):
+    new_access_token = refresh_access_token(refresh_token)
+    return new_access_token
 
 
 @router.post("/users",
