@@ -4,7 +4,7 @@ import random
 from datetime import date
 from urllib.parse import urlencode
 
-from locust import HttpUser, between, task, TaskSet
+from locust import HttpUser, between, task, TaskSet, tag
 import dotenv
 
 dotenv.load_dotenv()
@@ -17,6 +17,7 @@ class OrderServiceBehavior(TaskSet):
     def on_start(self):
         self.login()
 
+    @tag('auth')
     def login(self):
         headers = {
             "accept": "application/json",
@@ -55,6 +56,7 @@ class OrderServiceBehavior(TaskSet):
             "Content-Type": "application/json"
         }
 
+    @tag('quotation')
     def create_quotation(self):
         headers = self.get_headers()
         data = {
@@ -63,7 +65,8 @@ class OrderServiceBehavior(TaskSet):
             "status": "CREATED"
         }
 
-        with self.client.post("/api/v1/quotations", headers=headers, json=data, catch_response=True) as response:
+        with self.client.post("/api/v1/quotations",
+                              headers=headers, json=data, catch_response=True, name="/api/v1/quotations") as response:
             if response.status_code == 200:
                 try:
                     response_data = json.loads(response.text)
@@ -80,6 +83,7 @@ class OrderServiceBehavior(TaskSet):
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
+    @tag('quotation')
     def add_products_to_quotation(self, quotation_id):
         headers = self.get_headers()
 
@@ -91,7 +95,8 @@ class OrderServiceBehavior(TaskSet):
         }
             for _ in range(number_items)]
 
-        with self.client.post(f"/api/v1/quotations/products", headers=headers, json=items, catch_response=True) as response:
+        with self.client.post(f"/api/v1/quotations/products",
+                              headers=headers, json=items, catch_response=True, name="/api/v1/quotations/products") as response:
             if response.status_code == 200:
                 print("응답 성공")
                 try:
@@ -107,10 +112,12 @@ class OrderServiceBehavior(TaskSet):
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
+    @tag('quotation')
     def view_quotation(self, quotation_id):
         headers = self.get_headers()
 
-        with self.client.get(f"/api/v1/quotations/{quotation_id}", headers=headers, catch_response=True) as response:
+        with self.client.get(f"/api/v1/quotations/{quotation_id}",
+                             headers=headers, catch_response=True, name="/api/v1/quotations/{id}") as response:
             if response.status_code == 200:
                 print("응답 성공")
                 try:
@@ -127,6 +134,7 @@ class OrderServiceBehavior(TaskSet):
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
     @task(1)
+    @tag('scenario')
     def complex_scenario(self):
         quotation_id = self.create_quotation()
         if quotation_id:
@@ -141,6 +149,7 @@ class PastOrderServiceBehavior(TaskSet):
     def on_start(self):
         self.login()
 
+    @tag("auth")
     def login(self):
         headers = {
             "accept": "application/json",
@@ -179,6 +188,7 @@ class PastOrderServiceBehavior(TaskSet):
             "Content-Type": "application/json"
         }
 
+    @tag('past-order')
     def create_past_order(self):
         if not self.token:
             return
@@ -194,7 +204,8 @@ class PastOrderServiceBehavior(TaskSet):
             "product_ids": product_ids
         }
 
-        with self.client.post("/api/v1/past-order", headers=headers, json=data, catch_response=True) as response:
+        with self.client.post("/api/v1/past-order",
+                              headers=headers, json=data, catch_response=True, name="/api/v1/past-order") as response:
             if response.status_code == 200:
                 try:
                     response_data = json.loads(response.text)
@@ -211,13 +222,14 @@ class PastOrderServiceBehavior(TaskSet):
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
+    @tag('past-order')
     def add_products_to_past_order(self, past_order_id):
         headers = self.get_headers()
 
         product_id = random.randint(1, 1000)
 
         with self.client.post(f"/api/v1/past-order/{past_order_id}/{product_id}/update", headers=headers,
-                              catch_response=True) as response:
+                              catch_response=True, name="/api/v1/past-order/{past_order_id}/{product_id}/update") as response:
             if response.status_code == 200:
                 print("응답 성공")
                 try:
@@ -233,10 +245,12 @@ class PastOrderServiceBehavior(TaskSet):
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
+    @tag('past-order')
     def view_quotation(self, past_order_id):
         headers = self.get_headers()
 
-        with self.client.get(f"/api/v1/past-order/{past_order_id}", headers=headers, catch_response=True) as response:
+        with self.client.get(f"/api/v1/past-order/{past_order_id}",
+                             headers=headers, catch_response=True, name="/api/v1/past-order/{past_order_id}") as response:
             if response.status_code == 200:
                 print("응답 성공")
                 try:
@@ -253,6 +267,7 @@ class PastOrderServiceBehavior(TaskSet):
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
     @task(1)
+    @tag('scenario')
     def complex_scenario(self):
         past_order_id = self.create_past_order()
         if past_order_id:
@@ -267,6 +282,7 @@ class SearchProductBehaviour(TaskSet):
     def on_start(self):
         self.login()
 
+    @tag("auth")
     def login(self):
         headers = {
             "accept": "application/json",
@@ -305,12 +321,14 @@ class SearchProductBehaviour(TaskSet):
             "Content-Type": "application/json"
         }
 
+    @tag("product")
     def get_product_by_category(self):
         headers = self.get_headers()
 
         categories = ["공산", "냉장", "냉동", "야채"]
         rd_idx = random.randint(0, len(categories) - 1)
-        with self.client.get(f"/api/v1/products/{categories[rd_idx]}", headers=headers, catch_response=True) as response:
+        with self.client.get(f"/api/v1/products/{categories[rd_idx]}",
+                             headers=headers, catch_response=True, name="/api/v1/products/{category}") as response:
             if response.status_code == 200:
                 print("응답 성공")
                 try:
@@ -326,12 +344,14 @@ class SearchProductBehaviour(TaskSet):
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
+    @tag("product")
     def get_product_by_prefix(self):
         headers = self.get_headers()
 
         rd_keyword = ["감자", "식", "간장", "고추", "사과", "어묵", "꼬치"]
         rd_idx = random.randint(0, len(rd_keyword) - 1)
-        with self.client.get(f"/api/v1/products/search/{rd_keyword[rd_idx]}", headers=headers, catch_response=True) as response:
+        with self.client.get(f"/api/v1/products/search/{rd_keyword[rd_idx]}",
+                             headers=headers, catch_response=True, name="/api/v1/products/search/{keyword}") as response:
             if response.status_code == 200:
                 print("응답 성공")
                 try:
@@ -347,11 +367,12 @@ class SearchProductBehaviour(TaskSet):
             else:
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
+    @tag("product")
     def get_product_by_recent_purchase(self):
         headers = self.get_headers()
 
         with self.client.get(f"/api/v1/products/purchases/recent", headers=headers,
-                             catch_response=True) as response:
+                             catch_response=True, name="/api/v1/products/purchases/recent") as response:
             if response.status_code == 200:
                 print("응답 성공")
                 try:
@@ -368,6 +389,7 @@ class SearchProductBehaviour(TaskSet):
                 response.failure(f"HTTP 상태 코드: {response.status_code}")
 
     @task(1)
+    @tag("scenario")
     def complex_scenario(self):
         self.get_product_by_prefix()
         self.get_product_by_recent_purchase()
