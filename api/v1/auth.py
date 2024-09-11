@@ -29,18 +29,22 @@ async def login_access_token(
         raise GeneralException(ErrorStatus.INVALID_CREDENTIALS)
     access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
     refresh_token = create_refresh_token(data={"sub": user.email, "user_id": user.id})
-    token_info = Token(access_token=access_token, refresh_token= refresh_token, token_type="bearer")
+    token_info = Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
     return token_info
 
 
 @router.post("/token/refresh",
-             response_model=ApiResponse[str],
+             response_model=ApiResponse[Token],
              summary="액세스 토큰 재발급",
              description="리프레시 토큰으로 액세스 토큰을 재발급 받습니다.")
-@handle_exceptions(str)
-async def refresh_token(refresh_token: str):
+@handle_exceptions(Token)
+async def refresh_token(refresh_token: str,
+                        current_user: User = Depends(get_current_user)):
     new_access_token = refresh_access_token(refresh_token)
-    return new_access_token
+    new_refresh_token = create_refresh_token(data={"sub": current_user.email, "user_id": current_user.id})
+
+    token_info = Token(access_token=new_access_token, refresh_token=new_refresh_token, token_type="bearer")
+    return token_info
 
 
 @router.post("/users",
