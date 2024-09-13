@@ -15,3 +15,17 @@
 /fhir-server/api/v4/metadata
 /fhir/metadata
 /console
+/api/session/properties
+/telescope/requests
+/config.json
+/s/131323e2132313e27343e24333/_/;/META-INF/maven/com.atlassian.jira/jira-webapp-dist/pom.properties
+/.git/config
+/.DS_Store
+/_all_dbs
+/server-status
+/ecp/Current/exporttool/microsoft.exchange.ediscovery.exporttool.application
+/debug/default/view
+/about
+/.vscode/sftp.json
+/version
+/server
