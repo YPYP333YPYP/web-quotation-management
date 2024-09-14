@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, date
 
-from sqlalchemy import ForeignKey, Integer, DateTime, func, String, Text
+from sqlalchemy import ForeignKey, Integer, DateTime, func, String, Text, Date
 from core.db.database import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship, class_mapper
 
@@ -15,6 +15,7 @@ class Quotation(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     total_price: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(String(30), default="CREATED", nullable=False)
+    input_date: Mapped[date] = mapped_column(Date)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.current_timestamp())
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     particulars: Mapped[str] = mapped_column(Text, nullable=True)
