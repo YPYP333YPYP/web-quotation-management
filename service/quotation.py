@@ -18,7 +18,7 @@ from repository.product.product import ProductRepository
 from repository.quotation.quotation import QuotationRepository
 from repository.quotation.quotation_product import QuotationProductRepository
 from schemas.client import ClientPaginatedResponse
-from schemas.quotation import QuotationAdd, QuotationRead, to_quotation_read, QuotationUpdate
+from schemas.quotation import QuotationAdd, QuotationRead, to_quotation_read, QuotationUpdate, QuotationInfo
 
 import io
 from openpyxl import Workbook
@@ -41,7 +41,7 @@ class QuotationService:
 
     async def create_quotation(self, quotation_data: Dict[str, Any]) -> QuotationRead:
         client_id = quotation_data.get("client_id")
-        input_date = quotation_data.get("created_at")
+        input_date = quotation_data.get("input_date")
 
         client = await self.client_repository.get_client_by_id(client_id)
         if not client:
@@ -50,7 +50,7 @@ class QuotationService:
         if await self.quotation_repository.exist_quotation_by_client_id_and_today_date(client_id, input_date):
             raise ServiceException(ErrorStatus.QUOTATION_ALREADY_EXISTS)
 
-        if quotation_data.get("created_at") < datetime.now().date():
+        if quotation_data.get("input_date") < datetime.now().date():
             raise ServiceException(ErrorStatus.QUOTATION_DATE_BEFORE_CURRENT)
 
         year = input_date.year
@@ -59,6 +59,7 @@ class QuotationService:
         quotation_name = f"{year:04d}/{month:02d}/{day:02d}-{client.name}"
 
         quotation_data["total_price"] = 0
+        quotation_data["created_at"] = datetime.now().date()
         quotation_data["name"] = quotation_name
 
         quotation = Quotation(**quotation_data)
@@ -155,6 +156,7 @@ class QuotationService:
             "name": quotation.name,
             "total": quotation.total_price,
             "status": quotation.status,
+            "input_date": quotation.input_date,
             "created_at": quotation.created_at,
             "updated_at": quotation.updated_at
         }

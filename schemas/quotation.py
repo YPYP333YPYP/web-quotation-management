@@ -15,7 +15,7 @@ class QuotationStatus(str, Enum):
 
 class QuotationCreate(BaseModel):
     client_id: int
-    created_at: date
+    input_date: date
     status: QuotationStatus = QuotationStatus.CREATED
 
 
@@ -45,6 +45,7 @@ class QuotationInfo(BaseModel):
     name: str
     total: float
     status: str
+    input_date: date
     created_at: datetime
     updated_at: Optional[datetime]
 
@@ -54,6 +55,7 @@ class QuotationRead(BaseModel):
     name: str
     total_price: float
     status: str
+    input_date: date
     created_at: datetime
     updated_at: Optional[datetime]
 
@@ -84,6 +86,7 @@ def to_quotation_read(quotation: Quotation) -> QuotationRead:
         name=quotation.name,
         total_price=quotation.total_price,
         status=quotation.status,
+        input_date=quotation.input_date,
         created_at=quotation.created_at,
         updated_at=quotation.updated_at
     )
