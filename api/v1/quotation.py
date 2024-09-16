@@ -163,8 +163,7 @@ async def get_quotations_search(start: Optional[str] = Query(None, description="
                                 quotation_service: QuotationService = Depends(QuotationService),
                                 current_user: User = Depends(get_current_user)):
     quotations = await quotation_service.get_quotation_search(start, end, query)
-    result = [to_quotation_read(quotation) for quotation in quotations]
-    return ApiResponse[List[QuotationRead]].of(SuccessStatus.OK, result=result)
+    return quotations
 
 
 @router.get("/quotations/extract/{quotation_id}",

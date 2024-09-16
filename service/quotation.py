@@ -170,7 +170,8 @@ class QuotationService:
         start_date = datetime.strptime(start, "%Y-%m-%d")
         end_date = datetime.strptime(end, '%Y-%m-%d')
         quotations = await self.quotation_repository.search_quotation(start_date, end_date, query)
-        return quotations
+        result = [to_quotation_read(x) for x in quotations]
+        return result
 
     async def extract_quotations(self, quotation_id: int, for_zip: bool = False):
         products = await self.get_quotation_products(quotation_id)

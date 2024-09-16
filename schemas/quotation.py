@@ -45,7 +45,7 @@ class QuotationInfo(BaseModel):
     name: str
     total: float
     status: str
-    input_date: date
+    input_date: Optional[date]
     created_at: datetime
     updated_at: Optional[datetime]
 
@@ -55,7 +55,7 @@ class QuotationRead(BaseModel):
     name: str
     total_price: float
     status: str
-    input_date: date
+    input_date: Optional[date]
     created_at: datetime
     updated_at: Optional[datetime]
 
