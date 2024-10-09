@@ -191,7 +191,7 @@ class QuotationRepository:
             query = select(Quotation).where(
                 and_(
                     Quotation.client_id == client_id,
-                    func.date(Quotation.created_at) == input_date
+                    func.date(Quotation.input_date) == input_date
                 )
             ).exists()
 
