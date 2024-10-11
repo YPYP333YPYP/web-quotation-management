@@ -200,3 +200,14 @@ async def extract_today_quotations_to_zip(
         media_type='application/zip'
     )
 
+
+@router.get("/quotations/search/date/{input_date}",
+            response_model=ApiResponse[List[QuotationRead]],
+            summary="사용자 입력 날짜 기반 견적서 조회",
+            description="사용자가 입력한 날짜를 기반으로 견적서 정보를 조회 합니다.")
+@handle_exceptions(List[QuotationRead])
+async def get_quotations_search(input_date: str,
+                                quotation_service: QuotationService = Depends(QuotationService),
+                                current_user: User = Depends(get_current_user)):
+    quotations = await quotation_service.get_quotations_by_input_date(input_date)
+    return quotations

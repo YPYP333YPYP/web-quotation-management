@@ -225,3 +225,11 @@ class QuotationRepository:
 
             quotation.status = QuotationStatus.COMPLETED.value
             await session.commit()
+
+    @handle_db_exceptions()
+    async def get_quotations_by_input_date(self, input_date):
+        async with self.session as session:
+            query = select(Quotation).filter(Quotation.input_date == input_date)
+
+            result = await session.execute(query)
+            return result.scalars().all()

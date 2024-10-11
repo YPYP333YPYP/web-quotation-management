@@ -277,3 +277,9 @@ class QuotationService:
             raise ServiceException(ErrorStatus.QUOTATION_NOT_FOUND)
 
         await self.quotation_repository.update_quotation(quotation_id, quotation_data)
+
+    async def get_quotations_by_input_date(self, input_date: str):
+        input_date = datetime.strptime(input_date, "%Y-%m-%d")
+        quotations = await self.quotation_repository.get_quotations_by_input_date(input_date)
+        result = [to_quotation_read(x) for x in quotations]
+        return result
