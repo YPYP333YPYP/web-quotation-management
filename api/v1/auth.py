@@ -1,5 +1,9 @@
+import os
+import dotenv
+
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
+from authlib.integrations.starlette_client import OAuth
 
 from api.dependencies import get_current_user
 from core.decorator.decorator import handle_exceptions
@@ -11,6 +15,19 @@ from models.user import User
 from schemas.user import UserCreate, UserInDB, UserWithClient
 from schemas.auth import Token, PasswordChange
 from service.user import UserService
+
+dotenv.load_dotenv()
+
+oauth = OAuth()
+
+oauth.register(
+    name='kakao',
+    client_id=os.getenv('KAKAO_CLIENT_ID'),
+    client_secret=os.getenv('KAKAO_CLIENT_CODE'),
+    authorize_url='https://kauth.kakao.com/oauth/authorize',
+    access_token_url='https://kauth.kakao.com/oauth/token',
+    api_base_url='https://kapi.kakao.com/'
+)
 
 router = APIRouter(tags=["1. auth"])
 
@@ -136,3 +153,38 @@ async def activate_user(current_user: User = Depends(get_current_user),
 async def check_clients(current_user: User = Depends(get_current_user), user_service: UserService = Depends(UserService)):
     result = await user_service.check_client_create(current_user)
     return ApiResponse.on_success(result)
+
+
+@router.get("/login/kakao",
+            response_model=ApiResponse,
+            summary="카카오 계정으로 로그인",
+            description="카카오 계정으로 로그인을 진행합니다.")
+@handle_exceptions()
+async def kakao_login():
+    redirect_uri = "https://minifood-web.com/auth/kakao/callback"
+    return await oauth.kakao.authorize_redirect(redirect_uri)
+
+@router.get("/auth/kakao/callback",
+            response_model=ApiResponse[Token],
+            summary="카카오 API 콜백 함수",
+            description="카카오 로그인 API 사용 시 콜백되는 함수입니다.")
+@handle_exceptions()
+async def kakao_callback(user_service: UserService = Depends(UserService)):
+    token = await oauth.kakao.authorize_access_token()
+    user_info = await oauth.kakao.get('v2/user/me')
+
+    kakao_id = user_info['id']
+    nickname = user_info['properties']['nickname']
+    email = user_info.get('kakao_account', {}).get('email')
+
+    user = await user_service.kakao_login_or_signup(
+        kakao_id=kakao_id,
+        email=email,
+        nickname=nickname
+    )
+
+    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
+    refresh_token = create_refresh_token(data={"sub": user.email, "user_id": user.id})
+    token_info = Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
+
+    return token_info

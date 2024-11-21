@@ -98,3 +98,18 @@ class UserService:
     async def check_password(self, password: str, user: User):
         return await self.user_repository.check_password(user.id, password)
 
+    async def kakao_login_or_signup(self, kakao_id: int, email: str, nickname: str) -> User:
+        user = await self.user_repository.get_user_by_email(email)
+
+        if not user:
+            created_user = await self.user_repository.create_kakao_user(
+                kakao_id=kakao_id,
+                email=email,
+                nickname=nickname
+            )
+            return created_user
+        else:
+            return user
+
+
+
