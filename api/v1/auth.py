@@ -164,6 +164,7 @@ async def kakao_login():
     redirect_uri = "https://minifood-web.com/auth/kakao/callback"
     return await oauth.kakao.authorize_redirect(redirect_uri)
 
+
 @router.get("/auth/kakao/callback",
             response_model=ApiResponse[Token],
             summary="카카오 API 콜백 함수",
