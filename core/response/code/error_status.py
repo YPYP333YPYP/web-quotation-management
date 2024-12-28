@@ -80,6 +80,7 @@ class ErrorStatus(BaseCode):
     USER_ALREADY_EXISTS = ("4003", "이미 존재하는 사용자입니다.", "USER")
 
     KAKAO_MESSAGE_NOT_SENT = ("4001", "카카오 메시지 전송에 실패했습니다.", "KAKAO")
+    MISSING_REQUIRED_FIELD = ("4002", "필수 필드가 누락되었습니다.", "KAKAO")
 
     DISCORD_MESSAGE_NOT_SENT = ("4001", "디스코드 메시지 전송에 실패했습니다.", "DISCORD")
 

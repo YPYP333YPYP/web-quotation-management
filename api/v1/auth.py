@@ -1,9 +1,12 @@
 import os
+from urllib.parse import urlencode
+
 import dotenv
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from authlib.integrations.starlette_client import OAuth
+import httpx
+from starlette.responses import RedirectResponse
 
 from api.dependencies import get_current_user
 from core.decorator.decorator import handle_exceptions
@@ -18,16 +21,16 @@ from service.user import UserService
 
 dotenv.load_dotenv()
 
-oauth = OAuth()
+# 환경 변수
+KAKAO_CLIENT_ID = os.getenv("KAKAO_CLIENT_ID")
+KAKAO_CLIENT_SECRET = os.getenv("KAKAO_CLIENT_SECRET")
+REDIRECT_URI = "http://127.0.0.1:8000/api/v1/auth/kakao/callback"
 
-oauth.register(
-    name='kakao',
-    client_id=os.getenv('KAKAO_CLIENT_ID'),
-    client_secret=os.getenv('KAKAO_CLIENT_CODE'),
-    authorize_url='https://kauth.kakao.com/oauth/authorize',
-    access_token_url='https://kauth.kakao.com/oauth/token',
-    api_base_url='https://kapi.kakao.com/'
-)
+# REDIRECT_URI = "https://minifood-web.com/auth/kakao/callback"
+
+KAKAO_AUTH_URL = "https://kauth.kakao.com/oauth/authorize"
+KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
+KAKAO_USER_INFO_URL = "https://kapi.kakao.com/v2/user/me"
 
 router = APIRouter(tags=["1. auth"])
 
@@ -155,37 +158,76 @@ async def check_clients(current_user: User = Depends(get_current_user), user_ser
     return ApiResponse.on_success(result)
 
 
-@router.get("/login/kakao",
+@router.get("/kakao/login",
             response_model=ApiResponse,
-            summary="카카오 계정으로 로그인",
-            description="카카오 계정으로 로그인을 진행합니다.")
-@handle_exceptions()
+            summary="카카오 로그인",
+            description="카카오 로그인 API를 사용합니다.")
 async def kakao_login():
-    redirect_uri = "https://minifood-web.com/auth/kakao/callback"
-    return await oauth.kakao.authorize_redirect(redirect_uri)
+    params = {
+        "client_id": KAKAO_CLIENT_ID,
+        "redirect_uri": REDIRECT_URI,
+        "response_type": "code",
+        "scope": "account_email"
+    }
+    auth_url = f"{KAKAO_AUTH_URL}?{urlencode(params)}"
+    return RedirectResponse(url=auth_url)
 
 
-@router.get("/auth/kakao/callback",
+@router.get("/kakao/callback",
             response_model=ApiResponse[Token],
-            summary="카카오 API 콜백 함수",
-            description="카카오 로그인 API 사용 시 콜백되는 함수입니다.")
-@handle_exceptions()
-async def kakao_callback(user_service: UserService = Depends(UserService)):
-    token = await oauth.kakao.authorize_access_token()
-    user_info = await oauth.kakao.get('v2/user/me')
+            summary="카카오 로그인 API 콜백",
+            description="카카오 로그인 API 사용 시 리다이렉트 되어 실행됩니다.")
+async def kakao_callback(code: str, user_service: UserService = Depends(UserService)):
+    try:
+        async with httpx.AsyncClient() as client:
+            # 액세스 토큰 받기
+            token_params = {
+                "grant_type": "authorization_code",
+                "client_id": KAKAO_CLIENT_ID,
+                "client_secret": KAKAO_CLIENT_SECRET,
+                "code": code,
+                "redirect_uri": REDIRECT_URI
+            }
 
-    kakao_id = user_info['id']
-    nickname = user_info['properties']['nickname']
-    email = user_info.get('kakao_account', {}).get('email')
+            token_response = await client.post(KAKAO_TOKEN_URL, data=token_params)
+            token_response.raise_for_status()
+            token_data = token_response.json()
 
-    user = await user_service.kakao_login_or_signup(
-        kakao_id=kakao_id,
-        email=email,
-        nickname=nickname
-    )
+            # 사용자 정보 가져오기
+            headers = {
+                "Authorization": f"Bearer {token_data['access_token']}"
+            }
+            user_response = await client.get(KAKAO_USER_INFO_URL, headers=headers)
+            user_response.raise_for_status()
+            user_info = user_response.json()
 
-    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
-    refresh_token = create_refresh_token(data={"sub": user.email, "user_id": user.id})
-    token_info = Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
+            # 필요한 정보 추출
+            kakao_id = str(user_info['id'])
+            kakao_account = user_info.get('kakao_account', {})
+            email = kakao_account.get('email')
 
-    return token_info
+            # 이메일에서 닉네임 생성 (@ 이전 부분 사용)
+            nickname = email.split('@')[0] if email else f'User_{kakao_id}'
+
+            # 로그인 또는 회원가입 처리
+            user = await user_service.kakao_login_or_signup(
+                kakao_id=kakao_id,
+                email=email,
+                nickname=nickname
+            )
+
+            # JWT 토큰 생성
+            access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
+            refresh_token = create_refresh_token(data={"sub": user.email, "user_id": user.id})
+
+            return ApiResponse.on_success(Token(
+                    access_token=access_token,
+                    refresh_token=refresh_token,
+                    token_type="bearer"))
+
+    except httpx.HTTPError as e:
+        raise GeneralException(ErrorStatus.KAKAO_MESSAGE_NOT_SENT)
+    except KeyError as e:
+        raise GeneralException(ErrorStatus.REQUIRED_FIELD_MISSING)
+    except Exception as e:
+        raise GeneralException(ErrorStatus.INTERNAL_SERVER_ERROR)
