@@ -4,7 +4,7 @@ from fastapi import Depends
 
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import GeneralException
-from models.FAQ import FAQ
+from models import FAQ
 from repository.faq.faq import FAQRepository
 from schemas.faq import FAQCreate, FAQUpdate
 

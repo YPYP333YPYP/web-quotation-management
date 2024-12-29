@@ -1,10 +1,10 @@
 from datetime import datetime
+from fastapi import Depends
 
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
 from core.security import get_password_hash, verify_password
-from fastapi import Depends
-from models.user import User
+from models import User
 from repository.client.client import ClientRepository
 from repository.user.user import UserRepository
 from schemas.user import UserCreate, UserWithClient

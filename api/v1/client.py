@@ -12,10 +12,8 @@ from service.client import ClientService
 from api.dependencies import get_current_user
 from service.past_order import PastOrderService
 from service.quotation import QuotationService
-
 from core.response.api_response import ApiResponse
 from core.response.code.error_status import ErrorStatus
-from core.response.code.success_status import SuccessStatus
 from core.response.handler.exception_handler import GeneralException
 
 router = APIRouter(tags=["2. client"])

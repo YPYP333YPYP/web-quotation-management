@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import List
-
 from pydantic import BaseModel
 
-from models.past_order import PastOrder
+from models import PastOrder
 from schemas.product import ProductRead
 
 

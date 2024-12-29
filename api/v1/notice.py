@@ -1,5 +1,4 @@
 from typing import List
-
 from fastapi import APIRouter, Depends
 
 from core.decorator.decorator import handle_exceptions

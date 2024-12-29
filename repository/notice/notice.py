@@ -1,13 +1,11 @@
-from typing import Optional, List, Sequence
-
+from typing import Optional, Sequence
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from fastapi import Depends
 
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
-from models.notice import Notice
+from models import Notice
 
 
 class NoticeRepository:

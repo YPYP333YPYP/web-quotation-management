@@ -1,10 +1,9 @@
 from datetime import datetime, date
 from enum import Enum
 from typing import Optional, List
-
 from pydantic import BaseModel
 
-from models.quotation import Quotation
+from models import Quotation
 
 
 class QuotationStatus(str, Enum):

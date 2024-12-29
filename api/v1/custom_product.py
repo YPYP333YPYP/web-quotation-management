@@ -1,5 +1,4 @@
 from typing import List
-
 from fastapi import APIRouter, Depends
 
 from api.dependencies import get_current_user

@@ -6,13 +6,10 @@ from typing import List, Any, Dict, Optional
 
 from fastapi import Depends
 from sqlalchemy import func
-from sqlalchemy.orm import InstrumentedAttribute
-from sqlalchemy.orm.base import _T_co
 
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
-from models import Quotation, User
-from models.quotation_product import QuotationProduct
+from models import Quotation, User, QuotationProduct
 from repository.client.client import ClientRepository
 from repository.product.product import ProductRepository
 from repository.quotation.quotation import QuotationRepository

@@ -1,15 +1,13 @@
 from fastapi import Depends
 from sqlalchemy import func, select
-
 from datetime import datetime, date, timedelta
 from typing import List, Dict
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
-from models import Quotation, Client, Product
-from models.quotation_product import QuotationProduct
+from models import Quotation, Client, Product, QuotationProduct
+
 
 
 class StatisticsRepository:

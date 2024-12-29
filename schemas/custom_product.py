@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Optional
-
 from pydantic import BaseModel
 
-from models.custom_product import CustomProduct
+from models import CustomProduct
 
 
 class CustomProductCreate(BaseModel):

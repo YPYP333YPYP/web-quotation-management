@@ -1,12 +1,11 @@
 import os
-from urllib.parse import urlencode
-
+import httpx
 import dotenv
 
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-import httpx
 from starlette.responses import RedirectResponse
+from urllib.parse import urlencode
 
 from api.dependencies import get_current_user
 from core.decorator.decorator import handle_exceptions
@@ -14,7 +13,7 @@ from core.response.api_response import ApiResponse
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import GeneralException
 from core.security import create_access_token, create_refresh_token, refresh_access_token
-from models.user import User
+from models import User
 from schemas.user import UserCreate, UserInDB, UserWithClient
 from schemas.auth import Token, PasswordChange
 from service.user import UserService

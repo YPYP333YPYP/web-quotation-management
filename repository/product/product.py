@@ -1,14 +1,13 @@
 from datetime import datetime
 from typing import Sequence, Dict, Any, Optional
-
 from fastapi import Depends
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 from core.decorator.decorator import handle_db_exceptions
-from models.product import Product
 from core.db.database import async_get_db
-from sqlalchemy.future import select
+from models import Product
 
 
 class ProductRepository:

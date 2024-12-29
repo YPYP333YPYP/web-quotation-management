@@ -4,7 +4,7 @@ from fastapi import Depends
 
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
-from models.notice import Notice
+from models import Notice
 from repository.notice.notice import NoticeRepository
 from schemas.notice import NoticeCreate, NoticeUpdate
 

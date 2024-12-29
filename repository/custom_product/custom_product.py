@@ -1,13 +1,12 @@
 from datetime import datetime
 from typing import Optional, Sequence
-
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
-from models.custom_product import CustomProduct
+from models import CustomProduct
 from schemas.custom_product import CustomProductUpdate
 
 

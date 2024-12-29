@@ -4,7 +4,7 @@ from fastapi import Depends
 
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
-from models.custom_product import CustomProduct
+from models import CustomProduct
 from repository.custom_product.custom_product import CustomProductRepository
 from schemas.custom_product import CustomProductCreate, CustomProductRead, CustomProductUpdate, to_custom_product_read
 

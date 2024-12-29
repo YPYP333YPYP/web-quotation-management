@@ -7,9 +7,8 @@ from pydantic import ValidationError
 
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
-from models import User
+from models import User, Product
 from repository.product.product import ProductRepository
-from models.product import Product
 from schemas.product import ProductRead, to_product_count
 
 from core.db.redis import redis_client

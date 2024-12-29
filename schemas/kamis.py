@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional, Dict, Any
-import httpx
 from enum import Enum
 
 

@@ -2,10 +2,8 @@ from fastapi import APIRouter, Depends, Query
 from datetime import datetime, timedelta
 from typing import List
 
-from api.dependencies import get_current_user
 from core.decorator.decorator import handle_exceptions
 from core.response.api_response import ApiResponse
-from models import User
 from schemas.statistic import TopEntity, OverallStatistics, DailyTotal
 from service.statistic import StatisticsService
 

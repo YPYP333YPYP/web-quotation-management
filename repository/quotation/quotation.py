@@ -1,13 +1,12 @@
 from datetime import date, datetime
 from typing import Sequence
-
 from fastapi import Depends
 from sqlalchemy import select, func, and_, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
-from models import Quotation
-from models.quotation_product import QuotationProduct
+from models import Quotation, QuotationProduct
 from schemas.quotation import QuotationStatus, QuotationUpdate
 
 

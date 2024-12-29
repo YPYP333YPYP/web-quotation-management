@@ -1,14 +1,11 @@
 from typing import Optional, Sequence, Dict, Any
-
 from fastapi import Depends
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
-from models import Client, Quotation, User
-from models.past_order import PastOrder
-from models.quotation_product import QuotationProduct
+from models import Client, Quotation, User, PastOrder, QuotationProduct
 from schemas.client import RegionType
 
 
