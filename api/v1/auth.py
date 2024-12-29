@@ -24,7 +24,7 @@ dotenv.load_dotenv()
 # 환경 변수
 KAKAO_CLIENT_ID = os.getenv("KAKAO_CLIENT_ID")
 KAKAO_CLIENT_SECRET = os.getenv("KAKAO_CLIENT_SECRET")
-REDIRECT_URI = "http://127.0.0.1:8000/api/v1/auth/kakao/callback"
+REDIRECT_URI = "http://127.0.0.1:8000/api/v1/kakao/callback"
 
 # REDIRECT_URI = "https://minifood-web.com/auth/kakao/callback"
 

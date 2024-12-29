@@ -10,6 +10,7 @@ from core.db.database import async_get_db
 from core.decorator.decorator import handle_db_exceptions
 from core.security import verify_password
 from models.user import User
+from core.security import get_password_hash
 
 
 async def generate_dummy_password():
@@ -91,7 +92,7 @@ class UserRepository:
     async def create_kakao_user(self, kakao_id, email, nickname):
         async with self.session as session:
 
-            dummy_password = generate_dummy_password()
+            dummy_password = get_password_hash(await generate_dummy_password())
 
             user = User(
                 email=email,
