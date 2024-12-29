@@ -9,6 +9,16 @@ from core.db.database import Base
 
 @dataclass
 class PastOrder(Base):
+    """즐겨찾기를 관리하는 클래스
+
+    Attributes:
+        id (int): 고유한 즐겨찾기 ID
+        client_id (int): 고객 ID (ForeignKey로 연결된 clients 테이블의 ID)
+        name (str): 즐겨찾기 이름
+        product_ids (str): 즐겨찾기에 포함된 제품 ID 목록 (쉼표로 구분된 문자열)
+        created_at (datetime): 즐겨찾기 생성일 (자동 기록)
+        updated_at (datetime): 즐겨찾기 수정일 (수정된 경우 자동 갱신)
+    """
     __tablename__ = "past_orders"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)

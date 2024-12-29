@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 
 import dotenv
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 import httpx
 from starlette.responses import RedirectResponse

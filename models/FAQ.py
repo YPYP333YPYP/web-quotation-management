@@ -8,6 +8,16 @@ from core.db.database import Base
 
 @dataclass
 class FAQ(Base):
+    """FAQ(자주 묻는 질문)를 관리하는 클래스
+
+    Attributes:
+        id (int): 고유한 FAQ ID
+        category (str): FAQ 카테고리 (예: 계정, 결제 등)
+        question (str): 질문 내용
+        answer (str): 질문에 대한 답변
+        created_at (datetime): FAQ 생성일 (자동 기록)
+        updated_at (datetime): FAQ 수정일 (수정된 경우 자동 갱신)
+    """
     __tablename__ = 'faqs'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
