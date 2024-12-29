@@ -10,9 +10,10 @@ from service.kamis import KamisService
 
 load_dotenv()
 
+
 @pytest.mark.asyncio
 async def test_kamis_price_service():
-
+    """ Kamis 외부 API 테스트 함수"""
     cert_key = os.getenv('KAMIS_API_KEY')
     cert_id = os.getenv('KAMIS_ID')
 
