@@ -1,7 +1,7 @@
 import os
-from typing import Any, Sequence, Dict, Optional
-
 import pandas as pd
+
+from typing import Any, Sequence, Dict, Optional
 from fastapi import Depends, UploadFile
 from pydantic import ValidationError
 
@@ -10,11 +10,15 @@ from core.response.handler.exception_handler import ServiceException
 from models import User, Product
 from repository.product.product import ProductRepository
 from schemas.product import ProductRead, to_product_count
-
 from core.db.redis import redis_client
 
 
 def read_excel_file_about_product_list(file_path: str) -> list[Dict]:
+    """
+        excel 파일 형식
+        sheet name - 제품 카테고리
+        0열 - 제품 이름 / 1열 - 제품 개수 / 2열 - 제품 가격
+    """
     data = list()
     xls = pd.ExcelFile(file_path)
     for sheet_name in xls.sheet_names:
@@ -38,6 +42,10 @@ def read_excel_file_about_product_list(file_path: str) -> list[Dict]:
 
 
 def read_excel_file_about_vegetable_price_list(file_path: str) -> dict:
+    """
+       excel 파일 형식
+       0열 - 제품(vegetable) 이름 / 1열 - 제품(vegetable) 가격
+    """
     data = dict()
     df = pd.read_excel(file_path, header=None)
     try:
@@ -61,8 +69,9 @@ class ProductService:
             with open(file_path, "wb") as buffer:
                 buffer.write(await file.read())
             product_datas = read_excel_file_about_product_list(file_path)
+
+            # 중복된 제품 일 경우 제품 수정
             for product_data in product_datas:
-                print(product_data)
                 product = await self.product_repository.get_product_by_name(product_data["name"])
                 if product:
                     await self.product_repository.update_product(product.id, product_data)
@@ -71,14 +80,12 @@ class ProductService:
                     await self.product_repository.create_product(product)
 
         except Exception as e:
-            print(e)
             raise ServiceException(ErrorStatus.FILE_UPLOAD_ERROR)
 
     async def get_products_by_category(self, category: str) -> Sequence[Product]:
         return await self.product_repository.get_products_by_category(category)
 
     async def update_product(self, product_id: int, new_data: Dict[str, Any]) -> Optional[Product]:
-
         product = new_data
 
         if not new_data:

@@ -1,6 +1,5 @@
 from datetime import datetime, date
 from typing import Dict, List
-
 from fastapi import Depends
 
 from repository.statistic.statistic import StatisticsRepository

@@ -44,6 +44,7 @@ class PastOrderService:
         await self.past_order_repository.delete_past_order(past_order_id)
 
     async def add_product_past_order(self, past_order_id: int, product_id: int):
+        """ 생성된 즐겨찾기에 물품 추가 """
         past_order = await self.past_order_repository.get_by_id(past_order_id)
         if past_order is None:
             raise ServiceException(ErrorStatus.PAST_ORDER_NOT_FOUND)
@@ -53,6 +54,7 @@ class PastOrderService:
         await self.past_order_repository.update_past_order_product(past_order_id, product_id)
 
     async def remove_product_past_order(self, past_order_id: int, product_id: int):
+        """ 생성된 즐겨찾기에 물품 삭제 """
         past_order = await self.past_order_repository.get_by_id(past_order_id)
         if past_order is None:
             raise ServiceException(ErrorStatus.PAST_ORDER_NOT_FOUND)

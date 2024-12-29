@@ -52,6 +52,7 @@ class ClientService:
         await self.client_repository.update_client_region(client_id, region)
 
     async def get_client_check_preview(self, client_id: int, input_date: date):
+        """ 거래처가 견적서를 해당 날짜에 작성했는지 여부를 반환"""
         client = await self.client_repository.get_client_by_id(client_id)
         if not client:
             raise GeneralException(ErrorStatus.CLIENT_NOT_FOUND)
@@ -66,6 +67,7 @@ class ClientService:
         await self.client_repository.update_client_comment(client_id, input_comment)
 
     async def get_client_quotation_info_recent(self, client_id: int):
+        """ 거래처에서 최근에 구매한 제품 5개의 정보를 반환"""
         quotations, _ = await self.quotation_repository.get_quotations_by_client_id(client_id)
         if len(quotations) == 0:
             raise ServiceException(ErrorStatus.QUOTATION_NOT_FOUND)
@@ -80,7 +82,6 @@ class ClientService:
                 products=product_name,
                 date=quotation.created_at.date()
             )
-
             result.append(recent_info)
         return result
 

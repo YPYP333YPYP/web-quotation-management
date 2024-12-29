@@ -12,7 +12,7 @@ async def send_discord_alert(webhook_url: str, message: str):
     async with aiohttp.ClientSession() as session:
         webhook_data = {
             "content": message,
-            "username": "JMF SERVER BOT"
+            "username": "MINIFOOD SERVER BOT"
         }
         async with session.post(webhook_url, data=json.dumps(webhook_data),
                                 headers={"Content-Type": "application/json"}) as response:

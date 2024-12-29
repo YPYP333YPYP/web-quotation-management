@@ -1,11 +1,13 @@
 import urllib.parse
 import zipfile
+import io
+
 from datetime import datetime, date
 from math import ceil
 from typing import List, Any, Dict, Optional
-
 from fastapi import Depends
 from sqlalchemy import func
+from openpyxl import Workbook
 
 from core.response.code.error_status import ErrorStatus
 from core.response.handler.exception_handler import ServiceException
@@ -16,9 +18,6 @@ from repository.quotation.quotation import QuotationRepository
 from repository.quotation.quotation_product import QuotationProductRepository
 from schemas.client import ClientPaginatedResponse
 from schemas.quotation import QuotationAdd, QuotationRead, to_quotation_read, QuotationUpdate, QuotationInfo
-
-import io
-from openpyxl import Workbook
 from core.db.redis import redis_client
 from service.kakao import KakaoService
 
@@ -93,6 +92,7 @@ class QuotationService:
                 price=product.price * quantity,
                 quantity=quantity,
             )
+            # 견적서에 물품 추가 시 Redis 서버에 수량 증가
             await redis_client.hincrby(f"user:{current_user.client_id}:products", product_id, 1)
             tmp_list.append(quotation_product)
         return await self.quotation_product_repository.bulk_create_quotation_product(tmp_list)
@@ -201,7 +201,7 @@ class QuotationService:
         return output, filename
 
     async def get_paginated_quotations_for_client(self, client_id: int, page: int = 1, page_size: int = 10):
-
+        """ 거래처 별 견적서 반환 """
         quotations, total = await self.quotation_repository.get_quotations_by_client_id(client_id, page, page_size)
         quotation_reads = [to_quotation_read(x) for x in quotations]
 
@@ -222,7 +222,7 @@ class QuotationService:
             end_date: date,
             page: int,
             page_size: int):
-
+        """ 지정 날짜 범위에 해당하는 견적서 반환 """
         quotations, total = await self.quotation_repository.get_quotations_by_data_range(client_id, start_date, end_date, page, page_size)
         quotation_reads = [to_quotation_read(x) for x in quotations]
 
