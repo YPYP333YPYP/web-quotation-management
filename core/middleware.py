@@ -1,17 +1,13 @@
 import re
-import jwt
 import uuid
 import os
 import dotenv
 import sentry_sdk
 
 from fastapi import Request, FastAPI
-from jwt import InvalidTokenError
 from starlette.middleware.base import BaseHTTPMiddleware
 from contextvars import ContextVar
 from starlette.responses import JSONResponse
-from core.response.code.error_status import ErrorStatus
-from core.response.handler.exception_handler import GeneralException
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from core.utils import get_user_id_from_token, load_blacklist
@@ -32,6 +28,7 @@ ip_context = ContextVar("ip", default=None)
 
 
 class RequestMiddleware(BaseHTTPMiddleware):
+    """ 사용자 Request 정보 취득 목적을 위한 미들웨어"""
     async def dispatch(self, request: Request, call_next):
         request_id = str(uuid.uuid4())
         request_id_context.set(request_id)
@@ -52,6 +49,7 @@ class RequestMiddleware(BaseHTTPMiddleware):
 
 
 class URLPatternCheckMiddleware(BaseHTTPMiddleware):
+    """ Request URL 패턴 파악을 목적을 위한 미들웨어 """
     def __init__(
             self,
             app,
@@ -87,6 +85,7 @@ class URLPatternCheckMiddleware(BaseHTTPMiddleware):
 
 
 class BlacklistMiddleware(BaseHTTPMiddleware):
+    """ 잘못된 접근의 URL 차단을 위한 미들웨어 """
     def __init__(self, app: FastAPI, blacklist_file: str = "blacklist.txt"):
         super().__init__(app)
         self.blacklist_patterns = load_blacklist(blacklist_file)

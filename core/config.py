@@ -1,5 +1,7 @@
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
 from core.settings import MySQLSettings, JwtTokenSettings, RedisSettings
 
 load_dotenv()

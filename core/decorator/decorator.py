@@ -1,13 +1,12 @@
 import time
-from functools import wraps
-from typing import TypeVar, Type, Optional
 import logging
+
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer
+from functools import wraps
+from typing import TypeVar, Type, Optional
+
 from core.middleware import request_id_context, user_id_context, method_context, url_context, ip_context
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
 from core.response.api_response import ApiResponse
 from core.response.code.error_status import ErrorStatus
 from core.response.code.success_status import SuccessStatus
@@ -15,11 +14,14 @@ from core.response.handler.exception_handler import ServiceException, DatabaseEx
 
 T = TypeVar('T', bound=BaseModel)
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
 def handle_exceptions(response_model: Optional[Type[T]] = None):
+    """ Request에 대한 에러 발생 시 request 정보와 에러 정보를 로깅"""
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
