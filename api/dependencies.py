@@ -6,6 +6,8 @@ from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
 
 from models import User
 from service.user import UserService
+
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 

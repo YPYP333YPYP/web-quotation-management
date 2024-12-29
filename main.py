@@ -29,6 +29,7 @@ async def lifespan(app: FastAPI):
         logging.error(f"Test error occurred: {str(e)}")
         print(f"Test error logged: {str(e)}")
 
+    # 실행과 종료시 디스코드 메세지 전송
     await send_discord_startup_message()
 
     yield
@@ -53,6 +54,7 @@ def get_application() -> FastAPI:
 
     origins = ["*"]
 
+    # 어플리케이션 미들웨어 설정
     application.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
@@ -60,15 +62,15 @@ def get_application() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    application.add_exception_handler(GeneralException, general_exception_handler)
-    application.add_exception_handler(ResponseValidationError, validation_exception_handler)
     application.add_middleware(RequestMiddleware)
+    application.add_middleware(BlacklistMiddleware)
     application.add_middleware(
         URLPatternCheckMiddleware,
         url_pattern=r"^/api/v1/",
         excluded_paths=["/health", "/metrics", "/docs", "/openapi.json", "/favicon.ico"],
     )
-    application.add_middleware(BlacklistMiddleware)
+    application.add_exception_handler(GeneralException, general_exception_handler)
+    application.add_exception_handler(ResponseValidationError, validation_exception_handler)
 
     return application
 
